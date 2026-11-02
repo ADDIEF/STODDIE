@@ -1,0 +1,77 @@
+# Environment files and secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Python environments, bytecode, and test artifacts
+.venv/
+venv/
+**/.venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+htmlcov/
+
+# JavaScript dependencies and generated output
+node_modules/
+**/node_modules/
+.expo/
+**/.expo/
+dist/
+build/
+web-build/
+coverage/
+
+# Local databases, backups, logs, and collected static files
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.backup
+*.bak
+*.sql.gz
+*.log
+backend/src/staticfiles/
+
+# Local editor and agent configuration
+.vscode/
+.idea/
+.claude/
+**/.claude/
+/mobile/AGENTS.md
+/mobile/App.original.js
+
+# Private keys and local certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Personal reports and requirements PDF; keep the approved DBML/model PDF
+/documentacion/Informe STODDIE - Semana 2.docx
+/documentacion/INFORME_SEMANA_1_STODDIE.md
+/docs/Informe de Proyecto STODDIE_ App Móvil de Prevención y Alerta Ciudadana.pdf
+
+# Evidence needing personal-data redaction or Windows-path cropping
+/documentacion/evidencias/semana1_semana2/03-contenedores-saludables.png
+/documentacion/evidencias/semana1_semana2/04-postgresql-version-volumen.png
+/documentacion/evidencias/semana1_semana2/04.1-postgresql-version-volumen.png
+/documentacion/evidencias/semana1_semana2/05-migraciones-aplicadas.png
+/documentacion/evidencias/semana1_semana2/06-modelos-y-tablas.png
+/documentacion/evidencias/semana1_semana2/06.1-modelos-y-tablas.png
+/documentacion/evidencias/semana1_semana2/07-carga-catalogos.png
+/documentacion/evidencias/semana1_semana2/08-django-admin.png
+/documentacion/evidencias/semana1_semana2/10-pruebas-django.png

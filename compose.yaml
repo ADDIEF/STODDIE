@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:16
+    container_name: stoddie_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - stoddie_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - stoddie
+
+  backend:
+    profiles:
+      - development
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: development
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "${BACKEND_BIND_ADDRESS:-0.0.0.0}:${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend/src:/app/src
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - stoddie
+
+  backend-production:
+    profiles:
+      - production
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: production
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "False"
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "${BACKEND_BIND_ADDRESS:-0.0.0.0}:${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - stoddie
+
+volumes:
+  stoddie_postgres_data:
+
+networks:
+  stoddie:
+    driver: bridge

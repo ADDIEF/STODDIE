@@ -1,0 +1,303 @@
+
+Project STODDIE {
+  database_type: 'PostgreSQL'
+  Note: 'Aplicación móvil de prevención y alerta ciudadana para riesgos naturales en Bolivia. Prototipo basado en reportes ciudadanos geolocalizados, moderación, guías preventivas, contactos de emergencia y consulta meteorológica.'
+}
+
+// =====================================================
+// A. IDENTIDAD Y ROLES
+// =====================================================
+
+Table usuarios {
+  id_usuario integer [pk, increment]
+  primer_nombre varchar(80) [not null]
+  segundo_nombre varchar(80)
+  apellido_paterno varchar(80) [not null]
+  apellido_materno varchar(80)
+  correo varchar(120) [not null, unique]
+  password_hash varchar(255) [not null]
+  es_activo boolean [not null, default: true]
+  fecha_registro timestamp [not null, default: `now()`]
+}
+
+Table roles {
+  id_rol integer [pk, increment]
+  nombre_rol varchar(50) [not null, unique]
+  descripcion text
+
+  Note: 'Roles iniciales: Ciudadano y Administrador.'
+}
+
+Table usuarios_roles {
+  id_usuario integer [not null]
+  id_rol integer [not null]
+  fecha_asignacion timestamp [not null, default: `now()`]
+
+  indexes {
+    (id_usuario, id_rol) [pk]
+  }
+}
+
+// =====================================================
+// B. ORGANIZACIÓN GEOGRÁFICA
+// =====================================================
+
+Table departamentos {
+  id_departamento integer [pk, increment]
+  nombre_departamento varchar(100) [not null, unique]
+}
+
+Table municipios {
+  id_municipio integer [pk, increment]
+  id_departamento integer [not null]
+  nombre_municipio varchar(120) [not null]
+
+  indexes {
+    (id_departamento, nombre_municipio) [unique]
+  }
+}
+
+Table zonas {
+  id_zona integer [pk, increment]
+  id_municipio integer [not null]
+  nombre_zona varchar(120) [not null]
+  referencia varchar(200)
+
+  indexes {
+    (id_municipio, nombre_zona) [unique]
+  }
+}
+
+// =====================================================
+// C. RIESGOS E INCIDENTES
+// =====================================================
+
+Table tipos_riesgo {
+  id_tipo_riesgo integer [pk, increment]
+  nombre_riesgo varchar(80) [not null, unique]
+  descripcion text
+  es_activo boolean [not null, default: true]
+
+  Note: 'Ejemplos: inundación y deslizamiento.'
+}
+
+Table niveles_severidad {
+  id_nivel_severidad integer [pk, increment]
+  nombre_nivel varchar(40) [not null, unique]
+  descripcion text
+  orden smallint [not null]
+  
+  Note: 'Nivel de severidad declarado por el ciudadano; no constituye una evaluación técnica oficial.'
+}
+
+Table estados_incidente {
+  id_estado integer [pk, increment]
+  nombre_estado varchar(40) [not null, unique]
+  descripcion text
+
+  Note: 'Valores iniciales: Pendiente, Confirmado y Falso.'
+}
+
+Table incidentes {
+  id_incidente integer [pk, increment]
+  id_usuario integer [not null]
+  id_tipo_riesgo integer [not null]
+  id_nivel_severidad integer
+  id_estado integer [not null]
+  id_zona integer
+  descripcion text [not null]
+  latitud decimal(9,6) [not null]
+  longitud decimal(9,6) [not null]
+  referencia_ubicacion varchar(200)
+  fecha_reporte timestamp [not null, default: `now()`]
+  fecha_actualizacion timestamp [not null, default: `now()`]
+
+  indexes {
+    id_usuario
+    id_tipo_riesgo
+    id_nivel_severidad
+    id_estado
+    id_zona
+    fecha_reporte
+  }
+
+  Note: 'La zona es opcional si no se identifica. La latitud y longitud son obligatorias y deben validarse dentro de sus rangos geográficos.'
+}
+
+// =====================================================
+// D. SEGUIMIENTO Y MODERACIÓN
+// =====================================================
+
+Table historial_estados {
+  id_historial integer [pk, increment]
+  id_incidente integer [not null]
+  id_estado_anterior integer
+  id_estado_nuevo integer [not null]
+  id_usuario integer
+  fecha_cambio timestamp [not null, default: `now()`]
+  observacion text
+
+  indexes {
+    (id_incidente, fecha_cambio)
+    id_usuario
+  }
+
+  Note: 'id_estado_anterior e id_usuario pueden quedar vacíos para el registro inicial del incidente.'
+}
+
+Table comentarios_incidente {
+  id_comentario integer [pk, increment]
+  id_incidente integer [not null]
+  id_usuario integer [not null]
+  comentario text [not null]
+  fecha_comentario timestamp [not null, default: `now()`]
+
+  indexes {
+    (id_incidente, fecha_comentario)
+    id_usuario
+  }
+
+  Note: 'Comentarios administrativos para documentar la moderación de los reportes.'
+}
+
+// =====================================================
+// E. PREVENCIÓN Y SERVICIOS DE EMERGENCIA
+// =====================================================
+
+Table categorias_prevencion {
+  id_categoria integer [pk, increment]
+  nombre_categoria varchar(80) [not null, unique]
+  descripcion text
+  es_activa boolean [not null, default: true]
+}
+
+Table guias_prevencion {
+  id_guia integer [pk, increment]
+  id_categoria integer [not null]
+  titulo varchar(150) [not null]
+  contenido text [not null]
+  fecha_actualizacion timestamp [not null, default: `now()`]
+  es_activa boolean [not null, default: true]
+
+  indexes {
+    id_categoria
+    titulo
+  }
+}
+
+Table guias_tipos_riesgo {
+  id_guia integer [not null]
+  id_tipo_riesgo integer [not null]
+
+  indexes {
+    (id_guia, id_tipo_riesgo) [pk]
+  }
+}
+
+Table entidades_emergencia {
+  id_entidad integer [pk, increment]
+  id_municipio integer [not null]
+  nombre_entidad varchar(150) [not null]
+  tipo_entidad varchar(80) [not null]
+  direccion varchar(200)
+  latitud decimal(9,6)
+  longitud decimal(9,6)
+  es_activa boolean [not null, default: true]
+
+  indexes {
+    id_municipio
+    nombre_entidad
+  }
+
+  Note: 'Solo se registrarán entidades y datos de referencia verificables para la demostración.'
+}
+
+Table contactos_emergencia {
+  id_contacto integer [pk, increment]
+  id_entidad integer [not null]
+  tipo_contacto varchar(40) [not null]
+  valor_contacto varchar(120) [not null]
+  horario varchar(120)
+  es_activo boolean [not null, default: true]
+
+  indexes {
+    id_entidad
+  }
+}
+
+// =====================================================
+// F. FUENTES METEOROLÓGICAS
+// =====================================================
+
+Table fuentes_meteorologicas {
+  id_fuente integer [pk, increment]
+  id_usuario_registro integer [not null]
+  nombre_proveedor varchar(100) [not null, unique]
+  url_referencia varchar(250)
+  descripcion text
+  es_activa boolean [not null, default: true]
+
+  indexes {
+    id_usuario_registro
+  }
+
+  Note: 'Almacena información de referencia del proveedor. Las claves de acceso se guardan en variables de entorno. La consulta meteorológica se realiza al utilizar la aplicación y no se almacenan históricos de mediciones.'
+}
+
+// =====================================================
+// RELACIONES: IDENTIDAD Y ROLES
+// =====================================================
+
+Ref: usuarios_roles.id_usuario > usuarios.id_usuario
+Ref: usuarios_roles.id_rol > roles.id_rol
+
+// =====================================================
+// RELACIONES: GEOGRAFÍA
+// =====================================================
+
+Ref: municipios.id_departamento > departamentos.id_departamento
+Ref: zonas.id_municipio > municipios.id_municipio
+
+// =====================================================
+// RELACIONES: INCIDENTES
+// =====================================================
+
+Ref: incidentes.id_usuario > usuarios.id_usuario
+Ref: incidentes.id_tipo_riesgo > tipos_riesgo.id_tipo_riesgo
+Ref: incidentes.id_nivel_severidad > niveles_severidad.id_nivel_severidad
+Ref: incidentes.id_estado > estados_incidente.id_estado
+Ref: incidentes.id_zona > zonas.id_zona
+
+// =====================================================
+// RELACIONES: HISTORIAL Y MODERACIÓN
+// =====================================================
+
+Ref: historial_estados.id_incidente > incidentes.id_incidente
+Ref: historial_estados.id_estado_anterior > estados_incidente.id_estado
+Ref: historial_estados.id_estado_nuevo > estados_incidente.id_estado
+Ref: historial_estados.id_usuario > usuarios.id_usuario
+
+Ref: comentarios_incidente.id_incidente > incidentes.id_incidente
+Ref: comentarios_incidente.id_usuario > usuarios.id_usuario
+
+// =====================================================
+// RELACIONES: PREVENCIÓN
+// =====================================================
+
+Ref: guias_prevencion.id_categoria > categorias_prevencion.id_categoria
+
+Ref: guias_tipos_riesgo.id_guia > guias_prevencion.id_guia
+Ref: guias_tipos_riesgo.id_tipo_riesgo > tipos_riesgo.id_tipo_riesgo
+
+// =====================================================
+// RELACIONES: SERVICIOS DE EMERGENCIA
+// =====================================================
+
+Ref: entidades_emergencia.id_municipio > municipios.id_municipio
+Ref: contactos_emergencia.id_entidad > entidades_emergencia.id_entidad
+
+// =====================================================
+// RELACIONES: FUENTES METEOROLÓGICAS
+// =====================================================
+
+Ref: fuentes_meteorologicas.id_usuario_registro > usuarios.id_usuario
