@@ -21,7 +21,7 @@ export default function WeatherScreen({ onBack }) {
   const [clima, setClima] = useState(null);
   const [loading, setLoading] = useState(false);
   const [deptsLoading, setDeptsLoading] = useState(true);
-  [showPicker, setShowPicker] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     async function loadDepartamentos() {
