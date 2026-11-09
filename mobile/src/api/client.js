@@ -23,6 +23,18 @@ function getErrorMessage(data, fallback) {
   if (data && typeof data.detail === 'string') {
     return data.detail;
   }
+  if (data && typeof data === 'object') {
+    const firstKey = Object.keys(data)[0];
+    if (firstKey) {
+      const value = data[firstKey];
+      if (Array.isArray(value) && value.length > 0) {
+        return `${firstKey}: ${value[0]}`;
+      }
+      if (typeof value === 'string') {
+        return `${firstKey}: ${value}`;
+      }
+    }
+  }
   return fallback;
 }
 

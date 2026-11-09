@@ -1,119 +1,153 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import {
-  ActivityIndicator,
-  Button,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { apiRequest } from './src/api/client';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { getAuthToken, clearAuthToken } from './src/api/tokenStorage';
+import { authApi } from './src/api/client';
+
+import { COLORS } from './src/theme/colors';
+import LoginScreen from './src/screens/LoginScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
+import IncidentListScreen from './src/screens/IncidentListScreen';
+import IncidentCreateScreen from './src/screens/IncidentCreateScreen';
+import MapScreen from './src/screens/MapScreen';
+import IncidentDetailScreen from './src/screens/IncidentDetailScreen';
+import WeatherScreen from './src/screens/WeatherScreen';
+import PreventionScreen from './src/screens/PreventionScreen';
+import EmergencyScreen from './src/screens/EmergencyScreen';
+import AdminModerationScreen from './src/screens/AdminModerationScreen';
+import AdminDetailScreen from './src/screens/AdminDetailScreen';
+
+function isAdminUser(user) {
+  if (!user) return false;
+  if (user.is_staff || user.is_superuser) return true;
+  const roles = user.roles || [];
+  return roles.includes('Administrador');
+}
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
-  const [connected, setConnected] = useState(false);
-  const [message, setMessage] = useState('Comprobando conexión...');
-  const [detail, setDetail] = useState('');
-
-  async function checkConnection() {
-    setLoading(true);
-    setConnected(false);
-    setMessage('Comprobando conexión...');
-    setDetail('');
-
-    try {
-      await apiRequest('', {
-        authenticated: false,
-        timeoutMs: 10000,
-      });
-
-      setConnected(true);
-      setMessage('Conexión correcta');
-      setDetail('La API respondió correctamente.');
-    } catch (error) {
-      if (error.status === 401) {
-        setConnected(true);
-        setMessage('¡API conectada correctamente!');
-        setDetail('Django respondió HTTP 401. La API es accesible, pero requiere autenticación.');
-      } else {
-        setConnected(false);
-        setMessage('No se pudo conectar con la API');
-        setDetail(error.message || 'Error desconocido');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [screen, setScreen] = useState('LOADING');
+  const [incidentId, setIncidentId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
-    checkConnection();
+    async function checkAuth() {
+      const token = await getAuthToken();
+      if (!token) { setScreen('LOGIN'); return; }
+      try {
+        const me = await authApi.me();
+        setProfile(me);
+        const admin = isAdminUser(me);
+        setIsAdmin(admin);
+        setScreen(admin ? 'ADMIN' : 'LIST');
+      } catch {
+        setScreen('LIST');
+      }
+    }
+    checkAuth();
   }, []);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>STODDIE</Text>
-      <Text style={styles.subtitle}>Prueba de conexión móvil</Text>
+  const handleAfterLogin = (user) => {
+    if (user) {
+      setProfile(user);
+      const admin = isAdminUser(user);
+      setIsAdmin(admin);
+      setScreen(admin ? 'ADMIN' : 'LIST');
+    } else {
+      setScreen('LIST');
+    }
+  };
 
-      {loading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <>
-          <Text style={[
-            styles.status,
-            { color: connected ? '#16803c' : '#c62828' },
-          ]}>
-            {message}
-          </Text>
-          <Text style={styles.detail}>{detail}</Text>
-        </>
-      )}
+  const goLogin = () => setScreen('LOGIN');
+  const goRegister = () => setScreen('REGISTER');
+  const goList = () => setScreen(isAdmin ? 'ADMIN' : 'LIST');
+  const goMap = () => setScreen('MAP');
+  const goCreate = () => setScreen('CREATE');
+  const goDetail = (id) => { setIncidentId(id); setScreen('DETAIL'); };
+  const goAdminDetail = (id) => { setIncidentId(id); setScreen('ADMIN_DETAIL'); };
+  const goWeather = () => setScreen('WEATHER');
+  const goPrevention = () => setScreen('PREVENTION');
+  const goEmergency = () => setScreen('EMERGENCY');
 
-      <View style={styles.button}>
-        <Button
-          title="Volver a probar"
-          onPress={checkConnection}
-          disabled={loading}
+  const handleLogout = async () => {
+    try { await authApi.logout(); } catch {}
+    await clearAuthToken();
+    setProfile(null);
+    setIsAdmin(false);
+    setScreen('LOGIN');
+  };
+
+  let content;
+  switch (screen) {
+    case 'LOGIN':
+      content = <LoginScreen onLogin={handleAfterLogin} onRegister={goRegister} />;
+      break;
+    case 'REGISTER':
+      content = <RegisterScreen onRegister={() => setScreen('LOGIN')} onLogin={goLogin} />;
+      break;
+    case 'ADMIN':
+      content = (
+        <AdminModerationScreen
+          onBack={() => setScreen('LIST')}
+          onDetail={goAdminDetail}
+          onMap={goMap}
+          onLogout={handleLogout}
         />
-      </View>
+      );
+      break;
+    case 'ADMIN_DETAIL':
+      content = <AdminDetailScreen incidentId={incidentId} onBack={() => setScreen('ADMIN')} />;
+      break;
+    case 'LIST':
+      content = (
+        <IncidentListScreen
+          onMap={goMap}
+          onCreate={goCreate}
+          onWeather={goWeather}
+          onPrevention={goPrevention}
+          onEmergency={goEmergency}
+          onLogout={handleLogout}
+          onDetail={goDetail}
+          isAdmin={isAdmin}
+          onAdmin={() => setScreen('ADMIN')}
+        />
+      );
+      break;
+    case 'MAP':
+      content = <MapScreen onBack={goList} />;
+      break;
+    case 'CREATE':
+      content = (
+        <IncidentCreateScreen onBack={goList} onCreated={() => setScreen(isAdmin ? 'ADMIN' : 'LIST')} />
+      );
+      break;
+    case 'DETAIL':
+      content = (
+        <IncidentDetailScreen incidentId={incidentId} onBack={goList} />
+      );
+      break;
+    case 'WEATHER':
+      content = <WeatherScreen onBack={goList} />;
+      break;
+    case 'PREVENTION':
+      content = <PreventionScreen onBack={goList} />;
+      break;
+    case 'EMERGENCY':
+      content = <EmergencyScreen onBack={goList} />;
+      break;
+    default:
+      content = <Text style={{ color: COLORS.tan }}>Cargando...</Text>;
+  }
 
-      <StatusBar style="auto" />
+  return (
+    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+      <StatusBar style="auto" backgroundColor={COLORS.spaceCadet} />
+      {content}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f4f6f8',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 25,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#173b57',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 35,
-  },
-  status: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  detail: {
-    fontSize: 14,
-    color: '#444',
-    textAlign: 'center',
-    lineHeight: 21,
-  },
-  button: {
-    marginTop: 30,
-    width: 200,
-  },
+  container: { flex: 1 },
 });

@@ -23,21 +23,40 @@ class Command(BaseCommand):
         Categoria = get_model("prevention", "CategoriaPrevencion")
         Guia = get_model("prevention", "GuiaPrevencion")
         Fuente = get_model("weather", "FuenteMeteorologica")
+        EntidadEmergencia = get_model("emergency", "EntidadEmergencia")
+        ContactoEmergencia = get_model("emergency", "ContactoEmergencia")
 
-        admin = User.objects.get(email="admin123@gmail.com")
+        # Buscar o crear un usuario administrador para asociar registros
+        admin = User.objects.filter(email="admin@stoddie.local").first()
+        if not admin:
+            admin = User.objects.filter(is_staff=True, is_superuser=True).first()
+        if not admin:
+            self.stdout.write(
+                self.style.WARNING(
+                    "No se encontró un usuario administrador. "
+                    "Las fuentes meteorológicas se cargarán sin usuario de registro."
+                )
+            )
 
-        rol, _ = Role.objects.get_or_create(
+        # Roles
+        rol_admin, _ = Role.objects.get_or_create(
             nombre_rol="Administrador",
             defaults={"descripcion": "Administración general del sistema"}
         )
-        admin.roles.add(rol)
+        rol_ciudadano, _ = Role.objects.get_or_create(
+            nombre_rol="Ciudadano",
+            defaults={"descripcion": "Usuario ciudadano que reporta incidentes"}
+        )
 
+        if admin:
+            admin.roles.add(rol_admin)
+
+        # Geografía: La Paz
         departamento, _ = Departamento.objects.get_or_create(
             nombre_departamento="La Paz"
         )
 
         municipios = {}
-
         for nombre in ["La Paz", "El Alto"]:
             municipios[nombre], _ = Municipio.objects.get_or_create(
                 departamento=departamento,
@@ -46,31 +65,23 @@ class Command(BaseCommand):
 
         zonas = {
             "La Paz": [
-                "Centro",
-                "Sopocachi",
-                "Miraflores",
-                "Obrajes",
-                "Calacoto",
-                "Achumani",
-                "San Pedro",
-                "Tembladerani",
-                "Villa Fátima",
+                "Centro", "Sopocachi", "Miraflores", "Obrajes", "Calacoto",
+                "Achumani", "San Pedro", "Tembladerani", "Villa Fátima",
                 "Achachicala",
             ],
             "El Alto": [
-                "Ceja",
-                "Ciudad Satélite",
-                "Senkata",
+                "Ceja", "Ciudad Satélite", "Senkata",
             ],
         }
 
-        for municipio, nombres in zonas.items():
-            for nombre in nombres:
+        for municipio_nombre, nombres_zonas in zonas.items():
+            for nombre_zona in nombres_zonas:
                 Zona.objects.get_or_create(
-                    municipio=municipios[municipio],
-                    nombre_zona=nombre
+                    municipio=municipios[municipio_nombre],
+                    nombre_zona=nombre_zona
                 )
 
+        # Tipos de riesgo
         riesgos = {
             "Deslizamiento": "Movimiento de tierra o material en pendientes.",
             "Inundación": "Acumulación o desbordamiento de agua en zonas habitadas.",
@@ -80,13 +91,13 @@ class Command(BaseCommand):
         }
 
         riesgos_db = {}
-
         for nombre, descripcion in riesgos.items():
             riesgos_db[nombre], _ = TipoRiesgo.objects.get_or_create(
                 nombre_riesgo=nombre,
                 defaults={"descripcion": descripcion, "es_activo": True}
             )
 
+        # Niveles de severidad
         severidades = [
             ("Leve", "Afectación menor.", 1),
             ("Moderado", "Afectación que requiere atención.", 2),
@@ -100,6 +111,7 @@ class Command(BaseCommand):
                 defaults={"descripcion": descripcion, "orden": orden}
             )
 
+        # Estados de incidente
         estados = {
             "Pendiente": "Incidente registrado y pendiente de revisión.",
             "En Revisión": "Incidente en proceso de evaluación.",
@@ -114,6 +126,7 @@ class Command(BaseCommand):
                 defaults={"descripcion": descripcion}
             )
 
+        # Categorías y guías de prevención
         categorias = {
             "Preparación (Antes)": "Medidas preventivas antes de una emergencia.",
             "Acción (Durante)": "Recomendaciones para actuar durante una emergencia.",
@@ -121,7 +134,6 @@ class Command(BaseCommand):
         }
 
         categorias_db = {}
-
         for nombre, descripcion in categorias.items():
             categorias_db[nombre], _ = Categoria.objects.get_or_create(
                 nombre_categoria=nombre,
@@ -173,11 +185,11 @@ class Command(BaseCommand):
                     "es_activa": True,
                 }
             )
-
             guia.tipos_riesgo.add(
                 *[riesgos_db[nombre] for nombre in dato["riesgos"]]
             )
 
+        # Fuentes meteorológicas
         fuentes = [
             (
                 "SENAMHI",
@@ -188,6 +200,11 @@ class Command(BaseCommand):
                 "OpenWeatherMap",
                 "https://openweathermap.org/",
                 "Proveedor de información meteorológica mediante servicios web."
+            ),
+            (
+                "Open-Meteo",
+                "https://open-meteo.com/",
+                "API meteorológica gratuita sin clave de acceso requerida."
             ),
         ]
 
@@ -201,6 +218,94 @@ class Command(BaseCommand):
                     "es_activa": True,
                 }
             )
+
+        # =====================================================================
+        # ENTIDADES Y CONTACTOS DE EMERGENCIA (SEMANA 3)
+        # =====================================================================
+
+        entidades_datos = [
+            {
+                "nombre": "Bomberos Unidad La Paz",
+                "municipio": "La Paz",
+                "tipo": "Bomberos",
+                "direccion": "Av. 6 de Agosto, Zona Centro",
+                "latitud": -16.4991,
+                "longitud": -68.1349,
+                "contactos": [
+                    {"tipo": "Teléfono", "valor": "119", "horario": "24 horas"},
+                    {"tipo": "Teléfono", "valor": "2213456", "horario": "Oficinas"},
+                ],
+            },
+            {
+                "nombre": "Policía Boliviana - La Paz",
+                "municipio": "La Paz",
+                "tipo": "Policía",
+                "direccion": "Plaza Murillo, Zona Centro",
+                "latitud": -16.4999,
+                "longitud": -68.1339,
+                "contactos": [
+                    {"tipo": "Teléfono", "valor": "110", "horario": "24 horas"},
+                ],
+            },
+            {
+                "nombre": "COMI - Comité de Operaciones de Emergencia",
+                "municipio": "La Paz",
+                "tipo": "Gestión de Riesgos",
+                "direccion": "Edificio Municipal, Zona Sopocachi",
+                "latitud": -16.5032,
+                "longitud": -68.1411,
+                "contactos": [
+                    {"tipo": "Teléfono", "valor": "800104040", "horario": "24 horas"},
+                ],
+            },
+            {
+                "nombre": "Red de Salud La Paz",
+                "municipio": "La Paz",
+                "tipo": "Salud",
+                "direccion": "Av. Ejército, Zona Miraflores",
+                "latitud": -16.5132,
+                "longitud": -68.1234,
+                "contactos": [
+                    {"tipo": "Teléfono", "valor": "118", "horario": "Emergencias"},
+                    {"tipo": "Teléfono", "valor": "2225678", "horario": "Oficinas"},
+                ],
+            },
+            {
+                "nombre": "Bomberos El Alto",
+                "municipio": "El Alto",
+                "tipo": "Bomberos",
+                "direccion": "Av. 6 de Marzo, Zona Ceja",
+                "latitud": -16.5200,
+                "longitud": -68.1600,
+                "contactos": [
+                    {"tipo": "Teléfono", "valor": "119", "horario": "24 horas"},
+                ],
+            },
+        ]
+
+        for entidad_dato in entidades_datos:
+            entidad, _ = EntidadEmergencia.objects.get_or_create(
+                nombre_entidad=entidad_dato["nombre"],
+                defaults={
+                    "municipio": municipios[entidad_dato["municipio"]],
+                    "tipo_entidad": entidad_dato["tipo"],
+                    "direccion": entidad_dato["direccion"],
+                    "latitud": entidad_dato["latitud"],
+                    "longitud": entidad_dato["longitud"],
+                    "es_activa": True,
+                }
+            )
+
+            for contacto_dato in entidad_dato["contactos"]:
+                ContactoEmergencia.objects.get_or_create(
+                    entidad=entidad,
+                    tipo_contacto=contacto_dato["tipo"],
+                    valor_contacto=contacto_dato["valor"],
+                    defaults={
+                        "horario": contacto_dato.get("horario", ""),
+                        "es_activo": True,
+                    }
+                )
 
         self.stdout.write(self.style.SUCCESS(
             "Carga inicial de STODDIE completada correctamente."

@@ -60,6 +60,28 @@ class IncidenteReadSerializer(serializers.ModelSerializer):
     )
     id_estado = serializers.IntegerField(source='estado_id', read_only=True)
     id_zona = serializers.IntegerField(source='zona_id', read_only=True)
+    tipo_riesgo_nombre = serializers.CharField(
+        source='tipo_riesgo.nombre_riesgo',
+        read_only=True,
+        default='',
+    )
+    nivel_severidad_nombre = serializers.SerializerMethodField()
+    estado_nombre = serializers.CharField(
+        source='estado.nombre_estado',
+        read_only=True,
+        default='',
+    )
+    zona_nombre = serializers.SerializerMethodField()
+
+    def get_nivel_severidad_nombre(self, obj):
+        if obj.nivel_severidad_id:
+            return obj.nivel_severidad.nombre_nivel if obj.nivel_severidad else ''
+        return 'Sin definir'
+
+    def get_zona_nombre(self, obj):
+        if obj.zona_id:
+            return obj.zona.nombre_zona if obj.zona else ''
+        return 'Sin zona'
 
     class Meta:
         model = Incidente
@@ -67,9 +89,13 @@ class IncidenteReadSerializer(serializers.ModelSerializer):
             'id_incidente',
             'id_usuario',
             'id_tipo_riesgo',
+            'tipo_riesgo_nombre',
             'id_nivel_severidad',
+            'nivel_severidad_nombre',
             'id_estado',
+            'estado_nombre',
             'id_zona',
+            'zona_nombre',
             'descripcion',
             'latitud',
             'longitud',

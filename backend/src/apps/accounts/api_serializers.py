@@ -10,6 +10,8 @@ from .models import Role, User, UserRole
 class PublicUserSerializer(serializers.ModelSerializer):
     id_usuario = serializers.IntegerField(source='pk', read_only=True)
     roles = serializers.SerializerMethodField()
+    is_staff = serializers.BooleanField(read_only=True)
+    is_superuser = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -22,6 +24,8 @@ class PublicUserSerializer(serializers.ModelSerializer):
             'apellido_materno',
             'date_joined',
             'roles',
+            'is_staff',
+            'is_superuser',
         )
         read_only_fields = fields
 
@@ -82,6 +86,8 @@ class ProfileSerializer(StrictModelSerializer):
     id_usuario = serializers.IntegerField(source='pk', read_only=True)
     email = serializers.EmailField(read_only=True)
     roles = serializers.SerializerMethodField()
+    is_staff = serializers.BooleanField(read_only=True)
+    is_superuser = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -94,12 +100,16 @@ class ProfileSerializer(StrictModelSerializer):
             'apellido_materno',
             'date_joined',
             'roles',
+            'is_staff',
+            'is_superuser',
         )
         read_only_fields = (
             'id_usuario',
             'email',
             'date_joined',
             'roles',
+            'is_staff',
+            'is_superuser',
         )
 
     def get_roles(self, user):
