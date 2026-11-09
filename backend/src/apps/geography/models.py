@@ -6,6 +6,8 @@ class Departamento(models.Model):
     nombre_departamento = models.CharField(max_length=100, unique=True)
     latitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    clima_descripcion = models.TextField(null=True, blank=True)
+    recomendaciones = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'departamentos'

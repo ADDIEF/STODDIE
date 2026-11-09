@@ -52,63 +52,156 @@ class Command(BaseCommand):
             admin.roles.add(rol_admin)
 
         # =====================================================================
-        # 9 DEPARTAMENTOS DE BOLIVIA (con coordenadas aproximadas para clima/mapa)
+        # 9 DEPARTAMENTOS DE BOLIVIA
         # =====================================================================
         departamentos_datos = [
-            {"nombre": "La Paz", "latitud": -16.5, "longitud": -68.1,
-             "municipios": [
-                 {"nombre": "La Paz", "zonas": ["Centro", "Sopocachi", "Miraflores", "Obrajes", "Calacoto", "Achumani", "San Pedro", "Tembladerani", "Villa Fátima", "Achachicala"]},
-                 {"nombre": "El Alto", "zonas": ["Ceja", "Ciudad Satélite", "Senkata", "Villa 1ro de Mayo", "Villa Ingenio"]},
-                 {"nombre": "Viacha", "zonas": ["Central", "San Pedro", "Villa Nueva"]},
-             ]},
-            {"nombre": "Santa Cruz", "latitud": -17.8, "longitud": -63.1,
-             "municipios": [
-                 {"nombre": "Santa Cruz de la Sierra", "zonas": ["Plan 3000", "Los Tajibos", "Urubó", "Cañada", "Villa Primero de Mayo"]},
-                 {"nombre": "Warnes", "zonas": ["Central", "Villa Bolívar", "San Pedro"]},
-                 {"nombre": "Montero", "zonas": ["Centro", "Villa América", "San Miguel"]},
-             ]},
-            {"nombre": "Cochabamba", "latitud": -17.4, "longitud": -66.1,
-             "municipios": [
-                 {"nombre": "Cochabamba", "zonas": ["Ciudadela", "Cala Cala", "Villa Pagador", "Villa América", "San Antonio"]},
-                 {"nombre": "Quillacollo", "zonas": ["Centro", "Villa Pagador", "Villa América"]},
-                 {"nombre": "Sacaba", "zonas": ["Centro", "Villa Primero de Mayo", "San Pedro"]},
-             ]},
-            {"nombre": "Oruro", "latitud": -17.97, "longitud": -67.1,
-             "municipios": [
-                 {"nombre": "Oruro", "zonas": ["San Pedro", "1ro de Mayo", "Villa Constituyente", "Villa San José", "Central"]},
-                 {"nombre": "Challapata", "zonas": ["Centro", "Villa Primero de Mayo", "San Pedro"]},
-                 {"nombre": "Sabaya", "zonas": ["Central", "Villa Nueva", "San Pedro"]},
-             ]},
-            {"nombre": "Potosí", "latitud": -19.58, "longitud": -65.75,
-             "municipios": [
-                 {"nombre": "Potosí", "zonas": ["San Antonio", "Central", "Yura", "Villa Primero de Mayo", "San Pedro"]},
-                 {"nombre": "Tupiza", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
-                 {"nombre": "Villazón", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
-             ]},
-            {"nombre": "Chuquisaca", "latitud": -19.05, "longitud": -65.25,
-             "municipios": [
-                 {"nombre": "Sucre", "zonas": ["Recoleta", "Molino", "San Roque", "Villa Primero de Mayo", "Central"]},
-                 {"nombre": "Yamparáez", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
-                 {"nombre": "Zudáñez", "zonas": ["Central", "Villa Nueva", "San Roque"]},
-             ]},
-            {"nombre": "Tarija", "latitud": -21.53, "longitud": -64.73,
-             "municipios": [
-                 {"nombre": "Tarija", "zonas": ["Los Álamos", "La Toma", "Central", "Villa Primero de Mayo", "San Pedro"]},
-                 {"nombre": "Bermejo", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
-                 {"nombre": "Villa Montes", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
-             ]},
-            {"nombre": "Pando", "latitud": -11.0, "longitud": -67.0,
-             "municipios": [
-                 {"nombre": "Cobija", "zonas": ["Centro", "1ro de Mayo", "Bella Flor", "San Pedro", "Villa Nueva"]},
-                 {"nombre": "Filadelfia", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
-                 {"nombre": "Puerto Rico", "zonas": ["Central", "Villa Nueva", "San Roque"]},
-             ]},
-            {"nombre": "Beni", "latitud": -15.0, "longitud": -65.0,
-             "municipios": [
-                 {"nombre": "Trinidad", "zonas": ["Central", "1ro de Mayo", "San Roque", "Villa Primero de Mayo", "San Pedro"]},
-                 {"nombre": "Rurrenabaque", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
-                 {"nombre": "San Ignacio", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
-             ]},
+            {
+                "nombre": "La Paz",
+                "latitud": -16.5, "longitud": -68.1,
+                "clima": "Topografía accidentada de laderas y cuencas (La Paz) y planicie de gran altitud (El Alto). Altamente vulnerable a deslizamientos, riadas, granizadas y heladas.",
+                "recomendaciones": "La Paz (Lluvias y laderas): Limpie canaletas y canalillos de su vivienda antes de diciembre y evite echar basura a las torrenteras para prevenir inundaciones. Si observa grietas en paredes o pisos, o el flujo de agua cambia de color, evacúe inmediatamente sin sacar pertenencias por riesgo de deslizamiento. No retorne a su vivienda hasta que las autoridades declaren zona segura.\nEl Alto (Heladas y granizadas): Refuerce los techos de calamina para evitar colapsos por acumulación de granizo. Aísle las tuberías de agua expuestas a la intemperie con papel periódico y plásticos para evitar que revienten por el congelamiento del agua durante la madrugada.",
+                "municipios": [
+                    {"nombre": "La Paz", "zonas": ["Centro", "Sopocachi", "Miraflores", "Obrajes", "Calacoto", "Achumani", "San Pedro", "Tembladerani", "Villa Fátima", "Achachicala"]},
+                    {"nombre": "El Alto", "zonas": ["Ceja", "Ciudad Satélite", "Senkata", "Villa 1ro de Mayo", "Villa Ingenio"]},
+                    {"nombre": "Viacha", "zonas": ["Central", "San Pedro", "Villa Nueva"]},
+                ],
+                "entidades": [
+                    {"nombre": "Retén de Emergencias Municipal (SMGIR)", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, La Paz", "contactos": [("Teléfono", "114", "Atención 24 horas")]},
+                    {"nombre": "Bomberos Antofagasta", "tipo": "Bomberos", "direccion": "Av. Antofagasta, La Paz", "contactos": [("Teléfono", "119", "24 horas"), ("Teléfono", "2204125", "Oficinas")]},
+                    {"nombre": "Radio Patrullas", "tipo": "Policía", "direccion": "Zona Centro, La Paz", "contactos": [("Teléfono", "110", "24 horas")]},
+                    {"nombre": "Red de Ambulancias SUMA", "tipo": "Salud", "direccion": "Zona Centro, La Paz", "contactos": [("Teléfono", "161", "24 horas")]},
+                    {"nombre": "Defensa Civil", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, La Paz", "contactos": [("Teléfono", "113", "24 horas")]},
+                ],
+            },
+            {
+                "nombre": "Santa Cruz",
+                "latitud": -17.8, "longitud": -63.1,
+                "clima": "Clima tropical, caluroso y húmedo. Vulnerable a incendios forestales y urbanos en época seca, vientos huracanados (surazos fuertes) e inundaciones súbitas por saturación de drenaje en época de lluvias.",
+                "recomendaciones": "Calor e Incendios: Evite encender fogatas, quemar basura o realizar chaqueos durante la época seca y de vientos fuertes (agosto-octubre). Mantenga los lotes baldíos libres de maleza seca.\nVientos Fuertes: Asegure calaminas, letreros y objetos en balcones que puedan desprenderse. Evite estacionar vehículos debajo de árboles frondosos o letreros antiguos.\nLluvias: Limpie las canaletas para evitar el estancamiento de agua, mitigando tanto el riesgo de inundación barrial como la proliferación del mosquito del dengue.",
+                "municipios": [
+                    {"nombre": "Santa Cruz de la Sierra", "zonas": ["Plan 3000", "Los Tajibos", "Urubó", "Cañada", "Villa Primero de Mayo"]},
+                    {"nombre": "Warnes", "zonas": ["Central", "Villa Bolívar", "San Pedro"]},
+                    {"nombre": "Montero", "zonas": ["Centro", "Villa América", "San Miguel"]},
+                ],
+                "entidades": [
+                    {"nombre": "Departamento de Emergencias Municipales (DEM)", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Santa Cruz", "contactos": [("Teléfono", "800-125050", "24 horas")]},
+                    {"nombre": "Bomberos de la Policía", "tipo": "Bomberos", "direccion": "Zona Centro, Santa Cruz", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "Fundasol (Bomberos Voluntarios)", "tipo": "Bomberos", "direccion": "Zona Los Tajibos, Santa Cruz", "contactos": [("Teléfono", "342-9999", "24 horas")]},
+                    {"nombre": "Cruz Roja", "tipo": "Salud", "direccion": "Zona Centro, Santa Cruz", "contactos": [("Teléfono", "162", "24 horas")]},
+                ],
+            },
+            {
+                "nombre": "Cochabamba",
+                "latitud": -17.4, "longitud": -66.1,
+                "clima": "Clima de valles templados y trópico. Riesgo de sequías prolongadas, incendios forestales (Parque Nacional Tunari) y riadas en el cono sur y el trópico.",
+                "recomendaciones": "Sequía: Racionalice el uso del agua domiciliaria e implemente sistemas de recolección de agua de lluvia para riego y limpieza.\nIncendios Forestales: No arroje colillas de cigarro ni botellas de vidrio en zonas boscosas. Si vive cerca de áreas forestales, cree franjas de seguridad (cortafuegos) alrededor de su propiedad.\nRiadas: Evite asentamientos o construcciones en las franjas de seguridad (riberas) de los ríos, especialmente en el Trópico de Cochabamba.",
+                "municipios": [
+                    {"nombre": "Cochabamba", "zonas": ["Ciudadela", "Cala Cala", "Villa Pagador", "Villa América", "San Antonio"]},
+                    {"nombre": "Quillacollo", "zonas": ["Centro", "Villa Pagador", "Villa América"]},
+                    {"nombre": "Sacaba", "zonas": ["Centro", "Villa Primero de Mayo", "San Pedro"]},
+                ],
+                "entidades": [
+                    {"nombre": "Bomberos", "tipo": "Bomberos", "direccion": "Zona Centro, Cochabamba", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "SAR-Bolivia (Búsqueda y Rescate)", "tipo": "Rescate", "direccion": "Zona Centro, Cochabamba", "contactos": [("Teléfono", "132", "24 horas"), ("Teléfono", "425-1192", "Oficinas")]},
+                    {"nombre": "Unidad de Gestión de Riesgos (UGR) Gobernación", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Cochabamba", "contactos": [("Teléfono", "425-3000", "Oficinas")]},
+                ],
+            },
+            {
+                "nombre": "Chuquisaca",
+                "latitud": -19.05, "longitud": -65.25,
+                "clima": "Zonas de valle y chaco. Alta vulnerabilidad a sequías severas, granizadas destructivas para el sector agrícola y desbordes de ríos.",
+                "recomendaciones": "Granizadas: Para zonas periurbanas y agrícolas, implemente mallas antigranizo para proteger los cultivos y refuerce cubiertas ligeras.\nTormentas: Aléjese de los lechos de los ríos y quebradas durante tormentas eléctricas y lluvias fuertes, ya que las crecidas (riadas) ocurren de manera repentina.",
+                "municipios": [
+                    {"nombre": "Sucre", "zonas": ["Recoleta", "Molino", "San Roque", "Villa Primero de Mayo", "Central"]},
+                    {"nombre": "Yamparáez", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                    {"nombre": "Zudáñez", "zonas": ["Central", "Villa Nueva", "San Roque"]},
+                ],
+                "entidades": [
+                    {"nombre": "Retén de Emergencias Sucre", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Sucre", "contactos": [("Teléfono", "114", "24 horas")]},
+                    {"nombre": "Bomberos de la Policía", "tipo": "Bomberos", "direccion": "Zona Centro, Sucre", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "Dirección Departamental de Riesgos", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Sucre", "contactos": [("Teléfono", "113", "24 horas")]},
+                ],
+            },
+            {
+                "nombre": "Tarija",
+                "latitud": -21.53, "longitud": -64.73,
+                "clima": "Clima templado en valles y caluroso en el chaco. Afectado por incendios forestales (Serranía de Sama), riadas y sequías.",
+                "recomendaciones": "Incendios: Respete las prohibiciones de encender fuego en reservas naturales. Mantenga despejadas de vegetación seca las áreas circundantes a las viviendas periurbanas.\nSequía: Racionalice el agua potable y evite el lavado excesivo de aceras y vehículos.",
+                "municipios": [
+                    {"nombre": "Tarija", "zonas": ["Los Álamos", "La Toma", "Central", "Villa Primero de Mayo", "San Pedro"]},
+                    {"nombre": "Bermejo", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                    {"nombre": "Villa Montes", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
+                ],
+                "entidades": [
+                    {"nombre": "Bomberos de la Policía", "tipo": "Bomberos", "direccion": "Zona Centro, Tarija", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "Grupo de Rescate Brasschaat / Voluntarios", "tipo": "Rescate", "direccion": "Zona Centro, Tarija", "contactos": [("Teléfono", "119", "24 horas"), ("Teléfono", "664-3333", "Oficinas")]},
+                    {"nombre": "Defensa Civil", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Tarija", "contactos": [("Teléfono", "113", "24 horas")]},
+                ],
+            },
+            {
+                "nombre": "Potosí",
+                "latitud": -19.58, "longitud": -65.75,
+                "clima": "Clima árido, frío y de alta montaña. Riesgo extremo por nevadas severas, heladas, vientos fuertes y escasez de agua.",
+                "recomendaciones": "Nevadas y Frío Extremo: Evite viajes interdepartamentales nocturnos durante alertas de nevadas. Acopie forraje y construya cobertizos para proteger al ganado de la congelación.\nVientos: Refuerce y amarre los techos de calamina de las viviendas. Mantenga un kit de emergencia con mantas térmicas y alimentos no perecederos.",
+                "municipios": [
+                    {"nombre": "Potosí", "zonas": ["San Antonio", "Central", "Yura", "Villa Primero de Mayo", "San Pedro"]},
+                    {"nombre": "Tupiza", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                    {"nombre": "Villazón", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
+                ],
+                "entidades": [
+                    {"nombre": "Bomberos y Rescate", "tipo": "Bomberos", "direccion": "Zona Centro, Potosí", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "Policía Camionera / Tránsito", "tipo": "Policía", "direccion": "Zona Centro, Potosí", "contactos": [("Teléfono", "110", "Carreteras")]},
+                    {"nombre": "Cruz Roja", "tipo": "Salud", "direccion": "Zona Centro, Potosí", "contactos": [("Teléfono", "162", "24 horas")]},
+                ],
+            },
+            {
+                "nombre": "Oruro",
+                "latitud": -17.97, "longitud": -67.1,
+                "clima": "Altiplano frío y seco. Riesgos de inundaciones lentas por desborde (cuenca del río Desaguadero), heladas intensas y sequía.",
+                "recomendaciones": "Inundaciones por desborde: Construya defensivos o camellones de tierra para proteger viviendas y zonas de pastoreo cerca de cuerpos de agua. No intente cruzar zonas anegadas a pie ni en vehículo.\nHeladas: Utilice ropa térmica en capas, proteja vías respiratorias al salir de madrugada y asegure que las fuentes de calor (estufas) tengan ventilación para evitar intoxicación por monóxido de carbono.",
+                "municipios": [
+                    {"nombre": "Oruro", "zonas": ["San Pedro", "1ro de Mayo", "Villa Constituyente", "Villa San José", "Central"]},
+                    {"nombre": "Challapata", "zonas": ["Centro", "Villa Primero de Mayo", "San Pedro"]},
+                    {"nombre": "Sabaya", "zonas": ["Central", "Villa Nueva", "San Pedro"]},
+                ],
+                "entidades": [
+                    {"nombre": "Bomberos", "tipo": "Bomberos", "direccion": "Zona Centro, Oruro", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "Unidad de Defensa Civil", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Oruro", "contactos": [("Teléfono", "113", "24 horas")]},
+                    {"nombre": "Radio Patrullas", "tipo": "Policía", "direccion": "Zona Centro, Oruro", "contactos": [("Teléfono", "110", "24 horas")]},
+                ],
+            },
+            {
+                "nombre": "Beni",
+                "latitud": -15.0, "longitud": -65.0,
+                "clima": "Tropical, muy caluroso y húmedo. Altísima vulnerabilidad a inundaciones extensas, desbordes de grandes ríos e incendios forestales en la Amazonía durante la temporada seca.",
+                "recomendaciones": "Inundaciones: Edifique viviendas sobre palafitos o lomas artificiales. Mantenga siempre lista una embarcación menor o bote de rescate. Traslade al ganado a zonas altas designadas antes de que inicie la temporada de lluvias intensas (diciembre a marzo).\nSalud: Use mosquiteros y repelentes constantemente para prevenir brotes de dengue, zika y chikungunya tras las inundaciones.",
+                "municipios": [
+                    {"nombre": "Trinidad", "zonas": ["Central", "1ro de Mayo", "San Roque", "Villa Primero de Mayo", "San Pedro"]},
+                    {"nombre": "Rurrenabaque", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                    {"nombre": "San Ignacio", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
+                ],
+                "entidades": [
+                    {"nombre": "COE Departamental (Centro de Operaciones de Emergencia)", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Trinidad", "contactos": [("Teléfono", "113", "24 horas"), ("Teléfono", "462-2222", "Oficinas")]},
+                    {"nombre": "Bomberos Voluntarios Trinidad", "tipo": "Bomberos", "direccion": "Zona Centro, Trinidad", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "Fuerza Naval Boliviana (Capitanías de Puerto)", "tipo": "Rescate", "direccion": "Puertos locales, Beni", "contactos": [("Teléfono", "110", "Rescates fluviales")]},
+                ],
+            },
+            {
+                "nombre": "Pando",
+                "latitud": -11.0, "longitud": -67.0,
+                "clima": "Selva amazónica, clima cálido y altamente lluvioso. Amenazas constantes de desbordes súbitos de ríos (como el río Acre), lluvias torrenciales e incendios forestales.",
+                "recomendaciones": "Crecida de Ríos: Mantenga un monitoreo constante del nivel de los ríos fronterizos. Evacúe inmediatamente a los albergues temporales habilitados ante la primera alerta de rebalse, llevando únicamente documentos personales guardados en bolsas impermeables.\nLluvias: Elimine cualquier recipiente que pueda acumular agua en patios y techos para evitar criaderos de mosquitos.",
+                "municipios": [
+                    {"nombre": "Cobija", "zonas": ["Centro", "1ro de Mayo", "Bella Flor", "San Pedro", "Villa Nueva"]},
+                    {"nombre": "Filadelfia", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                    {"nombre": "Puerto Rico", "zonas": ["Central", "Villa Nueva", "San Roque"]},
+                ],
+                "entidades": [
+                    {"nombre": "Policía Departamental", "tipo": "Policía", "direccion": "Zona Centro, Cobija", "contactos": [("Teléfono", "110", "24 horas")]},
+                    {"nombre": "Bomberos", "tipo": "Bomberos", "direccion": "Zona Centro, Cobija", "contactos": [("Teléfono", "119", "24 horas")]},
+                    {"nombre": "Unidad de Gestión de Riesgos Municipal (Cobija)", "tipo": "Gestión de Riesgos", "direccion": "Zona Centro, Cobija", "contactos": [("Teléfono", "Alcaldía", "Emergencias")]},
+                ],
+            },
         ]
 
         departamentos_db = {}
@@ -117,12 +210,18 @@ class Command(BaseCommand):
         for dep_data in departamentos_datos:
             departamento, created = Departamento.objects.get_or_create(
                 nombre_departamento=dep_data["nombre"],
-                defaults={"latitud": dep_data["latitud"], "longitud": dep_data["longitud"]},
+                defaults={
+                    "latitud": dep_data["latitud"],
+                    "longitud": dep_data["longitud"],
+                    "clima_descripcion": dep_data["clima"],
+                    "recomendaciones": dep_data["recomendaciones"],
+                },
             )
-            # Actualizar coordenadas si ya existía
-            if departamento.latitud != dep_data["latitud"] or departamento.longitud != dep_data["longitud"]:
+            if not created:
                 departamento.latitud = dep_data["latitud"]
                 departamento.longitud = dep_data["longitud"]
+                departamento.clima_descripcion = dep_data["clima"]
+                departamento.recomendaciones = dep_data["recomendaciones"]
                 departamento.save()
             departamentos_db[dep_data["nombre"]] = departamento
 
@@ -252,57 +351,34 @@ class Command(BaseCommand):
             )
 
         # =====================================================================
-        # ENTIDADES Y CONTACTOS DE EMERGENCIA (por departamento)
+        # ENTIDADES Y CONTACTOS DE EMERGENCIA POR DEPARTAMENTO
         # =====================================================================
 
-        entidades_datos_por_dep = {
-            "La Paz": [
-                {"nombre": "Bomberos Unidad La Paz", "municipio": "La Paz", "tipo": "Bomberos", "direccion": "Av. 6 de Agosto, Zona Centro", "lat": -16.4991, "lon": -68.1349, "contactos": [{"tipo": "Teléfono", "valor": "119", "horario": "24 horas"}]},
-                {"nombre": "Policía Boliviana - La Paz", "municipio": "La Paz", "tipo": "Policía", "direccion": "Plaza Murillo, Zona Centro", "lat": -16.4999, "lon": -68.1339, "contactos": [{"tipo": "Teléfono", "valor": "110", "horario": "24 horas"}]},
-                {"nombre": "COMI - La Paz", "municipio": "La Paz", "tipo": "Gestión de Riesgos", "direccion": "Edificio Municipal, Zona Sopocachi", "lat": -16.5032, "lon": -68.1411, "contactos": [{"tipo": "Teléfono", "valor": "800104040", "horario": "24 horas"}]},
-                {"nombre": "Red de Salud La Paz", "municipio": "La Paz", "tipo": "Salud", "direccion": "Av. Ejército, Zona Miraflores", "lat": -16.5132, "lon": -68.1234, "contactos": [{"tipo": "Teléfono", "valor": "118", "horario": "Emergencias"}, {"tipo": "Teléfono", "valor": "2225678", "horario": "Oficinas"}]},
-            ],
-            "Santa Cruz": [
-                {"nombre": "Bomberos Unidad Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Bomberos", "direccion": "Av. Radial, Zona Plan 3000", "lat": -17.78, "lon": -63.18, "contactos": [{"tipo": "Teléfono", "valor": "119", "horario": "24 horas"}]},
-                {"nombre": "Policía Boliviana - Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Policía", "direccion": "Plaza 24 de Septiembre, Zona Centro", "lat": -17.79, "lon": -63.19, "contactos": [{"tipo": "Teléfono", "valor": "110", "horario": "24 horas"}]},
-                {"nombre": "COMI - Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Gestión de Riesgos", "direccion": "Gobernación, Zona Centro", "lat": -17.79, "lon": -63.18, "contactos": [{"tipo": "Teléfono", "valor": "800104040", "horario": "24 horas"}]},
-                {"nombre": "Red de Salud Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Salud", "direccion": "Av. Virgen de Cotoca, Zona Los Tajibos", "lat": -17.8, "lon": -63.17, "contactos": [{"tipo": "Teléfono", "valor": "118", "horario": "Emergencias"}, {"tipo": "Teléfono", "valor": "3334567", "horario": "Oficinas"}]},
-            ],
-        }
-
-        for dep_nombre, entidades_lista in entidades_datos_por_dep.items():
-            if dep_nombre not in departamentos_db:
+        for dep_data in departamentos_datos:
+            if dep_data["nombre"] not in departamentos_db:
                 continue
-            departamento = departamentos_db[dep_nombre]
+            departamento = departamentos_db[dep_data["nombre"]]
 
-            for entidad_dato in entidades_lista:
-                municipio_obj = None
-                for mun_key, mun_obj in municipios_db.items():
-                    if mun_obj.departamento_id == departamento.id and mun_obj.nombre_municipio == entidad_dato["municipio"]:
-                        municipio_obj = mun_obj
-                        break
-                if not municipio_obj:
-                    continue
-
+            for entidad_dato in dep_data.get("entidades", []):
                 entidad, _ = EntidadEmergencia.objects.get_or_create(
                     nombre_entidad=entidad_dato["nombre"],
                     defaults={
-                        "municipio": municipio_obj,
+                        "departamento": departamento,
                         "tipo_entidad": entidad_dato["tipo"],
                         "direccion": entidad_dato["direccion"],
-                        "latitud": entidad_dato["lat"],
-                        "longitud": entidad_dato["lon"],
+                        "latitud": dep_data["latitud"],
+                        "longitud": dep_data["longitud"],
                         "es_activa": True,
                     }
                 )
 
-                for contacto_dato in entidad_dato["contactos"]:
+                for tipo, valor, horario in entidad_dato["contactos"]:
                     ContactoEmergencia.objects.get_or_create(
                         entidad=entidad,
-                        tipo_contacto=contacto_dato["tipo"],
-                        valor_contacto=contacto_dato["valor"],
+                        tipo_contacto=tipo,
+                        valor_contacto=valor,
                         defaults={
-                            "horario": contacto_dato.get("horario", ""),
+                            "horario": horario,
                             "es_activo": True,
                         }
                     )

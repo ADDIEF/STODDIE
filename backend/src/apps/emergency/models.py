@@ -3,10 +3,20 @@ from django.db import models
 
 class EntidadEmergencia(models.Model):
     id = models.AutoField(primary_key=True, db_column='id_entidad')
+    departamento = models.ForeignKey(
+        'geography.Departamento',
+        on_delete=models.DO_NOTHING,
+        db_column='id_departamento',
+        null=True,
+        blank=True,
+        db_index=False,
+    )
     municipio = models.ForeignKey(
         'geography.Municipio',
         on_delete=models.DO_NOTHING,
         db_column='id_municipio',
+        null=True,
+        blank=True,
         db_index=False,
     )
     nombre_entidad = models.CharField(max_length=150)
@@ -29,6 +39,7 @@ class EntidadEmergencia(models.Model):
     class Meta:
         db_table = 'entidades_emergencia'
         indexes = [
+            models.Index(fields=['departamento'], name='idx_ent_departamento'),
             models.Index(fields=['municipio'], name='idx_ent_municipio'),
             models.Index(fields=['nombre_entidad'], name='idx_ent_nombre'),
         ]

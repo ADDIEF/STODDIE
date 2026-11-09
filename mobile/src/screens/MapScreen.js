@@ -30,8 +30,9 @@ const MAP_HTML_TEMPLATE = `
 <body>
   <div id="map"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script id="incidents-data" type="application/json">__INCIDENTS_JSON__</script>
   <script>
-    const incidents = JSON.parse('__INCIDENTS_JSON__');
+    const incidents = JSON.parse(document.getElementById('incidents-data').textContent);
     const map = L.map('map', { scrollWheelZoom: false }).setView([-16.5, -68.13], 6);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -119,7 +120,7 @@ export default function MapScreen({ onBack }) {
   if (Platform.OS === 'web') {
     const html = MAP_HTML_TEMPLATE.replace(
       '__INCIDENTS_JSON__',
-      JSON.stringify(incidents).replace(/'/g, '\\u0027').replace(/"/g, '&quot;')
+      JSON.stringify(incidents).replace(/</g, '\\u003c')
     );
 
     return (
@@ -144,7 +145,7 @@ export default function MapScreen({ onBack }) {
 
   const html = MAP_HTML_TEMPLATE.replace(
     '__INCIDENTS_JSON__',
-    JSON.stringify(incidents).replace(/'/g, '\\u0027').replace(/"/g, '&quot;')
+    JSON.stringify(incidents).replace(/</g, '\\u003c')
   );
 
   return (

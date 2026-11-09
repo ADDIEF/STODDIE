@@ -9,11 +9,22 @@ class EntidadEmergenciaSerializer(serializers.ModelSerializer):
         source='municipio_id',
         read_only=True,
     )
+    id_departamento = serializers.IntegerField(
+        source='departamento_id',
+        read_only=True,
+    )
+    nombre_departamento = serializers.CharField(
+        source='departamento.nombre_departamento',
+        read_only=True,
+        default='',
+    )
 
     class Meta:
         model = EntidadEmergencia
         fields = (
             'id_entidad',
+            'id_departamento',
+            'nombre_departamento',
             'id_municipio',
             'nombre_entidad',
             'tipo_entidad',

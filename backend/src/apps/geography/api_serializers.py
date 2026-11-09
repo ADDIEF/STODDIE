@@ -8,7 +8,7 @@ class DepartamentoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Departamento
-        fields = ('id_departamento', 'nombre_departamento')
+        fields = ('id_departamento', 'nombre_departamento', 'latitud', 'longitud', 'clima_descripcion', 'recomendaciones')
         read_only_fields = fields
 
 

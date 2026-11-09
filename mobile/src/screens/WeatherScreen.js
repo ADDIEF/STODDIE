@@ -18,6 +18,7 @@ export default function WeatherScreen({ onBack }) {
   const [departamentos, setDepartamentos] = useState([]);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState(null);
   const [selectedDepartamentoLabel, setSelectedDepartamentoLabel] = useState('Selecciona un departamento...');
+  const [selectedDepartamento, setSelectedDepartamento] = useState(null);
   const [clima, setClima] = useState(null);
   const [loading, setLoading] = useState(false);
   const [deptsLoading, setDeptsLoading] = useState(true);
@@ -103,6 +104,7 @@ export default function WeatherScreen({ onBack }) {
                     onPress={() => {
                       setSelectedDepartamentoId(d.id_departamento);
                       setSelectedDepartamentoLabel(d.nombre_departamento);
+                      setSelectedDepartamento(d);
                       setShowPicker(false);
                     }}
                   >
@@ -140,17 +142,23 @@ export default function WeatherScreen({ onBack }) {
               </Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={[styles.resultLabel, { color: COLORS.slateGray }]}>Dirección viento:</Text>
-              <Text style={[styles.resultValue, { color: COLORS.spaceCadet }]}>
-                {clima.viento_direccion != null ? `${clima.viento_direccion}°` : '—'}
-              </Text>
-            </View>
-            <View style={styles.resultRow}>
               <Text style={[styles.resultLabel, { color: COLORS.slateGray }]}>Fecha/Hora:</Text>
               <Text style={[styles.resultValue, { color: COLORS.spaceCadet }]}>
                 {clima.fecha_hora || '—'}
               </Text>
             </View>
+            {selectedDepartamento && (
+              <>
+                <Text style={[styles.recomendacionesTitle, { color: COLORS.tan }]}>Recomendaciones preventivas</Text>
+                <Text style={[styles.recomendacionesText, { color: COLORS.spaceCadet }]}>
+                  {selectedDepartamento.clima_descripcion}
+                </Text>
+                <Text style={[styles.recomendacionesTitle, { color: COLORS.tan }]}>Prevención</Text>
+                <Text style={[styles.recomendacionesText, { color: COLORS.spaceCadet }]}>
+                  {selectedDepartamento.recomendaciones}
+                </Text>
+              </>
+            )}
             <Text style={[styles.disclaimer, { color: COLORS.slateGray }]}>
               Información de referencia de {clima.proveedor}. No representa una alerta oficial.
             </Text>
@@ -226,6 +234,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  recomendacionesTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 14,
+    marginBottom: 4,
+  },
+  recomendacionesText: {
+    fontSize: 13,
+    lineHeight: 20,
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });

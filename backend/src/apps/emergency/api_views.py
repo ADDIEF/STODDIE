@@ -16,17 +16,15 @@ class EntidadEmergenciaViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = EntidadEmergencia.objects.filter(es_activa=True).select_related(
-            'municipio', 'municipio__departamento'
+            'departamento', 'municipio'
         ).order_by('nombre_entidad')
         user = self.request.user
         # Si es administrador, ve todas las entidades de todos los departamentos
         if user.is_staff or user.roles.filter(nombre_rol='Administrador').exists():
             return queryset
-        # Si es ciudadano, solo ve entidades de su departamento
+        # Si es ciudadano con departamento asignado, solo ve entidades de su departamento
         if user.departamento_id:
-            queryset = queryset.filter(
-                municipio__departamento_id=user.departamento_id
-            )
+            queryset = queryset.filter(departamento_id=user.departamento_id)
         return queryset
 
     def list(self, request, *args, **kwargs):
