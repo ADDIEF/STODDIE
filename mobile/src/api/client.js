@@ -35,6 +35,11 @@ function getErrorMessage(data, fallback) {
       }
     }
   }
+  if (data && typeof data === 'object' && data.non_field_errors) {
+    const val = data.non_field_errors;
+    if (Array.isArray(val) && val.length > 0) return val[0];
+    if (typeof val === 'string') return val;
+  }
   return fallback;
 }
 

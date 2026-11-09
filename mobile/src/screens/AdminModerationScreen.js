@@ -16,6 +16,9 @@ export default function AdminModerationScreen({
   onBack,
   onDetail,
   onMap,
+  onWeather,
+  onPrevention,
+  onEmergency,
   onLogout,
 }) {
   const [incidents, setIncidents] = useState([]);
@@ -109,8 +112,17 @@ export default function AdminModerationScreen({
           <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onMap}>
             <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🗺️ Mapa</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onLogout}>
-            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🚪 Salir</Text>
+          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onWeather}>
+            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🌤️ Clima</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onPrevention}>
+            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🛡️ Prevención</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onEmergency}>
+            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🚨 Emergencia</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.caput, borderColor: COLORS.caput }]} onPress={onLogout}>
+            <Text style={[styles.headerButtonText, { color: '#FFF' }]}>🚪 Salir</Text>
           </TouchableOpacity>
         </View>
       </View>

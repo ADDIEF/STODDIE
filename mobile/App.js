@@ -92,6 +92,9 @@ export default function App() {
           onBack={() => setScreen('LIST')}
           onDetail={goAdminDetail}
           onMap={goMap}
+          onWeather={() => setScreen('WEATHER')}
+          onPrevention={() => setScreen('PREVENTION')}
+          onEmergency={() => setScreen('EMERGENCY')}
           onLogout={handleLogout}
         />
       );
@@ -128,13 +131,13 @@ export default function App() {
       );
       break;
     case 'WEATHER':
-      content = <WeatherScreen onBack={goList} />;
+      content = <WeatherScreen onBack={isAdmin ? () => setScreen('ADMIN') : goList} />;
       break;
     case 'PREVENTION':
-      content = <PreventionScreen onBack={goList} />;
+      content = <PreventionScreen onBack={isAdmin ? () => setScreen('ADMIN') : goList} />;
       break;
     case 'EMERGENCY':
-      content = <EmergencyScreen onBack={goList} />;
+      content = <EmergencyScreen onBack={isAdmin ? () => setScreen('ADMIN') : goList} />;
       break;
     default:
       content = <Text style={{ color: COLORS.tan }}>Cargando...</Text>;
