@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 
 
 class Command(BaseCommand):
-    help = "Carga los datos iniciales de STODDIE sin duplicarlos."
+    help = "Carga los datos iniciales de STODDIE para todo Bolivia sin duplicarlos."
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -51,35 +51,93 @@ class Command(BaseCommand):
         if admin:
             admin.roles.add(rol_admin)
 
-        # Geografía: La Paz
-        departamento, _ = Departamento.objects.get_or_create(
-            nombre_departamento="La Paz"
-        )
+        # =====================================================================
+        # 9 DEPARTAMENTOS DE BOLIVIA (con coordenadas aproximadas para clima/mapa)
+        # =====================================================================
+        departamentos_datos = [
+            {"nombre": "La Paz", "latitud": -16.5, "longitud": -68.1,
+             "municipios": [
+                 {"nombre": "La Paz", "zonas": ["Centro", "Sopocachi", "Miraflores", "Obrajes", "Calacoto", "Achumani", "San Pedro", "Tembladerani", "Villa Fátima", "Achachicala"]},
+                 {"nombre": "El Alto", "zonas": ["Ceja", "Ciudad Satélite", "Senkata", "Villa 1ro de Mayo", "Villa Ingenio"]},
+                 {"nombre": "Viacha", "zonas": ["Central", "San Pedro", "Villa Nueva"]},
+             ]},
+            {"nombre": "Santa Cruz", "latitud": -17.8, "longitud": -63.1,
+             "municipios": [
+                 {"nombre": "Santa Cruz de la Sierra", "zonas": ["Plan 3000", "Los Tajibos", "Urubó", "Cañada", "Villa Primero de Mayo"]},
+                 {"nombre": "Warnes", "zonas": ["Central", "Villa Bolívar", "San Pedro"]},
+                 {"nombre": "Montero", "zonas": ["Centro", "Villa América", "San Miguel"]},
+             ]},
+            {"nombre": "Cochabamba", "latitud": -17.4, "longitud": -66.1,
+             "municipios": [
+                 {"nombre": "Cochabamba", "zonas": ["Ciudadela", "Cala Cala", "Villa Pagador", "Villa América", "San Antonio"]},
+                 {"nombre": "Quillacollo", "zonas": ["Centro", "Villa Pagador", "Villa América"]},
+                 {"nombre": "Sacaba", "zonas": ["Centro", "Villa Primero de Mayo", "San Pedro"]},
+             ]},
+            {"nombre": "Oruro", "latitud": -17.97, "longitud": -67.1,
+             "municipios": [
+                 {"nombre": "Oruro", "zonas": ["San Pedro", "1ro de Mayo", "Villa Constituyente", "Villa San José", "Central"]},
+                 {"nombre": "Challapata", "zonas": ["Centro", "Villa Primero de Mayo", "San Pedro"]},
+                 {"nombre": "Sabaya", "zonas": ["Central", "Villa Nueva", "San Pedro"]},
+             ]},
+            {"nombre": "Potosí", "latitud": -19.58, "longitud": -65.75,
+             "municipios": [
+                 {"nombre": "Potosí", "zonas": ["San Antonio", "Central", "Yura", "Villa Primero de Mayo", "San Pedro"]},
+                 {"nombre": "Tupiza", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                 {"nombre": "Villazón", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
+             ]},
+            {"nombre": "Chuquisaca", "latitud": -19.05, "longitud": -65.25,
+             "municipios": [
+                 {"nombre": "Sucre", "zonas": ["Recoleta", "Molino", "San Roque", "Villa Primero de Mayo", "Central"]},
+                 {"nombre": "Yamparáez", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                 {"nombre": "Zudáñez", "zonas": ["Central", "Villa Nueva", "San Roque"]},
+             ]},
+            {"nombre": "Tarija", "latitud": -21.53, "longitud": -64.73,
+             "municipios": [
+                 {"nombre": "Tarija", "zonas": ["Los Álamos", "La Toma", "Central", "Villa Primero de Mayo", "San Pedro"]},
+                 {"nombre": "Bermejo", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                 {"nombre": "Villa Montes", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
+             ]},
+            {"nombre": "Pando", "latitud": -11.0, "longitud": -67.0,
+             "municipios": [
+                 {"nombre": "Cobija", "zonas": ["Centro", "1ro de Mayo", "Bella Flor", "San Pedro", "Villa Nueva"]},
+                 {"nombre": "Filadelfia", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                 {"nombre": "Puerto Rico", "zonas": ["Central", "Villa Nueva", "San Roque"]},
+             ]},
+            {"nombre": "Beni", "latitud": -15.0, "longitud": -65.0,
+             "municipios": [
+                 {"nombre": "Trinidad", "zonas": ["Central", "1ro de Mayo", "San Roque", "Villa Primero de Mayo", "San Pedro"]},
+                 {"nombre": "Rurrenabaque", "zonas": ["Centro", "Villa Nueva", "San Pedro"]},
+                 {"nombre": "San Ignacio", "zonas": ["Centro", "Villa Primero de Mayo", "San José"]},
+             ]},
+        ]
 
-        municipios = {}
-        for nombre in ["La Paz", "El Alto"]:
-            municipios[nombre], _ = Municipio.objects.get_or_create(
-                departamento=departamento,
-                nombre_municipio=nombre
+        departamentos_db = {}
+        municipios_db = {}
+
+        for dep_data in departamentos_datos:
+            departamento, created = Departamento.objects.get_or_create(
+                nombre_departamento=dep_data["nombre"],
+                defaults={"latitud": dep_data["latitud"], "longitud": dep_data["longitud"]},
             )
+            # Actualizar coordenadas si ya existía
+            if departamento.latitud != dep_data["latitud"] or departamento.longitud != dep_data["longitud"]:
+                departamento.latitud = dep_data["latitud"]
+                departamento.longitud = dep_data["longitud"]
+                departamento.save()
+            departamentos_db[dep_data["nombre"]] = departamento
 
-        zonas = {
-            "La Paz": [
-                "Centro", "Sopocachi", "Miraflores", "Obrajes", "Calacoto",
-                "Achumani", "San Pedro", "Tembladerani", "Villa Fátima",
-                "Achachicala",
-            ],
-            "El Alto": [
-                "Ceja", "Ciudad Satélite", "Senkata",
-            ],
-        }
-
-        for municipio_nombre, nombres_zonas in zonas.items():
-            for nombre_zona in nombres_zonas:
-                Zona.objects.get_or_create(
-                    municipio=municipios[municipio_nombre],
-                    nombre_zona=nombre_zona
+            for mun_data in dep_data["municipios"]:
+                municipio, _ = Municipio.objects.get_or_create(
+                    departamento=departamento,
+                    nombre_municipio=mun_data["nombre"],
                 )
+                municipios_db[f"{dep_data['nombre']}|{mun_data['nombre']}"] = municipio
+
+                for zona_nombre in mun_data["zonas"]:
+                    Zona.objects.get_or_create(
+                        municipio=municipio,
+                        nombre_zona=zona_nombre,
+                    )
 
         # Tipos de riesgo
         riesgos = {
@@ -144,33 +202,19 @@ class Command(BaseCommand):
             {
                 "titulo": "Mantenimiento de sumideros",
                 "categoria": "Preparación (Antes)",
-                "contenido": (
-                    "Antes de la temporada de lluvias, revisa y limpia "
-                    "canaletas y desagües de tu vivienda. No arrojes basura "
-                    "a los sumideros ni a los canales de drenaje."
-                ),
+                "contenido": "Antes de la temporada de lluvias, revisa y limpia canaletas y desagües de tu vivienda. No arrojes basura a los sumideros ni a los canales de drenaje.",
                 "riesgos": ["Inundación"],
             },
             {
                 "titulo": "Evacuación por deslizamiento",
                 "categoria": "Acción (Durante)",
-                "contenido": (
-                    "Si observas grietas nuevas en paredes o terrenos, "
-                    "movimientos de tierra o señales de inestabilidad, "
-                    "aléjate de la zona y busca un lugar seguro. "
-                    "No arriesgues tu vida intentando recuperar pertenencias."
-                ),
+                "contenido": "Si observas grietas nuevas en paredes o terrenos, movimientos de tierra o señales de inestabilidad, aléjate de la zona y busca un lugar seguro. No arriesgues tu vida intentando recuperar pertenencias.",
                 "riesgos": ["Deslizamiento"],
             },
             {
                 "titulo": "Retorno seguro después de una riada",
                 "categoria": "Recuperación (Después)",
-                "contenido": (
-                    "No regreses a una zona inundada hasta que las "
-                    "autoridades indiquen que es seguro. Evita el contacto "
-                    "con agua contaminada y revisa los daños antes de "
-                    "volver a utilizar la vivienda."
-                ),
+                "contenido": "No regreses a una zona inundada hasta que las autoridades indiquen que es seguro. Evita el contacto con agua contaminada y revisa los daños antes de volver a utilizar la vivienda.",
                 "riesgos": ["Riada / Desborde", "Inundación"],
             },
         ]
@@ -191,21 +235,9 @@ class Command(BaseCommand):
 
         # Fuentes meteorológicas
         fuentes = [
-            (
-                "SENAMHI",
-                "https://senamhi.gob.bo/",
-                "Servicio Nacional de Meteorología e Hidrología de Bolivia."
-            ),
-            (
-                "OpenWeatherMap",
-                "https://openweathermap.org/",
-                "Proveedor de información meteorológica mediante servicios web."
-            ),
-            (
-                "Open-Meteo",
-                "https://open-meteo.com/",
-                "API meteorológica gratuita sin clave de acceso requerida."
-            ),
+            ("SENAMHI", "https://senamhi.gob.bo/", "Servicio Nacional de Meteorología e Hidrología de Bolivia."),
+            ("OpenWeatherMap", "https://openweathermap.org/", "Proveedor de información meteorológica mediante servicios web."),
+            ("Open-Meteo", "https://open-meteo.com/", "API meteorológica gratuita sin clave de acceso requerida."),
         ]
 
         for nombre, url, descripcion in fuentes:
@@ -220,95 +252,63 @@ class Command(BaseCommand):
             )
 
         # =====================================================================
-        # ENTIDADES Y CONTACTOS DE EMERGENCIA (SEMANA 3)
+        # ENTIDADES Y CONTACTOS DE EMERGENCIA (por departamento)
         # =====================================================================
 
-        entidades_datos = [
-            {
-                "nombre": "Bomberos Unidad La Paz",
-                "municipio": "La Paz",
-                "tipo": "Bomberos",
-                "direccion": "Av. 6 de Agosto, Zona Centro",
-                "latitud": -16.4991,
-                "longitud": -68.1349,
-                "contactos": [
-                    {"tipo": "Teléfono", "valor": "119", "horario": "24 horas"},
-                    {"tipo": "Teléfono", "valor": "2213456", "horario": "Oficinas"},
-                ],
-            },
-            {
-                "nombre": "Policía Boliviana - La Paz",
-                "municipio": "La Paz",
-                "tipo": "Policía",
-                "direccion": "Plaza Murillo, Zona Centro",
-                "latitud": -16.4999,
-                "longitud": -68.1339,
-                "contactos": [
-                    {"tipo": "Teléfono", "valor": "110", "horario": "24 horas"},
-                ],
-            },
-            {
-                "nombre": "COMI - Comité de Operaciones de Emergencia",
-                "municipio": "La Paz",
-                "tipo": "Gestión de Riesgos",
-                "direccion": "Edificio Municipal, Zona Sopocachi",
-                "latitud": -16.5032,
-                "longitud": -68.1411,
-                "contactos": [
-                    {"tipo": "Teléfono", "valor": "800104040", "horario": "24 horas"},
-                ],
-            },
-            {
-                "nombre": "Red de Salud La Paz",
-                "municipio": "La Paz",
-                "tipo": "Salud",
-                "direccion": "Av. Ejército, Zona Miraflores",
-                "latitud": -16.5132,
-                "longitud": -68.1234,
-                "contactos": [
-                    {"tipo": "Teléfono", "valor": "118", "horario": "Emergencias"},
-                    {"tipo": "Teléfono", "valor": "2225678", "horario": "Oficinas"},
-                ],
-            },
-            {
-                "nombre": "Bomberos El Alto",
-                "municipio": "El Alto",
-                "tipo": "Bomberos",
-                "direccion": "Av. 6 de Marzo, Zona Ceja",
-                "latitud": -16.5200,
-                "longitud": -68.1600,
-                "contactos": [
-                    {"tipo": "Teléfono", "valor": "119", "horario": "24 horas"},
-                ],
-            },
-        ]
+        entidades_datos_por_dep = {
+            "La Paz": [
+                {"nombre": "Bomberos Unidad La Paz", "municipio": "La Paz", "tipo": "Bomberos", "direccion": "Av. 6 de Agosto, Zona Centro", "lat": -16.4991, "lon": -68.1349, "contactos": [{"tipo": "Teléfono", "valor": "119", "horario": "24 horas"}]},
+                {"nombre": "Policía Boliviana - La Paz", "municipio": "La Paz", "tipo": "Policía", "direccion": "Plaza Murillo, Zona Centro", "lat": -16.4999, "lon": -68.1339, "contactos": [{"tipo": "Teléfono", "valor": "110", "horario": "24 horas"}]},
+                {"nombre": "COMI - La Paz", "municipio": "La Paz", "tipo": "Gestión de Riesgos", "direccion": "Edificio Municipal, Zona Sopocachi", "lat": -16.5032, "lon": -68.1411, "contactos": [{"tipo": "Teléfono", "valor": "800104040", "horario": "24 horas"}]},
+                {"nombre": "Red de Salud La Paz", "municipio": "La Paz", "tipo": "Salud", "direccion": "Av. Ejército, Zona Miraflores", "lat": -16.5132, "lon": -68.1234, "contactos": [{"tipo": "Teléfono", "valor": "118", "horario": "Emergencias"}, {"tipo": "Teléfono", "valor": "2225678", "horario": "Oficinas"}]},
+            ],
+            "Santa Cruz": [
+                {"nombre": "Bomberos Unidad Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Bomberos", "direccion": "Av. Radial, Zona Plan 3000", "lat": -17.78, "lon": -63.18, "contactos": [{"tipo": "Teléfono", "valor": "119", "horario": "24 horas"}]},
+                {"nombre": "Policía Boliviana - Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Policía", "direccion": "Plaza 24 de Septiembre, Zona Centro", "lat": -17.79, "lon": -63.19, "contactos": [{"tipo": "Teléfono", "valor": "110", "horario": "24 horas"}]},
+                {"nombre": "COMI - Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Gestión de Riesgos", "direccion": "Gobernación, Zona Centro", "lat": -17.79, "lon": -63.18, "contactos": [{"tipo": "Teléfono", "valor": "800104040", "horario": "24 horas"}]},
+                {"nombre": "Red de Salud Santa Cruz", "municipio": "Santa Cruz de la Sierra", "tipo": "Salud", "direccion": "Av. Virgen de Cotoca, Zona Los Tajibos", "lat": -17.8, "lon": -63.17, "contactos": [{"tipo": "Teléfono", "valor": "118", "horario": "Emergencias"}, {"tipo": "Teléfono", "valor": "3334567", "horario": "Oficinas"}]},
+            ],
+        }
 
-        for entidad_dato in entidades_datos:
-            entidad, _ = EntidadEmergencia.objects.get_or_create(
-                nombre_entidad=entidad_dato["nombre"],
-                defaults={
-                    "municipio": municipios[entidad_dato["municipio"]],
-                    "tipo_entidad": entidad_dato["tipo"],
-                    "direccion": entidad_dato["direccion"],
-                    "latitud": entidad_dato["latitud"],
-                    "longitud": entidad_dato["longitud"],
-                    "es_activa": True,
-                }
-            )
+        for dep_nombre, entidades_lista in entidades_datos_por_dep.items():
+            if dep_nombre not in departamentos_db:
+                continue
+            departamento = departamentos_db[dep_nombre]
 
-            for contacto_dato in entidad_dato["contactos"]:
-                ContactoEmergencia.objects.get_or_create(
-                    entidad=entidad,
-                    tipo_contacto=contacto_dato["tipo"],
-                    valor_contacto=contacto_dato["valor"],
+            for entidad_dato in entidades_lista:
+                municipio_obj = None
+                for mun_key, mun_obj in municipios_db.items():
+                    if mun_obj.departamento_id == departamento.id and mun_obj.nombre_municipio == entidad_dato["municipio"]:
+                        municipio_obj = mun_obj
+                        break
+                if not municipio_obj:
+                    continue
+
+                entidad, _ = EntidadEmergencia.objects.get_or_create(
+                    nombre_entidad=entidad_dato["nombre"],
                     defaults={
-                        "horario": contacto_dato.get("horario", ""),
-                        "es_activo": True,
+                        "municipio": municipio_obj,
+                        "tipo_entidad": entidad_dato["tipo"],
+                        "direccion": entidad_dato["direccion"],
+                        "latitud": entidad_dato["lat"],
+                        "longitud": entidad_dato["lon"],
+                        "es_activa": True,
                     }
                 )
 
+                for contacto_dato in entidad_dato["contactos"]:
+                    ContactoEmergencia.objects.get_or_create(
+                        entidad=entidad,
+                        tipo_contacto=contacto_dato["tipo"],
+                        valor_contacto=contacto_dato["valor"],
+                        defaults={
+                            "horario": contacto_dato.get("horario", ""),
+                            "es_activo": True,
+                        }
+                    )
+
         self.stdout.write(self.style.SUCCESS(
-            "Carga inicial de STODDIE completada correctamente."
+            "Carga inicial de STODDIE para Bolivia completada correctamente."
         ))
 
         for app in [

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,30 +12,40 @@ import {
   View,
 } from 'react-native';
 import { apiRequest } from '../api/client';
-import { COLORS } from '../theme/colors';
+import { COLORS } from '../App';
 
 export default function WeatherScreen({ onBack }) {
-  const [latitud, setLatitud] = useState('-16.5');
-  const [longitud, setLongitud] = useState('-68.1');
+  const [departamentos, setDepartamentos] = useState([]);
+  const [selectedDepartamentoId, setSelectedDepartamentoId] = useState(null);
+  const [selectedDepartamentoLabel, setSelectedDepartamentoLabel] = useState('Selecciona un departamento...');
   const [clima, setClima] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [deptsLoading, setDeptsLoading] = useState(true);
+  [showPicker, setShowPicker] = useState(false);
+
+  useEffect(() => {
+    async function loadDepartamentos() {
+      try {
+        const data = await apiRequest('geography/departments/');
+        setDepartamentos(data.results || data);
+      } catch {
+        Alert.alert('Error', 'No se pudieron cargar los departamentos');
+      } finally {
+        setDeptsLoading(false);
+      }
+    }
+    loadDepartamentos();
+  }, []);
 
   async function consultarClima() {
-    if (!latitud || !longitud) {
-      Alert.alert('Campos requeridos', 'Ingresa latitud y longitud.');
+    if (!selectedDepartamentoId) {
+      Alert.alert('Campo requerido', 'Selecciona un departamento.');
       return;
     }
-    const lat = parseFloat(latitud);
-    const lng = parseFloat(longitud);
-    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      Alert.alert('Coordenadas inválidas', 'Latitud: -90 a 90. Longitud: -180 a 180.');
-      return;
-    }
-
     setLoading(true);
     try {
       const data = await apiRequest(
-        `weather/sources/forecast/?latitud=${latitud}&longitud=${longitud}`
+        `weather/sources/forecast/?departamento_id=${selectedDepartamentoId}`
       );
       setClima(data);
     } catch (error) {
@@ -52,78 +62,96 @@ export default function WeatherScreen({ onBack }) {
     }
   }
 
+  if (deptsLoading) {
+    return (
+      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
+        <ActivityIndicator size="large" color={COLORS.coffee} />
+      </View>
+    );
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-            <Text style={styles.backText}>← Volver</Text>
+            <Text style={[styles.backText, { color: COLORS.tan }]}>← Volver</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Información meteorológica</Text>
-          <Text style={styles.subtitle}>Consulta de referencia climática</Text>
+          <Text style={[styles.title, { color: COLORS.tan }]}>Información meteorológica</Text>
+          <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>Consulta por departamento de Bolivia</Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>Latitud</Text>
-          <TextInput
-            style={styles.input}
-            value={latitud}
-            onChangeText={setLatitud}
-            keyboardType="numeric"
-            placeholder="-16.5..."
-          />
+          <View style={[styles.selectorGroup, { borderColor: COLORS.slateGray }]}>
+            <Text style={[styles.label, { color: COLORS.tan }]}>Departamento (obligatorio)</Text>
+            <TouchableOpacity
+              style={[styles.selector, { borderColor: COLORS.slateGray }]}
+              onPress={() => setShowPicker(!showPicker)}
+            >
+              <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedDepartamentoLabel}</Text>
+              <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
+            </TouchableOpacity>
+            {showPicker && (
+              <View style={[styles.pickerList, { borderColor: COLORS.slateGray }]}>
+                {departamentos.map((d) => (
+                  <TouchableOpacity
+                    key={d.id_departamento}
+                    style={[styles.pickerItem, { borderBottomColor: COLORS.tan }]}
+                    onPress={() => {
+                      setSelectedDepartamentoId(d.id_departamento);
+                      setSelectedDepartamentoLabel(d.nombre_departamento);
+                      setShowPicker(false);
+                    }}
+                  >
+                    <Text style={[styles.pickerItemText, { color: COLORS.spaceCadet }]}>{d.nombre_departamento}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
 
-          <Text style={styles.label}>Longitud</Text>
-          <TextInput
-            style={styles.input}
-            value={longitud}
-            onChangeText={setLongitud}
-            keyboardType="numeric"
-            placeholder="-68.1..."
-          />
-
-          <TouchableOpacity style={styles.button} onPress={consultarClima}>
-            <Text style={styles.buttonText}>
-              {loading ? 'Consultando...' : 'Consultar clima'}
+          <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.coffee }]} onPress={consultarClima}>
+            <Text style={[styles.buttonText, { color: '#FFF' }]}>
+              {loading ? 'Consultando...' : 'Consultar clima por departamento'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {clima && (
-          <View style={styles.resultCard}>
-            <Text style={styles.resultTitle}>Resultado</Text>
+          <View style={[styles.resultCard, { backgroundColor: '#FFF', borderLeftColor: COLORS.caput }]}>
+            <Text style={[styles.resultTitle, { color: COLORS.spaceCadet }]}>Resultado - {clima.ubicacion}</Text>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Proveedor:</Text>
-              <Text style={styles.resultValue}>{clima.proveedor}</Text>
+              <Text style={[styles.resultLabel, { color: COLORS.slateGray }]}>Proveedor:</Text>
+              <Text style={[styles.resultValue, { color: COLORS.spaceCadet }]}>{clima.proveedor}</Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Temperatura:</Text>
-              <Text style={styles.resultValue}>
+              <Text style={[styles.resultLabel, { color: COLORS.slateGray }]}>Temperatura:</Text>
+              <Text style={[styles.resultValue, { color: COLORS.spaceCadet }]}>
                 {clima.temperatura != null ? `${clima.temperatura} °C` : '—'}
               </Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Viento:</Text>
-              <Text style={styles.resultValue}>
+              <Text style={[styles.resultLabel, { color: COLORS.slateGray }]}>Viento:</Text>
+              <Text style={[styles.resultValue, { color: COLORS.spaceCadet }]}>
                 {clima.viento_velocidad != null ? `${clima.viento_velocidad} km/h` : '—'}
               </Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Dirección viento:</Text>
-              <Text style={styles.resultValue}>
+              <Text style={[styles.resultLabel, { color: COLORS.slateGray }]}>Dirección viento:</Text>
+              <Text style={[styles.resultValue, { color: COLORS.spaceCadet }]}>
                 {clima.viento_direccion != null ? `${clima.viento_direccion}°` : '—'}
               </Text>
             </View>
             <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Fecha/Hora:</Text>
-              <Text style={styles.resultValue}>
+              <Text style={[styles.resultLabel, { color: COLORS.slateGray }]}>Fecha/Hora:</Text>
+              <Text style={[styles.resultValue, { color: COLORS.spaceCadet }]}>
                 {clima.fecha_hora || '—'}
               </Text>
             </View>
-            <Text style={styles.disclaimer}>
+            <Text style={[styles.disclaimer, { color: COLORS.slateGray }]}>
               Información de referencia de {clima.proveedor}. No representa una alerta oficial.
             </Text>
           </View>
@@ -134,24 +162,42 @@ export default function WeatherScreen({ onBack }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.spaceCadet },
+  container: { flex: 1 },
   scrollContent: { flexGrow: 1, padding: 16 },
   header: { marginBottom: 20 },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4 },
+  backText: { fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 24, fontWeight: 'bold', marginTop: 4 },
+  subtitle: { fontSize: 14, marginTop: 4 },
   form: { gap: 14 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.tan, marginBottom: 4 },
-  input: {
-    backgroundColor: '#fff',
+  label: { fontSize: 13, fontWeight: '600', marginBottom: 6 },
+  selectorGroup: { position: 'relative', marginBottom: 4 },
+  selector: {
+    backgroundColor: '#FFF',
     borderWidth: 1,
-    borderColor: COLORS.slateGray,
     borderRadius: 8,
     padding: 12,
-    fontSize: 16,
-    color: COLORS.spaceCadet,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minHeight: 50,
+    width: '100%',
   },
+  selectorText: { fontSize: 16, flex: 1 },
+  selectorArrow: { fontSize: 14 },
+  pickerList: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderRadius: 8,
+    marginTop: 4,
+    maxHeight: 260,
+  },
+  pickerItem: {
+    padding: 14,
+    borderBottomWidth: 1,
+  },
+  pickerItemText: { fontSize: 15 },
   button: {
     backgroundColor: COLORS.coffee,
     borderRadius: 8,
@@ -159,9 +205,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  buttonText: { color: '#FFF', fontWeight: '600', fontSize: 16 },
   resultCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
     borderRadius: 12,
     padding: 16,
     marginTop: 20,
@@ -170,18 +216,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
   },
-  resultTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.spaceCadet, marginBottom: 12 },
+  resultTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
   resultRow: { marginBottom: 10 },
-  resultLabel: { fontSize: 13, fontWeight: '600', color: COLORS.slateGray },
-  resultValue: { fontSize: 15, color: COLORS.spaceCadet, marginTop: 2 },
+  resultLabel: { fontSize: 13, fontWeight: '600' },
+  resultValue: { fontSize: 15, marginTop: 2 },
   disclaimer: {
     fontSize: 12,
-    color: COLORS.slateGray,
     marginTop: 12,
     fontStyle: 'italic',
     textAlign: 'center',
   },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });

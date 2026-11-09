@@ -22,9 +22,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
 
         if extra_fields.get('is_staff') is not True:
-            raise ValueError('A superuser must have is_staff=True.')
+            raise ValueError('A superuser must be is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError('A superuser must have is_superuser=True.')
+            raise ValueError('A superuser must be is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
 
@@ -61,6 +61,14 @@ class User(AbstractUser):
         default=timezone.now,
         db_column='fecha_registro',
         db_default=TransactionNow(),
+    )
+    departamento = models.ForeignKey(
+        'geography.Departamento',
+        on_delete=models.SET_NULL,
+        db_column='id_departamento',
+        null=True,
+        blank=True,
+        db_index=False,
     )
     roles = models.ManyToManyField(
         Role,

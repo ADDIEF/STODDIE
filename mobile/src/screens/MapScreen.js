@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -14,7 +14,7 @@ import { WebView } from 'react-native-webview';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
 
-const MAP_HTML = `
+const MAP_HTML_TEMPLATE = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,8 +31,8 @@ const MAP_HTML = `
   <div id="map"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const incidents = __INCIDENTS__;
-    const map = L.map('map', { scrollWheelZoom: false }).setView([-16.5, -68.13], 13);
+    const incidents = JSON.parse('__INCIDENTS_JSON__');
+    const map = L.map('map', { scrollWheelZoom: false }).setView([-16.5, -68.13], 6);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
@@ -48,15 +48,35 @@ const MAP_HTML = `
     });
 
     const markers = [];
+    const bounds = [];
+
     if (incidents && incidents.length > 0) {
       incidents.forEach((inc) => {
-        if (inc.latitud == null || inc.longitud == null) return;
-        const m = L.marker([inc.latitud, inc.longitud], { icon: redIcon }).addTo(map);
-        m.bindPopup('<div class="popup"><b>Incidente #' + (inc.id_incidente || inc.pk) + '</b><br><b>Tipo:</b> ' + (inc.tipo_riesgo_nombre || inc.tipo_riesgo || '—') + '<br><b>Severidad:</b> ' + (inc.nivel_severidad_nombre || 'Sin definir') + '<br><b>Estado:</b> ' + (inc.estado_nombre || inc.id_estado || '—') + '<br><b>Zona:</b> ' + (inc.zona_nombre || 'Sin zona') + '<br><b>Fecha:</b> ' + (inc.fecha_reporte ? inc.fecha_reporte.slice(0,10) : '—') + '<br><b>Nota:</b> ' + (inc.descripcion || '—') + '</div>');
-        markers.push(m);
+        const lat = parseFloat(inc.latitud);
+        const lng = parseFloat(inc.longitud);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const m = L.marker([lat, lng], { icon: redIcon }).addTo(map);
+          m.bindPopup(
+            '<div class="popup">' +
+            '<b>Incidente #' + (inc.id_incidente || inc.pk) + '</b><br>' +
+            '<b>Tipo:</b> ' + (inc.tipo_riesgo_nombre || inc.tipo_riesgo || '—') + '<br>' +
+            '<b>Severidad:</b> ' + (inc.nivel_severidad_nombre || 'Sin definir') + '<br>' +
+            '<b>Estado:</b> ' + (inc.estado_nombre || inc.id_estado || '—') + '<br>' +
+            '<b>Zona:</b> ' + (inc.zona_nombre || 'Sin zona') + '<br>' +
+            '<b>Fecha:</b> ' + (inc.fecha_reporte ? inc.fecha_reporte.slice(0, 10) : '—') + '<br>' +
+            '<b>Nota:</b> ' + (inc.descripcion || '—') +
+            '</div>'
+          );
+          markers.push(m);
+          bounds.push([lat, lng]);
+        }
       });
-      const group = L.featureGroup(markers);
-      map.fitBounds(group.getBounds().pad(0.1));
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds);
+      }
+    } else {
+      map.setView([-16.5, -68.13], 6);
     }
   </script>
 </body>
@@ -74,8 +94,8 @@ export default function MapScreen({ onBack }) {
         const data = await apiRequest('incidents/');
         const list = (data.results || data).map((inc) => ({
           ...inc,
-          latitud: inc.latitud != null ? parseFloat(inc.latitud) : null,
-          longitud: inc.longitud != null ? parseFloat(inc.longitud) : null,
+          latitud: inc.latitud != null ? String(inc.latitud) : null,
+          longitud: inc.longitud != null ? String(inc.longitud) : null,
         }));
         setIncidents(list);
       } catch (error) {
@@ -96,22 +116,25 @@ export default function MapScreen({ onBack }) {
     );
   }
 
-  const html = MAP_HTML.replace('__INCIDENTS__', JSON.stringify(incidents));
-
   if (Platform.OS === 'web') {
+    const html = MAP_HTML_TEMPLATE.replace(
+      '__INCIDENTS_JSON__',
+      JSON.stringify(incidents).replace(/'/g, '\\u0027').replace(/"/g, '&quot;')
+    );
+
     return (
       <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={onBack}>
             <Text style={[styles.backText, { color: COLORS.tan }]}>← Volver</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: COLORS.tan }]}>Mapa La Paz</Text>
-          <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>{incidents.length} reporte(s) • clic en punto rojo para detalle</Text>
+          <Text style={[styles.title, { color: COLORS.tan }]}>Mapa de incidentes - Bolivia</Text>
+          <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>{incidents.length} reporte(s) en el mapa</Text>
         </View>
         <View style={{ flex: 1 }}>
           {React.createElement('iframe', {
             srcDoc: html,
-            title: 'Mapa de incidentes — La Paz',
+            title: 'Mapa de incidentes - Bolivia',
             style: { border: '0', width: '100%', height: '100%', display: 'block' },
           })}
         </View>
@@ -119,16 +142,28 @@ export default function MapScreen({ onBack }) {
     );
   }
 
+  const html = MAP_HTML_TEMPLATE.replace(
+    '__INCIDENTS_JSON__',
+    JSON.stringify(incidents).replace(/'/g, '\\u0027').replace(/"/g, '&quot;')
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack}>
           <Text style={[styles.backText, { color: COLORS.tan }]}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={[styles.title, { color: COLORS.tan }]}>Mapa La Paz</Text>
-        <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>{incidents.length} reporte(s) en La Paz • clic en punto rojo</Text>
+        <Text style={[styles.title, { color: COLORS.tan }]}>Mapa de incidentes - Bolivia</Text>
+        <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>{incidents.length} reporte(s) en el mapa</Text>
       </View>
-      <WebView style={styles.webview} originWhitelist={['*']} javaScriptEnabled domStorageEnabled source={{ html }} />
+      <WebView
+        style={styles.webview}
+        originWhitelist={['*']}
+        javaScriptEnabled
+        domStorageEnabled
+        originWhitelist={['*']}
+        source={{ html }}
+      />
     </View>
   );
 }
@@ -151,22 +186,4 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 12, marginTop: 2 },
   webview: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 14,
-    marginHorizontal: 12,
-    marginBottom: 10,
-    borderLeftWidth: 4,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardTitle: { fontSize: 16, fontWeight: '600' },
-  metaRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
-  metaLabel: { fontSize: 12, fontWeight: '600', minWidth: 90 },
-  metaValue: { fontSize: 14 },
-  listContent: { paddingBottom: 20 },
 });

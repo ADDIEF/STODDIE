@@ -10,24 +10,33 @@ from .models import ContactoEmergencia, EntidadEmergencia
 
 
 class EntidadEmergenciaViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = EntidadEmergencia.objects.filter(es_activa=True).select_related(
-        'municipio'
-    ).order_by('nombre_entidad')
     serializer_class = EntidadEmergenciaSerializer
     search_fields = ('nombre_entidad', 'tipo_entidad', 'direccion')
     ordering_fields = ('nombre_entidad',)
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        municipality_id = self.request.query_params.get('id_municipio')
-        if municipality_id is not None:
+        queryset = EntidadEmergencia.objects.filter(es_activa=True).select_related(
+            'municipio', 'municipio__departamento'
+        ).order_by('nombre_entidad')
+        user = self.request.user
+        # Si es administrador, ve todas las entidades de todos los departamentos
+        if user.is_staff or user.roles.filter(nombre_rol='Administrador').exists():
+            return queryset
+        # Si es ciudadano, solo ve entidades de su departamento
+        if user.departamento_id:
             queryset = queryset.filter(
-                municipio_id=parse_positive_integer(
-                    municipality_id,
-                    'id_municipio',
-                )
+                municipio__departamento_id=user.departamento_id
             )
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class ContactoEmergenciaViewSet(viewsets.ReadOnlyModelViewSet):

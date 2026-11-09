@@ -20,34 +20,59 @@ class FuenteMeteorologicaViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ('nombre_proveedor', 'descripcion')
     ordering_fields = ('nombre_proveedor',)
 
-    @action(detail=False, methods=('get',), permission_classes=(IsAuthenticated,))
-    def forecast(self, request):
+    def _get_coords_from_params(self, request):
         """
-        Consulta el clima actual para una latitud y longitud dadas.
-        Usa Open-Meteo (gratis, sin API key).
-        Query params: latitud, longitud
+        Obtiene latitud/longitud de los query params.
+        Acepta latitud/longitud directamente, o departamento_id, o zona_id.
         """
         latitud = request.query_params.get('latitud')
         longitud = request.query_params.get('longitud')
+        departamento_id = request.query_params.get('departamento_id')
+        zona_id = request.query_params.get('zona_id')
 
-        if not latitud or not longitud:
-            return Response(
-                {'detail': 'Se requieren los parámetros latitud y longitud.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if departamento_id:
+            try:
+                from apps.geography.models import Departamento
+                dep = Departamento.objects.get(pk=departamento_id)
+                if dep.latitud is not None and dep.longitud is not None:
+                    return dep.latitud, dep.longitud, dep.nombre_departamento
+            except Departamento.DoesNotExist:
+                pass
 
-        try:
-            lat = float(latitud)
-            lon = float(longitud)
-        except ValueError:
-            return Response(
-                {'detail': 'Latitud y longitud deben ser valores numéricos válidos.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if zona_id:
+            try:
+                from apps.geography.models import Zona
+                zona = Zona.objects.select_related('municipio__departamento').get(pk=zona_id)
+                if zona.municipio and zona.municipio.departamento:
+                    dep = zona.municipio.departamento
+                    if dep.latitud is not None and dep.longitud is not None:
+                        return dep.latitud, dep.longitud, f"{zona.nombre_zona}, {dep.nombre_departamento}"
+            except Zona.DoesNotExist:
+                pass
 
-        if lat < -90 or lat > 90 or lon < -180 or lon > 180:
+        if latitud and longitud:
+            try:
+                lat = float(latitud)
+                lng = float(longitud)
+                if -90 <= lat <= 90 and -180 <= lng <= 180:
+                    return lat, lng, f"({lat}, {lng})"
+            except (ValueError, TypeError):
+                pass
+
+        return None, None, None
+
+    @action(detail=False, methods=('get',), permission_classes=(IsAuthenticated,))
+    def forecast(self, request):
+        """
+        Consulta el clima actual para una ubicación dada.
+        Acepta latitud/longitud, o departamento_id, o zona_id.
+        Usa Open-Meteo (gratis, sin API key).
+        """
+        lat, lon, location_label = self._get_coords_from_params(request)
+
+        if lat is None or lon is None:
             return Response(
-                {'detail': 'Coordenadas fuera de rango válido.'},
+                {'detail': 'Se requieren latitud y longitud, o departamento_id, o zona_id.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -74,6 +99,7 @@ class FuenteMeteorologicaViewSet(viewsets.ReadOnlyModelViewSet):
                 'proveedor': proveedor_nombre,
                 'latitud': lat,
                 'longitud': lon,
+                'ubicacion': location_label,
                 'temperatura': current.get('temperature'),
                 'viento_velocidad': current.get('windspeed'),
                 'viento_direccion': current.get('winddirection'),
