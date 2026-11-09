@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { apiRequest } from '../api/client';
-import { COLORS } from '../App';
+import { COLORS } from '../theme/colors';
 
 export default function WeatherScreen({ onBack }) {
   const [departamentos, setDepartamentos] = useState([]);
