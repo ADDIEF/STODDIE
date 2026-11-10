@@ -63,7 +63,7 @@ export default function RegisterScreen({ onRegister, onLogin }) {
       });
       const lat = location.coords.latitude;
       const lon = location.coords.longitude;
-      setGpsCoords({ lat, lon });
+      setGpsCoords({ lat: parseFloat(lat.toFixed(6)), lon: parseFloat(lon.toFixed(6)) });
 
       const dep = departamentos.find((d) => d.id_departamento === selectedDepartamentoId);
       if (!dep) {

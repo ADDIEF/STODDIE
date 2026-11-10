@@ -85,8 +85,8 @@ class Incidente(models.Model):
         db_index=False,
     )
     descripcion = models.TextField()
-    latitud = models.DecimalField(max_digits=9, decimal_places=6)
-    longitud = models.DecimalField(max_digits=9, decimal_places=6)
+    latitud = models.DecimalField(max_digits=12, decimal_places=6)
+    longitud = models.DecimalField(max_digits=12, decimal_places=6)
     referencia_ubicacion = models.CharField(
         max_length=200,
         null=True,
