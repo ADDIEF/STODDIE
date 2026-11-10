@@ -53,13 +53,13 @@ export default function Toast({ message, type = 'info', visible, onHide }) {
   Animated.timing(opacity, {
     toValue: visible ? 1 : 0,
     duration: 300,
-    useNativeDriver: true,
+    useNativeDriver: false,
   }).start();
 
   Animated.timing(translateY, {
     toValue: visible ? 0 : 20,
     duration: 300,
-    useNativeDriver: true,
+    useNativeDriver: false,
   }).start();
 
   if (!visible) return null;

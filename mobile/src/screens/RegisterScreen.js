@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { authApi } from '../api/client';
+import { authApi, apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
 import { useToast } from '../context/ToastContext';
 
