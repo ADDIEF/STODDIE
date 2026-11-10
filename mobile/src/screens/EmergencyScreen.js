@@ -80,29 +80,31 @@ export default function EmergencyScreen({ onBack }) {
         </TouchableOpacity>
         {showPicker && (
           <View style={[styles.depPickerList, { borderColor: COLORS.slateGray }]}>
-            <TouchableOpacity
-              style={[styles.depPickerItem, { borderBottomColor: COLORS.tan }]}
-              onPress={() => {
-                setSelectedDepartamentoId(null);
-                setSelectedDepartamentoLabel('Todos los departamentos');
-                setShowPicker(false);
-              }}
-            >
-              <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>Todos los departamentos</Text>
-            </TouchableOpacity>
-            {departamentos.map((d) => (
+            <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
               <TouchableOpacity
-                key={d.id_departamento}
                 style={[styles.depPickerItem, { borderBottomColor: COLORS.tan }]}
                 onPress={() => {
-                  setSelectedDepartamentoId(d.id_departamento);
-                  setSelectedDepartamentoLabel(d.nombre_departamento);
+                  setSelectedDepartamentoId(null);
+                  setSelectedDepartamentoLabel('Todos los departamentos');
                   setShowPicker(false);
                 }}
               >
-                <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>{d.nombre_departamento}</Text>
+                <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>Todos los departamentos</Text>
               </TouchableOpacity>
-            ))}
+              {departamentos.map((d) => (
+                <TouchableOpacity
+                  key={d.id_departamento}
+                  style={[styles.depPickerItem, { borderBottomColor: COLORS.tan }]}
+                  onPress={() => {
+                    setSelectedDepartamentoId(d.id_departamento);
+                    setSelectedDepartamentoLabel(d.nombre_departamento);
+                    setShowPicker(false);
+                  }}
+                >
+                  <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>{d.nombre_departamento}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )}
       </View>

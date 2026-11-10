@@ -6,6 +6,10 @@ class Departamento(models.Model):
     nombre_departamento = models.CharField(max_length=100, unique=True)
     latitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitud = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lat_min = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lat_max = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lon_min = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lon_max = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     clima_descripcion = models.TextField(null=True, blank=True)
     recomendaciones = models.TextField(null=True, blank=True)
 
@@ -16,6 +20,14 @@ class Departamento(models.Model):
 
     def __str__(self):
         return self.nombre_departamento
+
+    def contiene_coordenada(self, lat, lon):
+        if None in (self.lat_min, self.lat_max, self.lon_min, self.lon_max):
+            return True
+        return (
+            float(self.lat_min) <= lat <= float(self.lat_max)
+            and float(self.lon_min) <= lon <= float(self.lon_max)
+        )
 
 
 class Municipio(models.Model):

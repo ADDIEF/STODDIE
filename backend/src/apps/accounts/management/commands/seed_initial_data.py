@@ -58,6 +58,7 @@ class Command(BaseCommand):
             {
                 "nombre": "La Paz",
                 "latitud": -16.5, "longitud": -68.1,
+                "lat_min": -17.5, "lat_max": -16.0, "lon_min": -69.5, "lon_max": -67.5,
                 "clima": "Topografía accidentada de laderas y cuencas (La Paz) y planicie de gran altitud (El Alto). Altamente vulnerable a deslizamientos, riadas, granizadas y heladas.",
                 "recomendaciones": "La Paz (Lluvias y laderas): Limpie canaletas y canalillos de su vivienda antes de diciembre y evite echar basura a las torrenteras para prevenir inundaciones. Si observa grietas en paredes o pisos, o el flujo de agua cambia de color, evacúe inmediatamente sin sacar pertenencias por riesgo de deslizamiento. No retorne a su vivienda hasta que las autoridades declaren zona segura.\nEl Alto (Heladas y granizadas): Refuerce los techos de calamina para evitar colapsos por acumulación de granizo. Aísle las tuberías de agua expuestas a la intemperie con papel periódico y plásticos para evitar que revienten por el congelamiento del agua durante la madrugada.",
                 "municipios": [
@@ -76,6 +77,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Santa Cruz",
                 "latitud": -17.8, "longitud": -63.1,
+                "lat_min": -20.0, "lat_max": -16.0, "lon_min": -65.0, "lon_max": -61.0,
                 "clima": "Clima tropical, caluroso y húmedo. Vulnerable a incendios forestales y urbanos en época seca, vientos huracanados (surazos fuertes) e inundaciones súbitas por saturación de drenaje en época de lluvias.",
                 "recomendaciones": "Calor e Incendios: Evite encender fogatas, quemar basura o realizar chaqueos durante la época seca y de vientos fuertes (agosto-octubre). Mantenga los lotes baldíos libres de maleza seca.\nVientos Fuertes: Asegure calaminas, letreros y objetos en balcones que puedan desprenderse. Evite estacionar vehículos debajo de árboles frondosos o letreros antiguos.\nLluvias: Limpie las canaletas para evitar el estancamiento de agua, mitigando tanto el riesgo de inundación barrial como la proliferación del mosquito del dengue.",
                 "municipios": [
@@ -93,6 +95,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Cochabamba",
                 "latitud": -17.4, "longitud": -66.1,
+                "lat_min": -18.5, "lat_max": -16.0, "lon_min": -67.0, "lon_max": -64.5,
                 "clima": "Clima de valles templados y trópico. Riesgo de sequías prolongadas, incendios forestales (Parque Nacional Tunari) y riadas en el cono sur y el trópico.",
                 "recomendaciones": "Sequía: Racionalice el uso del agua domiciliaria e implemente sistemas de recolección de agua de lluvia para riego y limpieza.\nIncendios Forestales: No arroje colillas de cigarro ni botellas de vidrio en zonas boscosas. Si vive cerca de áreas forestales, cree franjas de seguridad (cortafuegos) alrededor de su propiedad.\nRiadas: Evite asentamientos o construcciones en las franjas de seguridad (riberas) de los ríos, especialmente en el Trópico de Cochabamba.",
                 "municipios": [
@@ -109,6 +112,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Chuquisaca",
                 "latitud": -19.05, "longitud": -65.25,
+                "lat_min": -21.0, "lat_max": -18.5, "lon_min": -66.5, "lon_max": -64.5,
                 "clima": "Zonas de valle y chaco. Alta vulnerabilidad a sequías severas, granizadas destructivas para el sector agrícola y desbordes de ríos.",
                 "recomendaciones": "Granizadas: Para zonas periurbanas y agrícolas, implemente mallas antigranizo para proteger los cultivos y refuerce cubiertas ligeras.\nTormentas: Aléjese de los lechos de los ríos y quebradas durante tormentas eléctricas y lluvias fuertes, ya que las crecidas (riadas) ocurren de manera repentina.",
                 "municipios": [
@@ -125,6 +129,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Tarija",
                 "latitud": -21.53, "longitud": -64.73,
+                "lat_min": -22.5, "lat_max": -21.0, "lon_min": -65.5, "lon_max": -63.5,
                 "clima": "Clima templado en valles y caluroso en el chaco. Afectado por incendios forestales (Serranía de Sama), riadas y sequías.",
                 "recomendaciones": "Incendios: Respete las prohibiciones de encender fuego en reservas naturales. Mantenga despejadas de vegetación seca las áreas circundantes a las viviendas periurbanas.\nSequía: Racionalice el agua potable y evite el lavado excesivo de aceras y vehículos.",
                 "municipios": [
@@ -141,6 +146,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Potosí",
                 "latitud": -19.58, "longitud": -65.75,
+                "lat_min": -23.0, "lat_max": -19.0, "lon_min": -68.0, "lon_max": -65.0,
                 "clima": "Clima árido, frío y de alta montaña. Riesgo extremo por nevadas severas, heladas, vientos fuertes y escasez de agua.",
                 "recomendaciones": "Nevadas y Frío Extremo: Evite viajes interdepartamentales nocturnos durante alertas de nevadas. Acopie forraje y construya cobertizos para proteger al ganado de la congelación.\nVientos: Refuerce y amarre los techos de calamina de las viviendas. Mantenga un kit de emergencia con mantas térmicas y alimentos no perecederos.",
                 "municipios": [
@@ -157,6 +163,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Oruro",
                 "latitud": -17.97, "longitud": -67.1,
+                "lat_min": -22.0, "lat_max": -17.5, "lon_min": -69.5, "lon_max": -66.0,
                 "clima": "Altiplano frío y seco. Riesgos de inundaciones lentas por desborde (cuenca del río Desaguadero), heladas intensas y sequía.",
                 "recomendaciones": "Inundaciones por desborde: Construya defensivos o camellones de tierra para proteger viviendas y zonas de pastoreo cerca de cuerpos de agua. No intente cruzar zonas anegadas a pie ni en vehículo.\nHeladas: Utilice ropa térmica en capas, proteja vías respiratorias al salir de madrugada y asegure que las fuentes de calor (estufas) tengan ventilación para evitar intoxicación por monóxido de carbono.",
                 "municipios": [
@@ -173,6 +180,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Beni",
                 "latitud": -15.0, "longitud": -65.0,
+                "lat_min": -16.0, "lat_max": -10.5, "lon_min": -67.0, "lon_max": -63.0,
                 "clima": "Tropical, muy caluroso y húmedo. Altísima vulnerabilidad a inundaciones extensas, desbordes de grandes ríos e incendios forestales en la Amazonía durante la temporada seca.",
                 "recomendaciones": "Inundaciones: Edifique viviendas sobre palafitos o lomas artificiales. Mantenga siempre lista una embarcación menor o bote de rescate. Traslade al ganado a zonas altas designadas antes de que inicie la temporada de lluvias intensas (diciembre a marzo).\nSalud: Use mosquiteros y repelentes constantemente para prevenir brotes de dengue, zika y chikungunya tras las inundaciones.",
                 "municipios": [
@@ -189,6 +197,7 @@ class Command(BaseCommand):
             {
                 "nombre": "Pando",
                 "latitud": -11.0, "longitud": -67.0,
+                "lat_min": -12.5, "lat_max": -9.5, "lon_min": -69.5, "lon_max": -66.5,
                 "clima": "Selva amazónica, clima cálido y altamente lluvioso. Amenazas constantes de desbordes súbitos de ríos (como el río Acre), lluvias torrenciales e incendios forestales.",
                 "recomendaciones": "Crecida de Ríos: Mantenga un monitoreo constante del nivel de los ríos fronterizos. Evacúe inmediatamente a los albergues temporales habilitados ante la primera alerta de rebalse, llevando únicamente documentos personales guardados en bolsas impermeables.\nLluvias: Elimine cualquier recipiente que pueda acumular agua en patios y techos para evitar criaderos de mosquitos.",
                 "municipios": [
@@ -213,6 +222,10 @@ class Command(BaseCommand):
                 defaults={
                     "latitud": dep_data["latitud"],
                     "longitud": dep_data["longitud"],
+                    "lat_min": dep_data.get("lat_min"),
+                    "lat_max": dep_data.get("lat_max"),
+                    "lon_min": dep_data.get("lon_min"),
+                    "lon_max": dep_data.get("lon_max"),
                     "clima_descripcion": dep_data["clima"],
                     "recomendaciones": dep_data["recomendaciones"],
                 },
@@ -220,6 +233,10 @@ class Command(BaseCommand):
             if not created:
                 departamento.latitud = dep_data["latitud"]
                 departamento.longitud = dep_data["longitud"]
+                departamento.lat_min = dep_data.get("lat_min")
+                departamento.lat_max = dep_data.get("lat_max")
+                departamento.lon_min = dep_data.get("lon_min")
+                departamento.lon_max = dep_data.get("lon_max")
                 departamento.clima_descripcion = dep_data["clima"]
                 departamento.recomendaciones = dep_data["recomendaciones"]
                 departamento.save()
