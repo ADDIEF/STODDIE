@@ -187,33 +187,11 @@ export default function RegisterScreen({ onRegister, onLogin }) {
           <Text style={[styles.label, { color: COLORS.tan }]}>Departamento (obligatorio)</Text>
           <TouchableOpacity
             style={[styles.selector, { borderColor: COLORS.slateGray }]}
-            onPress={() => setShowPicker(!showPicker)}
+            onPress={() => setShowPicker(true)}
           >
             <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedDepartamentoLabel}</Text>
             <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
           </TouchableOpacity>
-          {showPicker && (
-            <View style={[styles.pickerList, { borderColor: COLORS.slateGray }]}>
-              <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
-                {departamentos.map((d) => (
-                  <TouchableOpacity
-                    key={d.id_departamento}
-                    style={[styles.pickerItem, { borderBottomColor: COLORS.tan }]}
-                    onPress={() => {
-                      setSelectedDepartamentoId(d.id_departamento);
-                      setSelectedDepartamentoLabel(d.nombre_departamento);
-                      setSelectedDepartamento(d);
-                      setShowPicker(false);
-                      setGpsStatus(null);
-                      setGpsCoords(null);
-                    }}
-                  >
-                    <Text style={[styles.pickerItemText, { color: COLORS.spaceCadet }]}>{d.nombre_departamento}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
 
           <Text style={[styles.label, { color: COLORS.tan }]}>Verificación de ubicación (GPS)</Text>
           <TouchableOpacity
@@ -249,6 +227,35 @@ export default function RegisterScreen({ onRegister, onLogin }) {
           <Text style={[styles.linkText, { color: COLORS.tan }]}>Ya tienes cuenta? Inicia sesión</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {showPicker && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Selecciona tu departamento</Text>
+            <ScrollView style={{ maxHeight: 300 }}>
+              {departamentos.map((d) => (
+                <TouchableOpacity
+                  key={d.id_departamento}
+                  style={styles.modalItem}
+                  onPress={() => {
+                    setSelectedDepartamentoId(d.id_departamento);
+                    setSelectedDepartamentoLabel(d.nombre_departamento);
+                    setSelectedDepartamento(d);
+                    setShowPicker(false);
+                    setGpsStatus(null);
+                    setGpsCoords(null);
+                  }}
+                >
+                  <Text style={styles.modalItemText}>{d.nombre_departamento}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowPicker(false)}>
+              <Text style={styles.modalCloseText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -314,4 +321,39 @@ const styles = StyleSheet.create({
   link: { marginTop: 20, alignItems: 'center' },
   linkText: { fontSize: 14, fontWeight: '600' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalBox: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 16,
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.spaceCadet,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalItem: {
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalItemText: { fontSize: 16, color: COLORS.spaceCadet },
+  modalClose: {
+    marginTop: 12,
+    padding: 10,
+    alignItems: 'center',
+  },
+  modalCloseText: { fontSize: 14, color: COLORS.coffee, fontWeight: '600' },
 });
