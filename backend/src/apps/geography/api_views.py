@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
 
 from apps.api_serializers import parse_positive_integer
 
@@ -15,6 +16,7 @@ class DepartamentoViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DepartamentoSerializer
     search_fields = ('nombre_departamento',)
     ordering_fields = ('nombre_departamento',)
+    permission_classes = [AllowAny]
 
 
 class MunicipioViewSet(viewsets.ReadOnlyModelViewSet):
