@@ -6,6 +6,7 @@ import { getAuthToken, clearAuthToken } from './src/api/tokenStorage';
 import { authApi } from './src/api/client';
 
 import { COLORS } from './src/theme/colors';
+import { ToastProvider } from './src/context/ToastContext';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import IncidentListScreen from './src/screens/IncidentListScreen';
@@ -144,10 +145,12 @@ export default function App() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
-      <StatusBar style="auto" backgroundColor={COLORS.spaceCadet} />
-      {content}
-    </View>
+    <ToastProvider>
+      <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+        <StatusBar style="auto" backgroundColor={COLORS.spaceCadet} />
+        {content}
+      </View>
+    </ToastProvider>
   );
 }
 

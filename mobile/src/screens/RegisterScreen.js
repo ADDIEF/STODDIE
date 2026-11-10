@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,18 +13,20 @@ import {
 import * as Location from 'expo-location';
 import { authApi } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { useToast } from '../context/ToastContext';
 
 export default function RegisterScreen({ onRegister, onLogin }) {
+  const { showToast, showError, showSuccess } = useToast();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [departamentos, setDepartamentos] = useState([]);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState(null);
-  const [selectedDepartamentoLabel, setSelectedDepartamentoLabel] = useState('Selecciona tu departamento...');
+  const [selectedDepartamentoLabel, setSelectedDepartamentoLabel] = useState('Selecciona tu departamento');
   const [selectedDepartamento, setSelectedDepartamento] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
-  const [gpsStatus, setGpsStatus] = useState(null); // null, 'loading', 'ok', 'error'
+  const [gpsStatus, setGpsStatus] = useState(null);
   const [gpsCoords, setGpsCoords] = useState(null);
   const [loading, setLoading] = useState(false);
   const [deptsLoading, setDeptsLoading] = useState(true);
@@ -33,11 +34,10 @@ export default function RegisterScreen({ onRegister, onLogin }) {
   useEffect(() => {
     async function loadDepartamentos() {
       try {
-        const { apiRequest } = await import('../api/client');
         const data = await apiRequest('geography/departments/');
         setDepartamentos(data.results || data);
-      } catch {
-        Alert.alert('Error', 'No se pudieron cargar los departamentos');
+      } catch (err) {
+        showError('No se pudieron cargar los departamentos');
       } finally {
         setDeptsLoading(false);
       }
@@ -45,9 +45,9 @@ export default function RegisterScreen({ onRegister, onLogin }) {
     loadDepartamentos();
   }, []);
 
-  async function verificarUbicacion() {
+  async function verifyLocation() {
     if (!selectedDepartamentoId) {
-      Alert.alert('Selecciona departamento', 'Primero selecciona tu departamento.');
+      showError('Primero selecciona tu departamento');
       return;
     }
     setGpsStatus('loading');
@@ -55,7 +55,7 @@ export default function RegisterScreen({ onRegister, onLogin }) {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         setGpsStatus('error');
-        Alert.alert('Permiso denegado', 'Se necesita permiso de ubicación para validar tu departamento.');
+        showError('Se necesita permiso de ubicación para verificar');
         return;
       }
       const location = await Location.getCurrentPositionAsync({
@@ -65,48 +65,52 @@ export default function RegisterScreen({ onRegister, onLogin }) {
       const lon = location.coords.longitude;
       setGpsCoords({ lat, lon });
 
-      if (selectedDepartamento && selectedDepartamento.contiene_coordenada) {
-        const dentro = (
-          lat >= parseFloat(selectedDepartamento.lat_min) &&
-          lat <= parseFloat(selectedDepartamento.lat_max) &&
-          lon >= parseFloat(selectedDepartamento.lon_min) &&
-          lon <= parseFloat(selectedDepartamento.lon_max)
-        );
-        if (dentro) {
+      const dep = departamentos.find((d) => d.id_departamento === selectedDepartamentoId);
+      if (!dep) {
+        setGpsStatus('error');
+        showError('Departamento no válido');
+        return;
+      }
+
+      if (dep.lat_min && dep.lat_max && dep.lon_min && dep.lon_max) {
+        const latNum = parseFloat(lat);
+        const lonNum = parseFloat(lon);
+        const latMin = parseFloat(dep.lat_min);
+        const latMax = parseFloat(dep.lat_max);
+        const lonMin = parseFloat(dep.lon_min);
+        const lonMax = parseFloat(dep.lon_max);
+
+        if (latNum >= latMin && latNum <= latMax && lonNum >= lonMin && lonNum <= lonMax) {
           setGpsStatus('ok');
-          Alert.alert('Ubicación válida', `Tu ubicación (${lat.toFixed(4)}, ${lon.toFixed(4)}) corresponde a ${selectedDepartamento.nombre_departamento}.`);
+          showSuccess(`Ubicación válida en ${dep.nombre_departamento}`);
         } else {
           setGpsStatus('error');
-          Alert.alert('Ubicación no válida', `Tu ubicación (${lat.toFixed(4)}, ${lon.toFixed(4)}) no corresponde a ${selectedDepartamento.nombre_departamento}. No puedes reportar en otra región.`);
+          showError(`Tu ubicación no corresponde a ${dep.nombre_departamento}. No puedes registrarte desde otra región.`);
         }
       } else {
         setGpsStatus('ok');
       }
-    } catch {
+    } catch (err) {
       setGpsStatus('error');
-      Alert.alert('Error', 'No se pudo obtener tu ubicación.');
+      showError('No se pudo obtener tu ubicación');
     }
   }
 
   async function handleRegister() {
     if (!firstName || !lastName || !email || !password) {
-      Alert.alert('Campos requeridos', 'Completa todos los campos.');
+      showError('Completa todos los campos');
       return;
     }
     if (!selectedDepartamentoId) {
-      Alert.alert('Departamento requerido', 'Selecciona tu departamento.');
+      showError('Selecciona tu departamento');
       return;
     }
-    if (!gpsCoords) {
-      Alert.alert('Verificación requerida', 'Debes verificar tu ubicación con GPS antes de registrarte.');
-      return;
-    }
-    if (gpsStatus !== 'ok') {
-      Alert.alert('Ubicación no válida', 'Tu ubicación no corresponde al departamento seleccionado.');
+    if (!gpsCoords || gpsStatus !== 'ok') {
+      showError('Debes verificar tu ubicación con GPS');
       return;
     }
     if (password.length < 8) {
-      Alert.alert('Contraseña corta', 'La contraseña debe tener al menos 8 caracteres.');
+      showError('La contraseña debe tener al menos 8 caracteres');
       return;
     }
     setLoading(true);
@@ -120,10 +124,11 @@ export default function RegisterScreen({ onRegister, onLogin }) {
         latitud: gpsCoords.lat,
         longitud: gpsCoords.lon,
       });
-      Alert.alert('Registro exitoso', 'Tu cuenta fue creada. Ahora inicia sesión.');
+      showSuccess('¡Cuenta creada exitosamente!');
       onLogin();
     } catch (error) {
-      Alert.alert('Error al registrarse', error.message || 'No se pudo completar el registro');
+      const msg = error.data ? JSON.stringify(error.data) : error.message;
+      showError(msg || 'No se pudo completar el registro');
     } finally {
       setLoading(false);
     }
@@ -199,7 +204,7 @@ export default function RegisterScreen({ onRegister, onLogin }) {
               styles.gpsBtn,
               { backgroundColor: gpsStatus === 'ok' ? COLORS.tan : '#e8f4fd', borderColor: COLORS.coffee }
             ]}
-            onPress={verificarUbicacion}
+            onPress={verifyLocation}
           >
             <Text style={[styles.gpsBtnText, { color: COLORS.coffee }]}>
               {gpsStatus === 'loading' ? 'Obteniendo ubicación...' :
@@ -264,16 +269,17 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, padding: 24, justifyContent: 'center' },
   header: { alignItems: 'center', marginBottom: 32 },
-  title: { fontSize: 32, fontWeight: 'bold' },
-  subtitle: { fontSize: 16, marginTop: 8 },
+  title: { fontSize: 32, fontWeight: 'bold', color: COLORS.tan },
+  subtitle: { fontSize: 16, color: COLORS.slateGray, marginTop: 8 },
   form: { gap: 16 },
-  label: { fontSize: 14, fontWeight: '600', marginBottom: 6 },
+  label: { fontSize: 14, fontWeight: '600', color: COLORS.tan, marginBottom: 6 },
   input: {
     backgroundColor: '#fff',
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
+    color: COLORS.spaceCadet,
   },
   selector: {
     backgroundColor: '#FFF',
@@ -287,18 +293,6 @@ const styles = StyleSheet.create({
   },
   selectorText: { fontSize: 16, flex: 1 },
   selectorArrow: { fontSize: 14 },
-  pickerList: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderTopWidth: 0,
-    borderRadius: 8,
-    marginTop: 4,
-  },
-  pickerItem: {
-    padding: 14,
-    borderBottomWidth: 1,
-  },
-  pickerItemText: { fontSize: 15 },
   gpsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
