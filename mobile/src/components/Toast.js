@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Animated,
   View,
@@ -49,6 +49,17 @@ export default function Toast({ message, type = 'info', visible, onHide }) {
     warning: '⚠️',
     info: 'ℹ️',
   };
+
+  // Auto-ocultar toast después de 3 segundos
+  useEffect(() => {
+    if (visible) {
+      const timer = setTimeout(() => {
+        onHide();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [visible, onHide]);
+
 
   Animated.timing(opacity, {
     toValue: visible ? 1 : 0,
