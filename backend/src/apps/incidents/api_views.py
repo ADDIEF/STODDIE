@@ -104,6 +104,11 @@ class IncidenteViewSet(
             'nivel_severidad',
             'estado',
             'zona',
+            'zona__localidad',
+            'zona__localidad__municipio',
+            'zona__localidad__municipio__provincia',
+            'zona__localidad__municipio__provincia__departamento',
+            'zona__localidad__municipio__provincia__departamento__pais',
         ).order_by('-fecha_reporte')
         if not self.is_moderator():
             queryset = queryset.filter(usuario=self.request.user)

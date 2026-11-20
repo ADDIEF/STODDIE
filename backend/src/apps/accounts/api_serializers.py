@@ -164,6 +164,20 @@ class ProfileSerializer(StrictModelSerializer):
     def get_roles(self, user):
         return list(user.roles.order_by('nombre_rol').values_list('nombre_rol', flat=True))
 
+    def validate(self, attrs):
+        campos_privilegiados = {
+            'id_usuario', 'email', 'date_joined', 'roles', 'is_staff', 'is_superuser',
+        }
+        intentados = campos_privilegiados.intersection(self.initial_data or {})
+        if intentados:
+            raise serializers.ValidationError(
+                {
+                    campo: 'Este campo no puede modificarse desde el perfil.'
+                    for campo in sorted(intentados)
+                }
+            )
+        return attrs
+
 
 class RoleSerializer(serializers.ModelSerializer):
     id_rol = serializers.IntegerField(source='pk', read_only=True)

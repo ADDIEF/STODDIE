@@ -5,7 +5,14 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from apps.emergency.models import ContactoEmergencia, EntidadEmergencia
-from apps.geography.models import Departamento, Municipio, Zona
+from apps.geography.models import (
+    Departamento,
+    Localidad,
+    Municipio,
+    Pais,
+    Provincia,
+    Zona,
+)
 from apps.incidents.models import (
     ComentarioIncidente,
     EstadoIncidente,
@@ -36,6 +43,18 @@ class AuthenticationApiTests(APITestCase):
         )
         self.role = Role.objects.create(nombre_rol='Ciudadano')
         UserRole.objects.create(usuario=self.user, rol=self.role)
+        pais, _ = Pais.objects.get_or_create(
+            nombre_pais='Bolivia',
+            defaults={'codigo_iso': 'BO'},
+        )
+        self.departamento = Departamento.objects.create(
+            nombre_departamento='Departamento de prueba',
+            pais=pais,
+            lat_min='-17.000000',
+            lat_max='-16.000000',
+            lon_min='-69.000000',
+            lon_max='-68.000000',
+        )
 
     def test_registration_creates_safe_citizen_and_token(self):
         response = self.client.post(
@@ -47,6 +66,9 @@ class AuthenticationApiTests(APITestCase):
                 'last_name': 'Hopper',
                 'apellido_materno': 'Murray',
                 'password': 'Different-password-83!secure',
+                'departamento_id': self.departamento.pk,
+                'latitud': '-16.500000',
+                'longitud': '-68.100000',
             },
             format='json',
         )
@@ -234,15 +256,25 @@ class IncidentApiTests(APITestCase):
         self.confirmed = EstadoIncidente.objects.create(
             nombre_estado='Confirmado'
         )
+        pais = Pais.objects.get_or_create(nombre_pais='Bolivia', defaults={'codigo_iso': 'BO'})[0]
         department = Departamento.objects.create(
-            nombre_departamento='Departamento de prueba'
+            nombre_departamento='Departamento de prueba',
+            pais=pais,
+        )
+        province = Provincia.objects.create(
+            departamento=department,
+            nombre_provincia='Provincia de prueba',
         )
         municipality = Municipio.objects.create(
-            departamento=department,
+            provincia=province,
             nombre_municipio='Municipio de prueba',
         )
-        self.zone = Zona.objects.create(
+        locality = Localidad.objects.create(
             municipio=municipality,
+            nombre_localidad='Localidad de prueba',
+        )
+        self.zone = Zona.objects.create(
+            localidad=locality,
             nombre_zona='Zona de prueba',
         )
 
@@ -635,11 +667,17 @@ class CatalogApiTests(APITestCase):
         )
 
     def test_geography_and_emergency_filters_validate_query_ids(self):
+        pais = Pais.objects.get_or_create(nombre_pais='Bolivia', defaults={'codigo_iso': 'BO'})[0]
         department = Departamento.objects.create(
-            nombre_departamento='Departamento norte'
+            nombre_departamento='Departamento norte',
+            pais=pais,
+        )
+        province = Provincia.objects.create(
+            departamento=department,
+            nombre_provincia='Provincia norte',
         )
         municipality = Municipio.objects.create(
-            departamento=department,
+            provincia=province,
             nombre_municipio='Municipio norte',
         )
         entity = EntidadEmergencia.objects.create(
@@ -652,8 +690,12 @@ class CatalogApiTests(APITestCase):
             tipo_contacto='Teléfono',
             valor_contacto='80000000',
         )
-        zone = Zona.objects.create(
+        locality = Localidad.objects.create(
             municipio=municipality,
+            nombre_localidad='Localidad norte',
+        )
+        zone = Zona.objects.create(
+            localidad=locality,
             nombre_zona='Zona norte',
         )
         response = self.client.get(

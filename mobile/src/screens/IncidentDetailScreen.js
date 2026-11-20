@@ -15,17 +15,24 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
         const data = await apiRequest(`incidents/${incidentId}/`);
+        if (cancelled) return;
         setIncident(data);
       } catch (error) {
-        Alert.alert('Error', error.message || 'No se pudo cargar el incidente');
+        if (!cancelled) {
+          Alert.alert('Error', error.message || 'No se pudo cargar el incidente');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     if (incidentId) load();
+    return () => {
+      cancelled = true;
+    };
   }, [incidentId]);
 
   if (loading) {
@@ -68,7 +75,11 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Zona:</Text>
-          <Text style={styles.value}>{incident.zona_nombre || (incident.id_zona ? `ID ${incident.id_zona}` : 'Sin zona')}</Text>
+          <Text style={styles.value}>
+            {incident.zona_ruta ||
+              incident.zona_nombre ||
+              (incident.id_zona ? `ID ${incident.id_zona}` : 'Sin zona')}
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Latitud:</Text>

@@ -42,7 +42,16 @@ export default function App() {
         const admin = isAdminUser(me);
         setIsAdmin(admin);
         setScreen(admin ? 'ADMIN' : 'LIST');
-      } catch {
+      } catch (error) {
+        // Solo cerramos sesión si el token dejó de ser válido.
+        // Si backend está temporalmente caído, conservamos la sesión local.
+        if (error?.status === 401 || error?.status === 403) {
+          await clearAuthToken();
+          setProfile(null);
+          setIsAdmin(false);
+          setScreen('LOGIN');
+          return;
+        }
         setScreen('LIST');
       }
     }

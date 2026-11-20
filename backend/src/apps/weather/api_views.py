@@ -62,9 +62,11 @@ class FuenteMeteorologicaViewSet(viewsets.ReadOnlyModelViewSet):
         if zona_id:
             try:
                 from apps.geography.models import Zona
-                zona = Zona.objects.select_related('municipio__departamento').get(pk=zona_id)
-                if zona.municipio and zona.municipio.departamento:
-                    dep = zona.municipio.departamento
+                zona = Zona.objects.select_related(
+                    'localidad__municipio__provincia__departamento',
+                ).get(pk=zona_id)
+                if zona.localidad_id and zona.departamento:
+                    dep = zona.departamento
                     if dep.latitud is not None and dep.longitud is not None:
                         return dep.latitud, dep.longitud, f"{zona.nombre_zona}, {dep.nombre_departamento}", dep
             except Zona.DoesNotExist:

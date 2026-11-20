@@ -9,8 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { apiRequest, authApi } from '../api/client';
-import { clearAuthToken } from '../api/tokenStorage';
+import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
 
 export default function IncidentListScreen({
@@ -77,11 +76,8 @@ export default function IncidentListScreen({
     );
   };
 
-  async function handleLogout() {
-    try {
-      await authApi.logout();
-    } catch {}
-    await clearAuthToken();
+  function handleLogout() {
+    // App.js se encarga de llamar a auth/logout/, limpiar el token y volver al login.
     onLogout();
   }
 

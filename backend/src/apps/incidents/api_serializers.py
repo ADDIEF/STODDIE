@@ -72,16 +72,52 @@ class IncidenteReadSerializer(serializers.ModelSerializer):
         default='',
     )
     zona_nombre = serializers.SerializerMethodField()
+    zona_ruta = serializers.SerializerMethodField()
+    id_localidad = serializers.SerializerMethodField()
+    nombre_localidad = serializers.SerializerMethodField()
+    id_municipio = serializers.SerializerMethodField()
+    nombre_municipio = serializers.SerializerMethodField()
+    id_departamento = serializers.SerializerMethodField()
+    nombre_departamento = serializers.SerializerMethodField()
 
     def get_nivel_severidad_nombre(self, obj):
         if obj.nivel_severidad_id:
             return obj.nivel_severidad.nombre_nivel if obj.nivel_severidad else ''
         return 'Sin definir'
 
+    def _valor_zona(self, obj, ruta):
+        if not obj.zona_id or not obj.zona:
+            return None
+        valor = obj.zona
+        for parte in ruta.split('.'):
+            valor = getattr(valor, parte, None)
+            if valor is None:
+                return None
+        return valor
+
     def get_zona_nombre(self, obj):
-        if obj.zona_id:
-            return obj.zona.nombre_zona if obj.zona else ''
-        return 'Sin zona'
+        return self._valor_zona(obj, 'nombre_zona') or 'Sin zona'
+
+    def get_zona_ruta(self, obj):
+        return self._valor_zona(obj, 'ruta_territorial')
+
+    def get_id_localidad(self, obj):
+        return self._valor_zona(obj, 'localidad_id')
+
+    def get_nombre_localidad(self, obj):
+        return self._valor_zona(obj, 'localidad.nombre_localidad')
+
+    def get_id_municipio(self, obj):
+        return self._valor_zona(obj, 'municipio_id')
+
+    def get_nombre_municipio(self, obj):
+        return self._valor_zona(obj, 'municipio.nombre_municipio')
+
+    def get_id_departamento(self, obj):
+        return self._valor_zona(obj, 'departamento_id')
+
+    def get_nombre_departamento(self, obj):
+        return self._valor_zona(obj, 'departamento.nombre_departamento')
 
     class Meta:
         model = Incidente
@@ -96,6 +132,13 @@ class IncidenteReadSerializer(serializers.ModelSerializer):
             'estado_nombre',
             'id_zona',
             'zona_nombre',
+            'zona_ruta',
+            'id_localidad',
+            'nombre_localidad',
+            'id_municipio',
+            'nombre_municipio',
+            'id_departamento',
+            'nombre_departamento',
             'descripcion',
             'latitud',
             'longitud',

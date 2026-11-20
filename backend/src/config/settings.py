@@ -78,7 +78,7 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in _required_env('DJANGO_ALLOWED_HOSTS').split(',')
     if host.strip()
-]
+] + ['testserver', 'localhost']
 
 if not DEBUG:
     if not ALLOWED_HOSTS:
@@ -151,14 +151,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Configuración para pruebas de la Semana 4 - SQLite para desarrollo local
+# Para usar PostgreSQL con Docker, descomenta el bloque original y comenta este
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': _required_env('POSTGRES_DB'),
-        'USER': _required_env('POSTGRES_USER'),
-        'PASSWORD': _required_env('POSTGRES_PASSWORD'),
-        'HOST': _required_env('DB_HOST'),
-        'PORT': _required_env('DB_PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

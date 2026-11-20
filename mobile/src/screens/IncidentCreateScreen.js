@@ -15,48 +15,204 @@ import * as Location from 'expo-location';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
 
+const SELECTED_PLACEHOLDER = 'Selecciona...';
+
+const PICKER_CONFIG = {
+  riesgo: {
+    title: 'Tipo de riesgo',
+    idField: 'id_tipo_riesgo',
+    labelField: 'nombre_riesgo',
+    detailField: null,
+    setter: 'tipoRiesgo',
+  },
+  severidad: {
+    title: 'Nivel de severidad',
+    idField: 'id_nivel_severidad',
+    labelField: 'nombre_nivel',
+    detailField: null,
+    setter: 'severidad',
+  },
+  departamento: {
+    title: 'Departamento',
+    idField: 'id_departamento',
+    labelField: 'nombre_departamento',
+    detailField: 'nombre_pais',
+    setter: 'departamento',
+  },
+  provincia: {
+    title: 'Provincia',
+    idField: 'id_provincia',
+    labelField: 'nombre_provincia',
+    detailField: 'nombre_departamento',
+    setter: 'provincia',
+  },
+  municipio: {
+    title: 'Municipio',
+    idField: 'id_municipio',
+    labelField: 'nombre_municipio',
+    detailField: 'nombre_provincia',
+    setter: 'municipio',
+  },
+  localidad: {
+    title: 'Localidad',
+    idField: 'id_localidad',
+    labelField: 'nombre_localidad',
+    detailField: 'nombre_municipio',
+    setter: 'localidad',
+  },
+  zona: {
+    title: 'Zona / barrio (opcional)',
+    idField: 'id_zona',
+    labelField: 'nombre_zona',
+    detailField: 'ruta_territorial',
+    setter: 'zona',
+  },
+};
+
+function toOptions(response) {
+  const items = response?.results || response;
+  return Array.isArray(items) ? items : [];
+}
+
+function optionLabel(config, option) {
+  const label = option[config.labelField];
+  const detail = config.detailField ? option[config.detailField] : null;
+  return detail ? `${label} — ${detail}` : label;
+}
+
+function buildTerritorialRoute(selection) {
+  const parts = [
+    selection.departamentoLabel,
+    selection.provinciaLabel,
+    selection.municipioLabel,
+    selection.localidadLabel,
+    selection.zonaLabel,
+  ].filter(Boolean);
+  return parts.join(' - ');
+}
+
 export default function IncidentCreateScreen({ onBack, onCreated }) {
   const [tipoRiesgoOptions, setTipoRiesgoOptions] = useState([]);
   const [severidadOptions, setSeveridadOptions] = useState([]);
+  const [departamentoOptions, setDepartamentoOptions] = useState([]);
+  const [provinciaOptions, setProvinciaOptions] = useState([]);
+  const [municipioOptions, setMunicipioOptions] = useState([]);
+  const [localidadOptions, setLocalidadOptions] = useState([]);
   const [zonaOptions, setZonaOptions] = useState([]);
   const [selectedTipoRiesgoId, setSelectedTipoRiesgoId] = useState(null);
-  const [selectedTipoRiesgoLabel, setSelectedTipoRiesgoLabel] = useState('Selecciona...');
+  const [selectedTipoRiesgoLabel, setSelectedTipoRiesgoLabel] = useState(SELECTED_PLACEHOLDER);
   const [selectedSeveridadId, setSelectedSeveridadId] = useState(null);
-  const [selectedSeveridadLabel, setSelectedSeveridadLabel] = useState('Selecciona...');
+  const [selectedSeveridadLabel, setSelectedSeveridadLabel] = useState(SELECTED_PLACEHOLDER);
   const [selectedZonaId, setSelectedZonaId] = useState(null);
-  const [selectedZonaLabel, setSelectedZonaLabel] = useState('Selecciona...');
+  const [selectedZonaLabel, setSelectedZonaLabel] = useState(SELECTED_PLACEHOLDER);
+  const [selectedDepartamentoId, setSelectedDepartamentoId] = useState(null);
+  const [selectedDepartamentoLabel, setSelectedDepartamentoLabel] = useState(SELECTED_PLACEHOLDER);
+  const [selectedProvinciaId, setSelectedProvinciaId] = useState(null);
+  const [selectedProvinciaLabel, setSelectedProvinciaLabel] = useState(SELECTED_PLACEHOLDER);
+  const [selectedMunicipioId, setSelectedMunicipioId] = useState(null);
+  const [selectedMunicipioLabel, setSelectedMunicipioLabel] = useState(SELECTED_PLACEHOLDER);
+  const [selectedLocalidadId, setSelectedLocalidadId] = useState(null);
+  const [selectedLocalidadLabel, setSelectedLocalidadLabel] = useState(SELECTED_PLACEHOLDER);
   const [descripcion, setDescripcion] = useState('');
   const [latitud, setLatitud] = useState('');
   const [longitud, setLongitud] = useState('');
   const [referencia, setReferencia] = useState('');
   const [loading, setLoading] = useState(false);
   const [catalogsLoading, setCatalogsLoading] = useState(true);
+  const [loadingOptions, setLoadingOptions] = useState(null);
   const [showPicker, setShowPicker] = useState(null);
+  const [geoLoadError, setGeoLoadError] = useState(false);
+
+  async function loadOptions(picker, path, { clearFrom } = {}) {
+    setLoadingOptions(picker);
+    try {
+      const response = await apiRequest(path);
+      const options = toOptions(response);
+      if (picker === 'provincia') setProvinciaOptions(options);
+      if (picker === 'municipio') setMunicipioOptions(options);
+      if (picker === 'localidad') setLocalidadOptions(options);
+      if (picker === 'zona') setZonaOptions(options);
+      setGeoLoadError(false);
+    } catch (_error) {
+      if (clearFrom) clearFrom();
+      setGeoLoadError(true);
+      Alert.alert(
+        'Error',
+        `No se pudieron cargar las opciones de ${PICKER_CONFIG[picker].title.toLowerCase()}. Revisa tu conexión e inténtalo de nuevo.`,
+      );
+    } finally {
+      setLoadingOptions(null);
+    }
+  }
+
+  function clearDownstream(level) {
+    const clears = {
+      departamento: ['provincia', 'municipio', 'localidad', 'zona'],
+      provincia: ['municipio', 'localidad', 'zona'],
+      municipio: ['localidad', 'zona'],
+      localidad: ['zona'],
+    };
+    const levels = clears[level] || [];
+    if (levels.includes('provincia')) {
+      setProvinciaOptions([]);
+      setSelectedProvinciaId(null);
+      setSelectedProvinciaLabel(SELECTED_PLACEHOLDER);
+    }
+    if (levels.includes('municipio')) {
+      setMunicipioOptions([]);
+      setSelectedMunicipioId(null);
+      setSelectedMunicipioLabel(SELECTED_PLACEHOLDER);
+    }
+    if (levels.includes('localidad')) {
+      setLocalidadOptions([]);
+      setSelectedLocalidadId(null);
+      setSelectedLocalidadLabel(SELECTED_PLACEHOLDER);
+    }
+    if (levels.includes('zona')) {
+      setZonaOptions([]);
+      setSelectedZonaId(null);
+      setSelectedZonaLabel(SELECTED_PLACEHOLDER);
+    }
+  }
 
   const loadCatalogs = async () => {
     setCatalogsLoading(true);
-    const [riskRes, sevRes, zoneRes] = await Promise.allSettled([
+    const [riskRes, sevRes, deptRes] = await Promise.allSettled([
       apiRequest('risk-types/'),
       apiRequest('severity-levels/'),
-      apiRequest('geography/zones/'),
+      apiRequest('geography/departments/'),
     ]);
-    if (riskRes.status === 'fulfilled') {
-      setTipoRiesgoOptions(riskRes.value.results || riskRes.value);
-    }
-    if (sevRes.status === 'fulfilled') {
-      setSeveridadOptions(sevRes.value.results || sevRes.value);
-    }
-    if (zoneRes.status === 'fulfilled') {
-      setZonaOptions(zoneRes.value.results || zoneRes.value);
-    }
-    if (riskRes.status === 'rejected' && sevRes.status === 'rejected') {
+    if (riskRes.status === 'fulfilled') setTipoRiesgoOptions(toOptions(riskRes.value));
+    if (sevRes.status === 'fulfilled') setSeveridadOptions(toOptions(sevRes.value));
+    if (deptRes.status === 'fulfilled') setDepartamentoOptions(toOptions(deptRes.value));
+    if (riskRes.status === 'rejected' && sevRes.status === 'rejected' && deptRes.status === 'rejected') {
       Alert.alert('Error', 'No se pudieron cargar los catálogos. Revisa tu conexión e inténtalo de nuevo.');
     }
     setCatalogsLoading(false);
   };
 
   useEffect(() => {
-    loadCatalogs();
+    let cancelled = false;
+    async function loadInitialCatalogs() {
+      setCatalogsLoading(true);
+      const [riskRes, sevRes, deptRes] = await Promise.allSettled([
+        apiRequest('risk-types/'),
+        apiRequest('severity-levels/'),
+        apiRequest('geography/departments/'),
+      ]);
+      if (cancelled) return;
+      if (riskRes.status === 'fulfilled') setTipoRiesgoOptions(toOptions(riskRes.value));
+      if (sevRes.status === 'fulfilled') setSeveridadOptions(toOptions(sevRes.value));
+      if (deptRes.status === 'fulfilled') setDepartamentoOptions(toOptions(deptRes.value));
+      if (riskRes.status === 'rejected' && sevRes.status === 'rejected' && deptRes.status === 'rejected') {
+        Alert.alert('Error', 'No se pudieron cargar los catálogos. Revisa tu conexión e inténtalo de nuevo.');
+      }
+      setCatalogsLoading(false);
+    }
+    loadInitialCatalogs();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function useCurrentLocation() {
@@ -120,6 +276,67 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
     }
   }
 
+  function selectOption(id, label) {
+    const config = PICKER_CONFIG[showPicker];
+    if (!config) return;
+    const setter = config.setter;
+    if (setter === 'tipoRiesgo') {
+      setSelectedTipoRiesgoId(id);
+      setSelectedTipoRiesgoLabel(label);
+    } else if (setter === 'severidad') {
+      setSelectedSeveridadId(id);
+      setSelectedSeveridadLabel(label);
+    } else if (setter === 'departamento') {
+      setSelectedDepartamentoId(id);
+      setSelectedDepartamentoLabel(label);
+      clearDownstream('departamento');
+      loadOptions('provincia', `geography/provinces/?id_departamento=${id}`);
+    } else if (setter === 'provincia') {
+      setSelectedProvinciaId(id);
+      setSelectedProvinciaLabel(label);
+      clearDownstream('provincia');
+      loadOptions('municipio', `geography/municipalities/?id_provincia=${id}`);
+    } else if (setter === 'municipio') {
+      setSelectedMunicipioId(id);
+      setSelectedMunicipioLabel(label);
+      clearDownstream('municipio');
+      loadOptions('localidad', `geography/localities/?id_municipio=${id}`);
+    } else if (setter === 'localidad') {
+      setSelectedLocalidadId(id);
+      setSelectedLocalidadLabel(label);
+      clearDownstream('localidad');
+      loadOptions('zona', `geography/zones/?id_localidad=${id}`);
+    } else if (setter === 'zona') {
+      setSelectedZonaId(id);
+      setSelectedZonaLabel(label);
+    }
+    setShowPicker(null);
+  }
+
+  function retryLoad() {
+    if (!showPicker) return;
+    const idByPicker = {
+      departamento: selectedDepartamentoId,
+      provincia: selectedProvinciaId,
+      municipio: selectedMunicipioId,
+      localidad: selectedLocalidadId,
+      zona: selectedLocalidadId,
+    };
+    const id = idByPicker[showPicker];
+    if (!id) {
+      setShowPicker(null);
+      loadCatalogs();
+      return;
+    }
+    const pathByPicker = {
+      provincia: `geography/provinces/?id_departamento=${id}`,
+      municipio: `geography/municipalities/?id_provincia=${id}`,
+      localidad: `geography/localities/?id_municipio=${id}`,
+      zona: `geography/zones/?id_localidad=${id}`,
+    };
+    loadOptions(showPicker, pathByPicker[showPicker]);
+  }
+
   if (catalogsLoading) {
     return (
       <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
@@ -129,36 +346,51 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
   }
 
   const pickerContent = () => {
-    const options = showPicker === 'riesgo' ? tipoRiesgoOptions : showPicker === 'severidad' ? severidadOptions : zonaOptions;
-    const labelField = showPicker === 'riesgo' ? 'nombre_riesgo' : showPicker === 'severidad' ? 'nombre_nivel' : 'nombre_zona';
-    const idField = showPicker === 'riesgo' ? 'id_tipo_riesgo' : showPicker === 'severidad' ? 'id_nivel_severidad' : 'id_zona';
-    const setSelected = (id, label) => {
-      if (showPicker === 'riesgo') { setSelectedTipoRiesgoId(id); setSelectedTipoRiesgoLabel(label); }
-      else if (showPicker === 'severidad') { setSelectedSeveridadId(id); setSelectedSeveridadLabel(label); }
-      else { setSelectedZonaId(id); setSelectedZonaLabel(label); }
-      setShowPicker(null);
-    };
+    const config = PICKER_CONFIG[showPicker];
+    const options = {
+      riesgo: tipoRiesgoOptions,
+      severidad: severidadOptions,
+      departamento: departamentoOptions,
+      provincia: provinciaOptions,
+      municipio: municipioOptions,
+      localidad: localidadOptions,
+      zona: zonaOptions,
+    }[showPicker];
+    const isLoading = loadingOptions === showPicker;
 
     return (
       <View style={[styles.pickerOverlay, { backgroundColor: COLORS.spaceCadet + 'DD' }]}>
         <View style={styles.pickerBox}>
-          <Text style={[styles.pickerTitle, { color: COLORS.spaceCadet }]}>{showPicker === 'riesgo' ? 'Tipo de riesgo' : showPicker === 'severidad' ? 'Nivel de severidad' : 'Zona'}</Text>
-          {options.length === 0 ? (
+          <Text style={[styles.pickerTitle, { color: COLORS.spaceCadet }]}>{config.title}</Text>
+          {isLoading ? (
+            <View style={styles.pickerLoading}>
+              <ActivityIndicator size="large" color={COLORS.coffee} />
+              <Text style={{ color: COLORS.slateGray }}>Cargando opciones...</Text>
+            </View>
+          ) : options.length === 0 ? (
             <View style={{ paddingVertical: 16 }}>
               <Text style={{ color: COLORS.slateGray, paddingVertical: 8 }}>No se cargaron opciones. Revisa tu conexión.</Text>
-              <TouchableOpacity style={styles.retryBtn} onPress={() => { loadCatalogs(); }}>
+              <TouchableOpacity style={styles.retryBtn} onPress={retryLoad}>
                 <Text style={[styles.retryBtnText, { color: COLORS.coffee }]}>Reintentar</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={true}>
+              {showPicker === 'zona' && (
+                <TouchableOpacity
+                  style={[styles.pickerItem, { borderBottomColor: '#E5E7EB' }]}
+                  onPress={() => selectOption(null, SELECTED_PLACEHOLDER)}
+                >
+                  <Text style={[styles.pickerItemText, { color: COLORS.slateGray }]}>Sin zona (opcional)</Text>
+                </TouchableOpacity>
+              )}
               {options.map((opt) => (
                 <TouchableOpacity
-                  key={opt[idField]}
+                  key={opt[config.idField]}
                   style={[styles.pickerItem, { borderBottomColor: '#E5E7EB' }]}
-                  onPress={() => setSelected(opt[idField], opt[labelField])}
+                  onPress={() => selectOption(opt[config.idField], optionLabel(config, opt))}
                 >
-                  <Text style={[styles.pickerItemText, { color: COLORS.spaceCadet }]} numberOfLines={2} ellipsizeMode="tail">{opt[labelField]}</Text>
+                  <Text style={[styles.pickerItemText, { color: COLORS.spaceCadet }]} numberOfLines={2} ellipsizeMode="tail">{optionLabel(config, opt)}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -169,6 +401,21 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
         </View>
       </View>
     );
+  };
+
+  const territorialRoute = buildTerritorialRoute({
+    departamentoLabel: selectedDepartamentoId ? selectedDepartamentoLabel : null,
+    provinciaLabel: selectedProvinciaId ? selectedProvinciaLabel : null,
+    municipioLabel: selectedMunicipioId ? selectedMunicipioLabel : null,
+    localidadLabel: selectedLocalidadId ? selectedLocalidadLabel : null,
+    zonaLabel: selectedZonaId ? selectedZonaLabel : null,
+  });
+  const canOpenPicker = (picker) => {
+    if (picker === 'provincia') return Boolean(selectedDepartamentoId);
+    if (picker === 'municipio') return Boolean(selectedProvinciaId);
+    if (picker === 'localidad') return Boolean(selectedMunicipioId);
+    if (picker === 'zona') return Boolean(selectedLocalidadId);
+    return true;
   };
 
   return (
@@ -208,16 +455,94 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
             </TouchableOpacity>
           </View>
 
+          <Text style={[styles.sectionTitle, { color: COLORS.tan }]}>Ubicación territorial</Text>
+
           <View style={[styles.selectorGroup, { borderColor: COLORS.slateGray }]}>
-            <Text style={[styles.label, { color: COLORS.tan }]}>Zona (opcional)</Text>
+            <Text style={[styles.label, { color: COLORS.tan }]}>Departamento (opcional)</Text>
             <TouchableOpacity
               style={[styles.selector, { borderColor: COLORS.slateGray }]}
+              onPress={() => setShowPicker('departamento')}
+            >
+              <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedDepartamentoLabel}</Text>
+              <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.selectorGroup, { borderColor: COLORS.slateGray }]}>
+            <Text style={[styles.label, { color: COLORS.tan }]}>Provincia (opcional)</Text>
+            <TouchableOpacity
+              style={[
+                styles.selector,
+                { borderColor: COLORS.slateGray },
+                !canOpenPicker('provincia') && styles.selectorDisabled,
+              ]}
+              disabled={!canOpenPicker('provincia')}
+              onPress={() => setShowPicker('provincia')}
+            >
+              <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedProvinciaLabel}</Text>
+              <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.selectorGroup, { borderColor: COLORS.slateGray }]}>
+            <Text style={[styles.label, { color: COLORS.tan }]}>Municipio (opcional)</Text>
+            <TouchableOpacity
+              style={[
+                styles.selector,
+                { borderColor: COLORS.slateGray },
+                !canOpenPicker('municipio') && styles.selectorDisabled,
+              ]}
+              disabled={!canOpenPicker('municipio')}
+              onPress={() => setShowPicker('municipio')}
+            >
+              <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedMunicipioLabel}</Text>
+              <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.selectorGroup, { borderColor: COLORS.slateGray }]}>
+            <Text style={[styles.label, { color: COLORS.tan }]}>Localidad (opcional)</Text>
+            <TouchableOpacity
+              style={[
+                styles.selector,
+                { borderColor: COLORS.slateGray },
+                !canOpenPicker('localidad') && styles.selectorDisabled,
+              ]}
+              disabled={!canOpenPicker('localidad')}
+              onPress={() => setShowPicker('localidad')}
+            >
+              <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedLocalidadLabel}</Text>
+              <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.selectorGroup, { borderColor: COLORS.slateGray }]}>
+            <Text style={[styles.label, { color: COLORS.tan }]}>Zona / barrio (opcional)</Text>
+            <TouchableOpacity
+              style={[
+                styles.selector,
+                { borderColor: COLORS.slateGray },
+                !canOpenPicker('zona') && styles.selectorDisabled,
+              ]}
+              disabled={!canOpenPicker('zona')}
               onPress={() => setShowPicker('zona')}
             >
               <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedZonaLabel}</Text>
               <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
             </TouchableOpacity>
           </View>
+
+          {territorialRoute ? (
+            <View style={styles.routeBox}>
+              <Text style={[styles.routeLabel, { color: COLORS.tan }]}>Ruta territorial</Text>
+              <Text style={[styles.routeText, { color: COLORS.spaceCadet }]}>{territorialRoute}</Text>
+            </View>
+          ) : null}
+          {geoLoadError ? (
+            <Text style={[styles.geoErrorText, { color: COLORS.slateGray }]}>
+              Algunas opciones de ubicación no se cargaron. Abre un selector para reintentar.
+            </Text>
+          ) : null}
 
           <Text style={[styles.label, { color: COLORS.tan }]}>Descripción</Text>
           <TextInput
@@ -289,6 +614,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, marginTop: 4 },
   form: { gap: 14 },
   label: { fontSize: 13, fontWeight: '600', marginBottom: 6 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', marginTop: 4 },
   selectorGroup: { position: 'relative', marginBottom: 4 },
   selector: {
     backgroundColor: '#FFF',
@@ -302,8 +628,19 @@ const styles = StyleSheet.create({
     minHeight: 52,
     width: '100%',
   },
+  selectorDisabled: { opacity: 0.6 },
   selectorText: { fontSize: 15, flex: 1, marginRight: 8, flexWrap: 'wrap', lineHeight: 20 },
   selectorArrow: { fontSize: 14 },
+  routeBox: {
+    borderWidth: 1,
+    borderColor: COLORS.slateGray,
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#FFFFFF10',
+  },
+  routeLabel: { fontSize: 12, fontWeight: '700', marginBottom: 4 },
+  routeText: { fontSize: 14, lineHeight: 20 },
+  geoErrorText: { fontSize: 12, lineHeight: 18 },
   textarea: {
     backgroundColor: '#FFF',
     borderWidth: 1,
@@ -369,6 +706,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
+  },
+  pickerLoading: {
+    paddingVertical: 24,
+    alignItems: 'center',
+    gap: 12,
   },
   pickerItem: {
     padding: 14,
