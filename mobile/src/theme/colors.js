@@ -37,7 +37,7 @@ export const COLORS = {
   headerGlass: 'rgba(36, 30, 62, 0.46)',
 
   // Vidrio blanquecino (profundidad sobre el fondo oscuro)
-  glass: 'rgba(255, 255, 255, 0.62)',
+  glass: 'rgba(255, 255, 255, 0.66)',
   glassWarm: 'rgba(254, 254, 242, 0.64)',
   glassStrong: 'rgba(255, 255, 255, 0.72)',
   glassBorder: 'rgba(255, 255, 255, 0.45)',
