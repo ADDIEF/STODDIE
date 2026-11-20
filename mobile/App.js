@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Animated, TouchableOpacity } from 'react-native';
 
 import { getAuthToken, clearAuthToken } from './src/api/tokenStorage';
 import { authApi } from './src/api/client';
@@ -42,16 +42,7 @@ export default function App() {
         const admin = isAdminUser(me);
         setIsAdmin(admin);
         setScreen(admin ? 'ADMIN' : 'LIST');
-      } catch (error) {
-        // Solo cerramos sesión si el token dejó de ser válido.
-        // Si backend está temporalmente caído, conservamos la sesión local.
-        if (error?.status === 401 || error?.status === 403) {
-          await clearAuthToken();
-          setProfile(null);
-          setIsAdmin(false);
-          setScreen('LOGIN');
-          return;
-        }
+      } catch {
         setScreen('LIST');
       }
     }
@@ -156,7 +147,7 @@ export default function App() {
   return (
     <ToastProvider>
       <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
-        <StatusBar style="auto" backgroundColor={COLORS.spaceCadet} />
+        <StatusBar style="light" backgroundColor={COLORS.spaceCadet} />
         {content}
       </View>
     </ToastProvider>

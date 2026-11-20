@@ -16,7 +16,7 @@ import { COLORS } from '../theme/colors';
 import { useToast } from '../context/ToastContext';
 
 export default function RegisterScreen({ onRegister, onLogin }) {
-  const { showToast, showError, showSuccess } = useToast();
+  const { showError, showSuccess } = useToast();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -138,6 +138,7 @@ export default function RegisterScreen({ onRegister, onLogin }) {
     return (
       <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
         <ActivityIndicator size="large" color={COLORS.coffee} />
+        <Text style={styles.loaderText}>Cargando departamentos...</Text>
       </View>
     );
   }
@@ -148,96 +149,102 @@ export default function RegisterScreen({ onRegister, onLogin }) {
       style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: COLORS.tan }]}>STODDIE</Text>
-          <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>Crear cuenta</Text>
-        </View>
+        <View style={styles.glassCard}>
+          <View style={styles.header}>
+            <Text style={styles.title}>STODDIE</Text>
+            <Text style={styles.subtitle}>Crear cuenta</Text>
+            <Text style={styles.subtitle2}>Sistema de Reportes Ciudadanos</Text>
+          </View>
 
-        <View style={styles.form}>
-          <Text style={[styles.label, { color: COLORS.tan }]}>Nombres</Text>
-          <TextInput
-            style={[styles.input, { borderColor: COLORS.slateGray, color: COLORS.spaceCadet }]}
-            value={firstName}
-            onChangeText={setFirstName}
-            placeholder="Juan Carlos"
-          />
+          <View style={styles.form}>
+            <Text style={styles.label}>Nombres</Text>
+            <TextInput
+              style={styles.input}
+              value={firstName}
+              onChangeText={setFirstName}
+              placeholder="Juan Carlos"
+            />
 
-          <Text style={[styles.label, { color: COLORS.tan }]}>Apellidos</Text>
-          <TextInput
-            style={[styles.input, { borderColor: COLORS.slateGray, color: COLORS.spaceCadet }]}
-            value={lastName}
-            onChangeText={setLastName}
-            placeholder="Pérez Gómez"
-          />
+            <Text style={styles.label}>Apellidos</Text>
+            <TextInput
+              style={styles.input}
+              value={lastName}
+              onChangeText={setLastName}
+              placeholder="Pérez Gómez"
+            />
 
-          <Text style={[styles.label, { color: COLORS.tan }]}>Correo electrónico</Text>
-          <TextInput
-            style={[styles.input, { borderColor: COLORS.slateGray, color: COLORS.spaceCadet }]}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholder="correo@ejemplo.com"
-          />
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholder="correo@ejemplo.com"
+            />
 
-          <Text style={[styles.label, { color: COLORS.tan }]}>Contraseña (mín. 8 caracteres)</Text>
-          <TextInput
-            style={[styles.input, { borderColor: COLORS.slateGray, color: COLORS.spaceCadet }]}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholder="••••••••"
-          />
+            <Text style={styles.label}>Contraseña (mín. 8 caracteres)</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              placeholder="••••••••"
+            />
 
-          <Text style={[styles.label, { color: COLORS.tan }]}>Departamento (obligatorio)</Text>
-          <TouchableOpacity
-            style={[styles.selector, { borderColor: COLORS.slateGray }]}
-            onPress={() => setShowPicker(true)}
-          >
-            <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedDepartamentoLabel}</Text>
-            <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
-          </TouchableOpacity>
+            <Text style={styles.label}>Departamento (obligatorio)</Text>
+            <TouchableOpacity
+              style={styles.selector}
+              onPress={() => setShowPicker(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.selectorText}>{selectedDepartamentoLabel}</Text>
+              <Text style={styles.selectorArrow}>▼</Text>
+            </TouchableOpacity>
 
-          <Text style={[styles.label, { color: COLORS.tan }]}>Verificación de ubicación (GPS)</Text>
-          <TouchableOpacity
-            style={[
-              styles.gpsBtn,
-              { backgroundColor: gpsStatus === 'ok' ? COLORS.tan : '#e8f4fd', borderColor: COLORS.coffee }
-            ]}
-            onPress={verifyLocation}
-          >
-            <Text style={[styles.gpsBtnText, { color: COLORS.coffee }]}>
-              {gpsStatus === 'loading' ? 'Obteniendo ubicación...' :
-               gpsStatus === 'ok' ? '✅ Ubicación verificada' :
-               gpsStatus === 'error' ? '❌ Error — Reintentar' :
-               '📍 Verificar mi ubicación (GPS)'}
-            </Text>
-          </TouchableOpacity>
-          {gpsCoords && gpsStatus === 'ok' && (
-            <Text style={[styles.gpsInfo, { color: COLORS.slateGray }]}>
-              Lat: {gpsCoords.lat.toFixed(4)}, Lon: {gpsCoords.lon.toFixed(4)}
-            </Text>
+            <Text style={styles.label}>Verificación de ubicación (GPS)</Text>
+            <TouchableOpacity
+              style={[
+                styles.gpsBtn,
+                gpsStatus === 'ok' && styles.gpsBtnOk,
+                gpsStatus === 'error' && styles.gpsBtnError,
+              ]}
+              onPress={verifyLocation}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.gpsBtnText}>
+                {gpsStatus === 'loading' ? 'Obteniendo ubicación...' :
+                 gpsStatus === 'ok' ? '✅ Ubicación verificada' :
+                 gpsStatus === 'error' ? '❌ Error — Reintentar' :
+                 '📍 Verificar mi ubicación (GPS)'}
+              </Text>
+            </TouchableOpacity>
+            {gpsCoords && gpsStatus === 'ok' && (
+              <Text style={styles.gpsInfo}>
+                Lat: {gpsCoords.lat.toFixed(4)}, Lon: {gpsCoords.lon.toFixed(4)}
+              </Text>
+            )}
+          </View>
+
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.coffee} style={styles.loading} />
+          ) : (
+            <TouchableOpacity style={styles.buttonPrimary} onPress={handleRegister}>
+              <Text style={styles.buttonPrimaryText}>Registrarse</Text>
+            </TouchableOpacity>
           )}
-        </View>
 
-        {loading ? (
-          <ActivityIndicator size="large" style={[styles.loading, { color: COLORS.coffee }]} />
-        ) : (
-          <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.coffee }]} onPress={handleRegister}>
-            <Text style={[styles.buttonText, { color: '#FFF' }]}>Registrarse</Text>
+          <TouchableOpacity style={styles.linkButton} onPress={onLogin}>
+            <Text style={styles.linkText}>Ya tienes cuenta? Inicia sesión</Text>
           </TouchableOpacity>
-        )}
-
-        <TouchableOpacity style={styles.link} onPress={onLogin}>
-          <Text style={[styles.linkText, { color: COLORS.tan }]}>Ya tienes cuenta? Inicia sesión</Text>
-        </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {showPicker && (
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Selecciona tu departamento</Text>
-            <ScrollView style={{ maxHeight: 300 }}>
+            <ScrollView style={styles.modalScroll}>
               {departamentos.map((d) => (
                 <TouchableOpacity
                   key={d.id_departamento}
@@ -250,6 +257,7 @@ export default function RegisterScreen({ onRegister, onLogin }) {
                     setGpsStatus(null);
                     setGpsCoords(null);
                   }}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.modalItemText}>{d.nombre_departamento}</Text>
                 </TouchableOpacity>
@@ -268,31 +276,46 @@ export default function RegisterScreen({ onRegister, onLogin }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, padding: 24, justifyContent: 'center' },
-  header: { alignItems: 'center', marginBottom: 32 },
-  title: { fontSize: 32, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 16, color: COLORS.slateGray, marginTop: 8 },
-  form: { gap: 16 },
-  label: { fontSize: 14, fontWeight: '600', color: COLORS.tan, marginBottom: 6 },
-  input: {
-    backgroundColor: '#fff',
+  glassCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 20,
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  header: { alignItems: 'center', marginBottom: 32 },
+  title: { fontSize: 36, fontWeight: 'bold', color: '#FFF', letterSpacing: 2 },
+  subtitle: { fontSize: 14, color: 'rgba(213, 184, 147, 0.9)', marginTop: 4 },
+  subtitle2: { fontSize: 12, color: 'rgba(213, 184, 147, 0.6)', marginTop: 2 },
+  form: { gap: 16 },
+  label: { fontSize: 14, fontWeight: '600', color: 'rgba(213, 184, 147, 0.9)', marginBottom: 6 },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderRadius: 12,
+    padding: 14,
     fontSize: 16,
     color: COLORS.spaceCadet,
   },
   selector: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
+    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderRadius: 12,
+    padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    minHeight: 50,
+    minHeight: 52,
   },
-  selectorText: { fontSize: 16, flex: 1 },
-  selectorArrow: { fontSize: 14 },
+  selectorText: { fontSize: 16, flex: 1, color: COLORS.spaceCadet },
+  selectorArrow: { fontSize: 14, color: COLORS.coffee },
   gpsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -301,35 +324,53 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1,
     borderRadius: 8,
+    backgroundColor: 'rgba(213, 184, 147, 0.25)',
+    borderColor: 'rgba(111, 77, 56, 0.5)',
   },
-  gpsBtnText: { fontSize: 14, fontWeight: '600' },
-  gpsInfo: { fontSize: 12, fontStyle: 'italic', textAlign: 'center' },
+  gpsBtnOk: { backgroundColor: 'rgba(30, 136, 229, 0.2)', borderColor: '#1E88E5' },
+  gpsBtnError: { backgroundColor: 'rgba(211, 47, 47, 0.2)', borderColor: '#D32F2F' },
+  gpsBtnText: { fontSize: 14, fontWeight: '600', color: COLORS.coffee },
+  gpsInfo: { fontSize: 12, fontStyle: 'italic', textAlign: 'center', color: 'rgba(213, 184, 147, 0.7)' },
   loading: { marginVertical: 20 },
-  button: {
-    borderRadius: 8,
-    padding: 14,
+  buttonPrimary: {
+    backgroundColor: COLORS.coffee,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  buttonText: { color: '#FFF', fontWeight: '600', fontSize: 16 },
-  link: { marginTop: 20, alignItems: 'center' },
-  linkText: { fontSize: 14, fontWeight: '600' },
+  buttonPrimaryText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
+  linkButton: { marginTop: 20, alignItems: 'center' },
+  linkText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   modalOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
   },
   modalBox: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
+    padding: 20,
     width: '90%',
     maxWidth: 400,
     maxHeight: '80%',
+    borderWidth: 1,
+    borderColor: 'rgba(213, 184, 147, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
   },
   modalTitle: {
     fontSize: 18,
@@ -338,6 +379,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: 'center',
   },
+  modalScroll: { maxHeight: 300 },
   modalItem: {
     padding: 14,
     borderBottomWidth: 1,
