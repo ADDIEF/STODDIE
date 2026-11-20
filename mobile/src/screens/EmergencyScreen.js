@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -12,8 +13,10 @@ import {
 } from 'react-native';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { useToast } from '../context/ToastContext';
 
 export default function EmergencyScreen({ onBack }) {
+  const { showError } = useToast();
   const [entidades, setEntidades] = useState([]);
   const [departamentos, setDepartamentos] = useState([]);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState(null);
@@ -43,7 +46,7 @@ export default function EmergencyScreen({ onBack }) {
         }));
         setEntidades(entidadesConContactos);
       } catch (error) {
-        Alert.alert('Error', error.message || 'No se pudieron cargar los contactos');
+        showError(error.message || 'No se pudieron cargar los contactos');
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -60,6 +63,7 @@ export default function EmergencyScreen({ onBack }) {
     return (
       <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
         <ActivityIndicator size="large" color={COLORS.coffee} />
+        <Text style={styles.loaderText}>Cargando contactos...</Text>
       </View>
     );
   }
@@ -67,42 +71,45 @@ export default function EmergencyScreen({ onBack }) {
   return (
     <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-          <Text style={[styles.backText, { color: COLORS.tan }]}>← Volver</Text>
+        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
+          <Text style={styles.backText}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={[styles.title, { color: COLORS.tan }]}>Contactos de emergencia - Bolivia</Text>
-        <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>{filteredEntidades.length} entidad(es)</Text>
+        <Text style={styles.title}>Contactos de Emergencia - Bolivia</Text>
+        <Text style={styles.subtitle}>{filteredEntidades.length} entidad(es) registrada(s)</Text>
         <TouchableOpacity
-          style={[styles.depSelector, { borderColor: COLORS.slateGray }]}
+          style={styles.depSelector}
           onPress={() => setShowPicker(!showPicker)}
+          activeOpacity={0.7}
         >
-          <Text style={[styles.depSelectorText, { color: COLORS.spaceCadet }]}>{selectedDepartamentoLabel}</Text>
-          <Text style={[styles.depSelectorArrow, { color: COLORS.coffee }]}>▼</Text>
+          <Text style={styles.depSelectorText}>{selectedDepartamentoLabel}</Text>
+          <Text style={styles.depSelectorArrow}>▼</Text>
         </TouchableOpacity>
         {showPicker && (
-          <View style={[styles.depPickerList, { borderColor: COLORS.slateGray }]}>
+          <View style={styles.depPickerList}>
             <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
               <TouchableOpacity
-                style={[styles.depPickerItem, { borderBottomColor: COLORS.tan }]}
+                style={styles.depPickerItem}
                 onPress={() => {
                   setSelectedDepartamentoId(null);
                   setSelectedDepartamentoLabel('Todos los departamentos');
                   setShowPicker(false);
                 }}
+                activeOpacity={0.7}
               >
-                <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>Todos los departamentos</Text>
+                <Text style={styles.depPickerItemText}>Todos los departamentos</Text>
               </TouchableOpacity>
               {departamentos.map((d) => (
                 <TouchableOpacity
                   key={d.id_departamento}
-                  style={[styles.depPickerItem, { borderBottomColor: COLORS.tan }]}
+                  style={styles.depPickerItem}
                   onPress={() => {
                     setSelectedDepartamentoId(d.id_departamento);
                     setSelectedDepartamentoLabel(d.nombre_departamento);
                     setShowPicker(false);
                   }}
+                  activeOpacity={0.7}
                 >
-                  <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>{d.nombre_departamento}</Text>
+                  <Text style={styles.depPickerItemText}>{d.nombre_departamento}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -151,23 +158,55 @@ export default function EmergencyScreen({ onBack }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.spaceCadet },
-  header: { padding: 16, paddingTop: 44 },
+  container: { flex: 1 },
+  header: {
+    padding: 16,
+    paddingTop: 44,
+    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+  },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
   backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
   title: { fontSize: 22, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4 },
-  card: {
-    backgroundColor: '#fff',
+  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4, marginBottom: 8 },
+  depSelector: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(97, 120, 145, 0.4)',
     borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  depSelectorText: { fontSize: 15, flex: 1, color: COLORS.spaceCadet },
+  depSelectorArrow: { fontSize: 12, color: COLORS.coffee },
+  depPickerList: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderRadius: 12,
+    marginTop: 4,
+    maxHeight: 220,
+  },
+  depPickerItem: {
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(213, 184, 147, 0.3)',
+  },
+  depPickerItemText: { fontSize: 15, color: COLORS.spaceCadet },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
     padding: 16,
     marginHorizontal: 12,
     marginBottom: 14,
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 6,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.caput,
   },
@@ -184,30 +223,6 @@ const styles = StyleSheet.create({
   contactoHorario: { fontSize: 11, color: COLORS.slateGray, fontStyle: 'italic' },
   noContacts: { fontSize: 13, color: COLORS.slateGray, fontStyle: 'italic' },
   listContent: { paddingBottom: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.spaceCadet },
-  depSelector: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  depSelectorText: { fontSize: 15, flex: 1 },
-  depSelectorArrow: { fontSize: 14 },
-  depPickerList: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderTopWidth: 0,
-    borderRadius: 8,
-    marginTop: 4,
-    maxHeight: 260,
-  },
-  depPickerItem: {
-    padding: 14,
-    borderBottomWidth: 1,
-  },
-  depPickerItemText: { fontSize: 15 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
 });

@@ -13,6 +13,7 @@ import {
 import { WebView } from 'react-native-webview';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { useToast } from '../context/ToastContext';
 
 const MAP_HTML_TEMPLATE = `
 <!DOCTYPE html>
@@ -85,6 +86,7 @@ const MAP_HTML_TEMPLATE = `
 `;
 
 export default function MapScreen({ onBack }) {
+  const { showError } = useToast();
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -100,7 +102,7 @@ export default function MapScreen({ onBack }) {
         }));
         setIncidents(list);
       } catch (error) {
-        Alert.alert('Error', error.message || 'No se pudieron cargar los incidentes');
+        showError(error.message || 'No se pudieron cargar los incidentes');
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -113,6 +115,7 @@ export default function MapScreen({ onBack }) {
     return (
       <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
         <ActivityIndicator size="large" color={COLORS.coffee} />
+        <Text style={styles.loaderText}>Cargando mapa...</Text>
       </View>
     );
   }
@@ -126,13 +129,13 @@ export default function MapScreen({ onBack }) {
     return (
       <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-            <Text style={[styles.backText, { color: COLORS.tan }]}>← Volver</Text>
+          <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
+            <Text style={styles.backText}>← Volver</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: COLORS.tan }]}>Mapa de incidentes - Bolivia</Text>
-          <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>{incidents.length} reporte(s) en el mapa</Text>
+          <Text style={styles.title}>Mapa de Incidentes - Bolivia</Text>
+          <Text style={styles.subtitle}>{incidents.length} reporte(s) en el mapa</Text>
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={styles.mapContainer}>
           {React.createElement('iframe', {
             srcDoc: html,
             title: 'Mapa de incidentes - Bolivia',
@@ -151,20 +154,13 @@ export default function MapScreen({ onBack }) {
   return (
     <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-          <Text style={[styles.backText, { color: COLORS.tan }]}>← Volver</Text>
+        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
+          <Text style={styles.backText}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={[styles.title, { color: COLORS.tan }]}>Mapa de incidentes - Bolivia</Text>
-        <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>{incidents.length} reporte(s) en el mapa</Text>
+        <Text style={styles.title}>Mapa de Incidentes - Bolivia</Text>
+        <Text style={styles.subtitle}>{incidents.length} reporte(s) en el mapa</Text>
       </View>
-      <WebView
-        style={styles.webview}
-        originWhitelist={['*']}
-        javaScriptEnabled
-        domStorageEnabled
-        originWhitelist={['*']}
-        source={{ html }}
-      />
+      <WebView style={styles.webview} originWhitelist={['*']} javaScriptEnabled domStorageEnabled source={{ html }} />
     </View>
   );
 }
@@ -174,17 +170,19 @@ const styles = StyleSheet.create({
   header: {
     padding: 12,
     paddingTop: 44,
-    backgroundColor: COLORS.spaceCadet,
+    backgroundColor: 'rgba(37, 52, 79, 0.85)',
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.slateGray,
+    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   backBtn: { alignSelf: 'flex-start' },
-  backText: { fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 18, fontWeight: 'bold' },
-  subtitle: { fontSize: 12, marginTop: 2 },
+  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 18, fontWeight: 'bold', color: COLORS.tan },
+  subtitle: { fontSize: 12, color: COLORS.slateGray, marginTop: 2 },
   webview: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  mapContainer: { flex: 1 },
+  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
 });

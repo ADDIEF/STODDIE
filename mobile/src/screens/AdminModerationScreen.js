@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { useToast } from '../context/ToastContext';
 
 const ESTADOS = [
   { id: 'ALL', label: 'Todos' },
@@ -32,6 +33,7 @@ export default function AdminModerationScreen({
   onEmergency,
   onLogout,
 }) {
+  const { showError } = useToast();
   const [incidents, setIncidents] = useState([]);
   const [departamentos, setDepartamentos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,7 @@ export default function AdminModerationScreen({
       setIncidents(incData.results || incData);
       setDepartamentos(depData.results || depData);
     } catch (error) {
-      Alert.alert('Error', error.message || 'No se pudieron cargar los incidentes');
+      showError(error.message || 'No se pudieron cargar los incidentes');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -69,12 +71,6 @@ export default function AdminModerationScreen({
 
   const filtered = incidents.filter((item) => {
     if (filterEstado !== 'ALL' && String(item.id_estado) !== filterEstado) return false;
-    if (filterDepartamento !== 'ALL') {
-      const depId = item.id_zona != null ? null : null;
-      // Filtrar por departamento requiere que el incidente tenga zona con municipio/departamento
-      // Por ahora filtramos por nombre de zona si coincide con un municipio del departamento
-      // Simplificación: mostramos todos si no hay forma de filtrar por departamento directamente
-    }
     if (searchText.trim()) {
       const q = searchText.toLowerCase();
       const text = `${item.descripcion || ''} ${item.tipo_riesgo_nombre || ''} ${item.zona_nombre || ''} ${item.id_estado || ''}`.toLowerCase();
@@ -88,18 +84,22 @@ export default function AdminModerationScreen({
 
   const renderItem = ({ item }) => {
     const isPend = String(item.id_estado) === '1';
+    const latNum = item.latitud != null ? parseFloat(item.latitud) : null;
+    const lngNum = item.longitud != null ? parseFloat(item.longitud) : null;
     return (
-      <TouchableOpacity style={[styles.card, isPend && styles.cardPending]} onPress={() => onDetail(item.id_incidente || item.pk)}>
+      <TouchableOpacity style={[styles.card, isPend && styles.cardPending]} onPress={() => onDetail(item.id_incidente || item.pk)} activeOpacity={0.7}>
         <View style={styles.cardHeader}>
-          <Text style={[styles.cardTitle, { color: COLORS.spaceCadet }]}>#{item.id_incidente || item.pk} • {item.tipo_riesgo_nombre || 'Sin tipo'}</Text>
-          <Text style={[styles.badge, isPend ? { color: COLORS.caput } : { color: COLORS.slateGray }]}>{getEstadoLabel(item.id_estado)}</Text>
+          <Text style={styles.cardTitle}>#{item.id_incidente || item.pk} • {item.tipo_riesgo_nombre || 'Sin tipo'}</Text>
+          <View style={[styles.badge, { backgroundColor: isPend ? COLORS.caput : COLORS.coffee }]}>
+            <Text style={styles.badgeText}>{getEstadoLabel(item.id_estado)}</Text>
+          </View>
         </View>
-        <Text style={[styles.description, { color: COLORS.spaceCadet }]} numberOfLines={2}>{item.descripcion || 'Sin descripción'}</Text>
-        <Text style={[styles.meta, { color: COLORS.slateGray }]}>
+        <Text style={styles.description} numberOfLines={2}>{item.descripcion || 'Sin descripción'}</Text>
+        <Text style={styles.meta}>
           Severidad: {item.nivel_severidad_nombre || 'Sin definir'} • Zona: {item.zona_nombre || 'Sin zona'}
         </Text>
-        <Text style={[styles.meta, { color: COLORS.slateGray }]}>
-          📍 {item.latitud != null ? parseFloat(item.latitud).toFixed(4) : '—'}, {item.longitud != null ? parseFloat(item.longitud).toFixed(4) : '—'} • {item.fecha_reporte ? item.fecha_reporte.slice(0, 10) : ''}
+        <Text style={styles.meta}>
+          📍 {latNum != null && !isNaN(latNum) && lngNum != null && !isNaN(lngNum) ? `${latNum.toFixed(4)}, ${lngNum.toFixed(4)}` : 'sin coordenadas'} • {item.fecha_reporte ? item.fecha_reporte.slice(0, 10) : ''}
         </Text>
       </TouchableOpacity>
     );
@@ -109,6 +109,7 @@ export default function AdminModerationScreen({
     return (
       <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
         <ActivityIndicator size="large" color={COLORS.coffee} />
+        <Text style={styles.loaderText}>Cargando incidentes...</Text>
       </View>
     );
   }
@@ -116,63 +117,67 @@ export default function AdminModerationScreen({
   return (
     <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={[styles.backText, { color: COLORS.tan }]}>← Cliente</Text>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.7}>
+          <Text style={styles.backText}>← Cliente</Text>
         </TouchableOpacity>
-        <Text style={[styles.title, { color: COLORS.tan }]}>Panel Admin — Moderación</Text>
-        <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>
+        <Text style={styles.title}>Panel Admin — Moderación</Text>
+        <Text style={styles.subtitle}>
           {incidents.length} totales • {countByEstado(1)} pendientes
         </Text>
 
         <TextInput
-          style={[styles.searchInput, { borderColor: COLORS.slateGray }]}
+          style={styles.searchInput}
           value={searchText}
           onChangeText={setSearchText}
           placeholder="Buscar por descripción, tipo, zona..."
           placeholderTextColor={COLORS.slateGray}
         />
 
-        <Text style={[styles.filterLabel, { color: COLORS.tan }]}>Filtrar por estado:</Text>
+        <Text style={styles.filterLabel}>Filtrar por estado:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
           {ESTADOS.map((e) => (
             <TouchableOpacity
               key={e.id}
-              style={[styles.filterBtn, filterEstado === e.id && { backgroundColor: COLORS.coffee, borderColor: COLORS.coffee }]}
+              style={[styles.filterBtn, filterEstado === e.id && styles.filterBtnActive]}
               onPress={() => setFilterEstado(e.id)}
+              activeOpacity={0.7}
             >
-              <Text style={[styles.filterText, filterEstado === e.id ? { color: '#FFF' } : { color: COLORS.spaceCadet }]}>
+              <Text style={[styles.filterText, filterEstado === e.id && styles.filterTextActive]}>
                 {e.label} {e.id !== 'ALL' ? `(${countByEstado(e.id)})` : ''}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <Text style={[styles.filterLabel, { color: COLORS.tan }]}>Filtrar por departamento:</Text>
+        <Text style={styles.filterLabel}>Filtrar por departamento:</Text>
         <TouchableOpacity
-          style={[styles.depSelector, { borderColor: COLORS.slateGray }]}
+          style={styles.depSelector}
           onPress={() => setShowDepPicker(!showDepPicker)}
+          activeOpacity={0.7}
         >
-          <Text style={[styles.depSelectorText, { color: COLORS.spaceCadet }]}>
+          <Text style={styles.depSelectorText}>
             {filterDepartamento === 'ALL' ? 'Todos los departamentos' : departamentos.find((d) => d.id_departamento === filterDepartamento)?.nombre_departamento || 'Todos'}
           </Text>
-          <Text style={[styles.depSelectorArrow, { color: COLORS.coffee }]}>▼</Text>
+          <Text style={styles.depSelectorArrow}>▼</Text>
         </TouchableOpacity>
         {showDepPicker && (
-          <View style={[styles.depPickerList, { borderColor: COLORS.slateGray }]}>
+          <View style={styles.depPickerList}>
             <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
               <TouchableOpacity
-                style={[styles.depPickerItem, { borderBottomColor: COLORS.tan }]}
+                style={styles.depPickerItem}
                 onPress={() => { setFilterDepartamento('ALL'); setShowDepPicker(false); }}
+                activeOpacity={0.7}
               >
-                <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>Todos los departamentos</Text>
+                <Text style={styles.depPickerItemText}>Todos los departamentos</Text>
               </TouchableOpacity>
               {departamentos.map((d) => (
                 <TouchableOpacity
                   key={d.id_departamento}
-                  style={[styles.depPickerItem, { borderBottomColor: COLORS.tan }]}
+                  style={styles.depPickerItem}
                   onPress={() => { setFilterDepartamento(d.id_departamento); setShowDepPicker(false); }}
+                  activeOpacity={0.7}
                 >
-                  <Text style={[styles.depPickerItemText, { color: COLORS.spaceCadet }]}>{d.nombre_departamento}</Text>
+                  <Text style={styles.depPickerItemText}>{d.nombre_departamento}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -180,19 +185,19 @@ export default function AdminModerationScreen({
         )}
 
         <View style={styles.headerButtons}>
-          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onMap}>
-            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🗺️ Mapa</Text>
+          <TouchableOpacity style={styles.headerButton} onPress={onMap} activeOpacity={0.7}>
+            <Text style={styles.headerButtonText}>🗺️ Mapa</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onWeather}>
-            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🌤️ Clima</Text>
+          <TouchableOpacity style={styles.headerButton} onPress={onWeather} activeOpacity={0.7}>
+            <Text style={styles.headerButtonText}>🌤️ Clima</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onPrevention}>
-            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🛡️ Prevención</Text>
+          <TouchableOpacity style={styles.headerButton} onPress={onPrevention} activeOpacity={0.7}>
+            <Text style={styles.headerButtonText}>🛡️ Prevención</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.tan, borderColor: COLORS.coffee }]} onPress={onEmergency}>
-            <Text style={[styles.headerButtonText, { color: COLORS.spaceCadet }]}>🚨 Emergencia</Text>
+          <TouchableOpacity style={styles.headerButton} onPress={onEmergency} activeOpacity={0.7}>
+            <Text style={styles.headerButtonText}>🚨 Emergencia</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.headerButton, { backgroundColor: COLORS.caput, borderColor: COLORS.caput }]} onPress={onLogout}>
+          <TouchableOpacity style={[styles.headerButton, styles.logoutButton]} onPress={onLogout} activeOpacity={0.7}>
             <Text style={[styles.headerButtonText, { color: '#FFF' }]}>🚪 Salir</Text>
           </TouchableOpacity>
         </View>
@@ -210,53 +215,88 @@ export default function AdminModerationScreen({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { padding: 16, paddingTop: 44 },
+  header: {
+    padding: 16,
+    paddingTop: 44,
+    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+  },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 22, fontWeight: 'bold' },
-  subtitle: { fontSize: 13, marginTop: 4 },
+  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.tan },
+  subtitle: { fontSize: 13, color: COLORS.slateGray, marginTop: 4, marginBottom: 8 },
   searchInput: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
-    borderRadius: 8,
+    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderRadius: 12,
     padding: 12,
     fontSize: 14,
-    marginTop: 10,
+    color: COLORS.spaceCadet,
+    marginTop: 8,
   },
-  filterLabel: { fontSize: 12, fontWeight: '600', marginTop: 10, marginBottom: 6 },
+  filterLabel: { fontSize: 12, fontWeight: '600', color: COLORS.tan, marginTop: 10, marginBottom: 6 },
   filterRow: { flexDirection: 'row', marginBottom: 4 },
-  filterBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1, borderColor: COLORS.slateGray, backgroundColor: '#FFF', marginRight: 8 },
-  filterText: { fontSize: 12, fontWeight: '600' },
+  filterBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1, borderColor: COLORS.slateGray, backgroundColor: 'rgba(255, 255, 255, 0.9)', marginRight: 8 },
+  filterBtnActive: { backgroundColor: COLORS.coffee, borderColor: COLORS.coffee },
+  filterText: { fontSize: 12, fontWeight: '600', color: COLORS.spaceCadet },
+  filterTextActive: { color: '#FFF' },
   depSelector: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
-    borderRadius: 8,
+    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderRadius: 12,
     padding: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  depSelectorText: { fontSize: 14, flex: 1 },
-  depSelectorArrow: { fontSize: 12 },
+  depSelectorText: { fontSize: 14, flex: 1, color: COLORS.spaceCadet },
+  depSelectorArrow: { fontSize: 12, color: COLORS.coffee },
   depPickerList: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderWidth: 1,
     borderTopWidth: 0,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 4,
+    maxHeight: 200,
   },
-  depPickerItem: { padding: 12, borderBottomWidth: 1 },
-  depPickerItemText: { fontSize: 14 },
+  depPickerItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(213, 184, 147, 0.3)' },
+  depPickerItemText: { fontSize: 14, color: COLORS.spaceCadet },
   headerButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
-  headerButton: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1 },
-  headerButtonText: { fontSize: 12, fontWeight: '600' },
-  card: { backgroundColor: '#FFF', borderRadius: 12, padding: 14, marginHorizontal: 12, marginBottom: 10, elevation: 2, borderLeftWidth: 4, borderLeftColor: COLORS.slateGray },
+  headerButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(213, 184, 147, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  headerButtonText: { fontSize: 12, fontWeight: '600', color: COLORS.tan },
+  logoutButton: { backgroundColor: COLORS.caput, borderColor: COLORS.caput },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    padding: 14,
+    marginHorizontal: 12,
+    marginBottom: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.slateGray,
+  },
   cardPending: { borderLeftColor: COLORS.caput },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  cardTitle: { fontSize: 15, fontWeight: '700', flex: 1, flexWrap: 'wrap' },
-  badge: { fontSize: 11, fontWeight: '700' },
-  description: { fontSize: 14, marginBottom: 6 },
-  meta: { fontSize: 12, marginBottom: 2 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.spaceCadet, flex: 1, flexWrap: 'wrap' },
+  badge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
+  badgeText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
+  description: { fontSize: 14, color: COLORS.spaceCadet, marginBottom: 6 },
+  meta: { fontSize: 12, color: COLORS.slateGray, marginBottom: 2 },
   list: { paddingBottom: 20 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
 });

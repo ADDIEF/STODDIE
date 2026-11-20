@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { useToast } from '../context/ToastContext';
 
-// Iconos de clima basados en el código WMO
 const WEATHER_ICONS = {
   0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️',
   51: '🌦️', 53: '🌦️', 55: '🌧️', 56: '🌧️', 57: '🌧️',
@@ -23,19 +23,15 @@ const WEATHER_ICONS = {
   95: '⛈️', 96: '⛈️', 99: '⛈️',
 };
 
-function getIcon(code) {
-  return WEATHER_ICONS[code] || '🌡️';
-}
-
+function getIcon(code) { return WEATHER_ICONS[code] || '🌡️'; }
 function getWindArrow(degrees) {
   if (degrees == null) return '→';
-  // Convertir grados a flecha
   const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
-  const idx = Math.round(degrees / 45) % 8;
-  return arrows[idx];
+  return arrows[Math.round(degrees / 45) % 8];
 }
 
 export default function WeatherScreen({ onBack }) {
+  const { showError } = useToast();
   const [departamentos, setDepartamentos] = useState([]);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState(null);
   const [selectedDepartamentoLabel, setSelectedDepartamentoLabel] = useState('Selecciona un departamento...');
@@ -51,7 +47,7 @@ export default function WeatherScreen({ onBack }) {
         const data = await apiRequest('geography/departments/');
         setDepartamentos(data.results || data);
       } catch {
-        Alert.alert('Error', 'No se pudieron cargar los departamentos');
+        showError('No se pudieron cargar los departamentos');
       } finally {
         setDeptsLoading(false);
       }
@@ -61,23 +57,18 @@ export default function WeatherScreen({ onBack }) {
 
   async function consultarClima() {
     if (!selectedDepartamentoId) {
-      Alert.alert('Campo requerido', 'Selecciona un departamento.');
+      showError('Selecciona un departamento');
       return;
     }
     setLoading(true);
     try {
-      const data = await apiRequest(
-        `weather/sources/forecast/?departamento_id=${selectedDepartamentoId}`
-      );
+      const data = await apiRequest(`weather/sources/forecast/?departamento_id=${selectedDepartamentoId}`);
       setClima(data);
     } catch (error) {
       if (error.status === 503) {
-        Alert.alert(
-          'Servicio no disponible',
-          error.data?.detail || 'El servicio meteorológico no está disponible en este momento.'
-        );
+        showError(error.data?.detail || 'Servicio no disponible');
       } else {
-        Alert.alert('Error', error.message || 'No se pudo consultar el clima.');
+        showError(error.message || 'No se pudo consultar el clima');
       }
     } finally {
       setLoading(false);
@@ -88,6 +79,7 @@ export default function WeatherScreen({ onBack }) {
     return (
       <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
         <ActivityIndicator size="large" color={COLORS.coffee} />
+        <Text style={styles.loaderText}>Cargando departamentos...</Text>
       </View>
     );
   }
@@ -96,37 +88,38 @@ export default function WeatherScreen({ onBack }) {
   const porHora = clima?.por_hora || [];
   const pronostico7 = clima?.pronostico_7_dias || [];
 
+  // Semáforo de riesgo climático
+  const weatherCode = actual?.codigo_clima;
+  const semaforoColor = weatherCode === 0 ? '#4CAF50' : weatherCode <= 3 ? '#FFA000' : weatherCode >= 80 ? '#D32F2F' : COLORS.slateGray;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-            <Text style={[styles.backText, { color: COLORS.tan }]}>← Volver</Text>
+        <View style={styles.glassHeader}>
+          <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
+            <Text style={styles.backText}>← Volver</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: COLORS.tan }]}>Tiempo en Bolivia</Text>
-          <Text style={[styles.subtitle, { color: COLORS.slateGray }]}>Pronóstico por departamento</Text>
+          <Text style={styles.title}>Tiempo en Bolivia</Text>
+          <Text style={styles.subtitle}>Pronóstico por departamento</Text>
         </View>
 
-        <View style={styles.form}>
-          <View style={[styles.selectorGroup, { borderColor: COLORS.slateGray }]}>
-            <Text style={[styles.label, { color: COLORS.tan }]}>Departamento</Text>
-            <TouchableOpacity
-              style={[styles.selector, { borderColor: COLORS.slateGray }]}
-              onPress={() => setShowPicker(!showPicker)}
-            >
-              <Text style={[styles.selectorText, { color: COLORS.spaceCadet }]}>{selectedDepartamentoLabel}</Text>
-              <Text style={[styles.selectorArrow, { color: COLORS.coffee }]}>▼</Text>
+        <View style={styles.glassCard}>
+          <View style={styles.selectorGroup}>
+            <Text style={styles.label}>Departamento</Text>
+            <TouchableOpacity style={styles.selector} onPress={() => setShowPicker(!showPicker)} activeOpacity={0.7}>
+              <Text style={styles.selectorText}>{selectedDepartamentoLabel}</Text>
+              <Text style={styles.selectorArrow}>▼</Text>
             </TouchableOpacity>
             {showPicker && (
-              <View style={[styles.pickerList, { borderColor: COLORS.slateGray }]}>
+              <View style={styles.pickerList}>
                 <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
                   {departamentos.map((d) => (
                     <TouchableOpacity
                       key={d.id_departamento}
-                      style={[styles.pickerItem, { borderBottomColor: COLORS.tan }]}
+                      style={styles.pickerItem}
                       onPress={() => {
                         setSelectedDepartamentoId(d.id_departamento);
                         setSelectedDepartamentoLabel(d.nombre_departamento);
@@ -134,8 +127,9 @@ export default function WeatherScreen({ onBack }) {
                         setShowPicker(false);
                         setClima(null);
                       }}
+                      activeOpacity={0.7}
                     >
-                      <Text style={[styles.pickerItemText, { color: COLORS.spaceCadet }]}>{d.nombre_departamento}</Text>
+                      <Text style={styles.pickerItemText}>{d.nombre_departamento}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -143,28 +137,23 @@ export default function WeatherScreen({ onBack }) {
             )}
           </View>
 
-          <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.coffee }]} onPress={consultarClima}>
-            <Text style={[styles.buttonText, { color: '#FFF' }]}>
-              {loading ? 'Consultando...' : 'Ver pronóstico'}
-            </Text>
+          <TouchableOpacity style={styles.buttonPrimary} onPress={consultarClima} activeOpacity={0.8}>
+            <Text style={styles.buttonPrimaryText}>{loading ? 'Consultando...' : 'Ver pronóstico'}</Text>
           </TouchableOpacity>
         </View>
 
         {clima && actual && (
           <>
-            {/* Tiempo actual estilo noticiero */}
-            <View style={styles.currentCard}>
+            <View style={[styles.glassCard, { borderLeftWidth: 4, borderLeftColor: semaforoColor }]}>
+              <View style={styles.semaforoRow}>
+                <View style={[styles.semaforoDot, { backgroundColor: semaforoColor }]} />
+                <Text style={styles.semaforoLabel}>Condición actual: {actual.descripcion}</Text>
+              </View>
               <Text style={styles.currentLocation}>Tiempo en {clima.ubicacion}</Text>
-              <Text style={styles.currentDateTime}>
-                {actual.fecha_hora ? actual.fecha_hora.replace('T', ' | ') : ''}
-              </Text>
+              <Text style={styles.currentDateTime}>{actual.fecha_hora ? actual.fecha_hora.replace('T', ' | ') : ''}</Text>
               <View style={styles.currentMain}>
                 <View style={styles.currentLeft}>
-                  <Text style={styles.currentDesc}>{actual.descripcion}</Text>
-                  <View style={styles.currentTempRow}>
-                    <Text style={styles.currentIcon}>{getIcon(actual.codigo_clima)}</Text>
-                    <Text style={styles.currentTemp}>{actual.temperatura != null ? `${Math.round(actual.temperatura)}°` : '—'}</Text>
-                  </View>
+                  <Text style={styles.currentTemp}>{actual.temperatura != null ? `${Math.round(actual.temperatura)}°` : '—'}</Text>
                   {actual.sensacion_termica != null && (
                     <Text style={styles.currentSensacion}>Sensación de {Math.round(actual.sensacion_termica)}°</Text>
                   )}
@@ -176,7 +165,7 @@ export default function WeatherScreen({ onBack }) {
                 </View>
               </View>
               <View style={styles.currentLinks}>
-                <Text style={styles.linkText}>Tiempo 1 - 7 días</Text>
+                <Text style={styles.linkText}>Tiempo 1-7 días</Text>
                 <Text style={styles.linkText}>|</Text>
                 <Text style={styles.linkText}>Mapa de lluvia</Text>
                 <Text style={styles.linkText}>|</Text>
@@ -184,7 +173,6 @@ export default function WeatherScreen({ onBack }) {
               </View>
             </View>
 
-            {/* Pronóstico por hora */}
             {porHora.length > 0 && (
               <>
                 <Text style={styles.sectionTitle}>Por hora</Text>
@@ -194,7 +182,7 @@ export default function WeatherScreen({ onBack }) {
                       <Text style={styles.hourTime}>{h.hora}</Text>
                       <Text style={styles.hourIcon}>{getIcon(h.codigo_clima)}</Text>
                       <Text style={styles.hourTemp}>{h.temperatura != null ? `${Math.round(h.temperatura)}°` : '—'}</Text>
-                      <Text style={styles.hourDesc}>{h.descripcion}</Text>
+                      <Text style={styles.hourDesc} numberOfLines={1}>{h.descripcion}</Text>
                       {h.viento_velocidad != null && (
                         <Text style={styles.hourWind}>{getWindArrow(h.viento_direccion)} {h.viento_velocidad} km/h</Text>
                       )}
@@ -207,7 +195,6 @@ export default function WeatherScreen({ onBack }) {
               </>
             )}
 
-            {/* Pronóstico 7 días */}
             {pronostico7.length > 0 && (
               <>
                 <Text style={styles.sectionTitle}>Pronóstico 7 días</Text>
@@ -235,7 +222,6 @@ export default function WeatherScreen({ onBack }) {
               </>
             )}
 
-            {/* Recomendaciones */}
             {clima.recomendaciones && (
               <>
                 <Text style={styles.sectionTitle}>Recomendaciones preventivas</Text>
@@ -260,68 +246,82 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1, padding: 16, paddingBottom: 40 },
   header: { marginBottom: 16 },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 24, fontWeight: 'bold', marginTop: 4 },
-  subtitle: { fontSize: 14, marginTop: 4 },
+  backText: { fontSize: 14, fontWeight: '600', color: COLORS.tan },
+  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.tan, marginTop: 4 },
+  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4 },
   form: { gap: 14 },
-  label: { fontSize: 13, fontWeight: '600', marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.tan, marginBottom: 6 },
   selectorGroup: { position: 'relative', marginBottom: 4 },
   selector: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
+    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderRadius: 12,
+    padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     minHeight: 50,
     width: '100%',
   },
-  selectorText: { fontSize: 16, flex: 1 },
-  selectorArrow: { fontSize: 14 },
+  selectorText: { fontSize: 16, flex: 1, color: COLORS.spaceCadet },
+  selectorArrow: { fontSize: 14, color: COLORS.coffee },
   pickerList: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderWidth: 1,
     borderTopWidth: 0,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 4,
+    maxHeight: 220,
   },
-  pickerItem: { padding: 14, borderBottomWidth: 1 },
-  pickerItemText: { fontSize: 15 },
-  button: {
+  pickerItem: { padding: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(213, 184, 147, 0.3)' },
+  pickerItemText: { fontSize: 15, color: COLORS.spaceCadet },
+  buttonPrimary: {
     backgroundColor: COLORS.coffee,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
   buttonText: { color: '#FFF', fontWeight: '600', fontSize: 16 },
-  currentCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    elevation: 2,
+  glassCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+    marginBottom: 16,
   },
-  currentLocation: { fontSize: 22, fontWeight: 'bold', color: COLORS.spaceCadet },
-  currentDateTime: { fontSize: 13, color: COLORS.slateGray, marginTop: 2, marginBottom: 12 },
+  semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 10 },
+  semaforoDot: { width: 16, height: 16, borderRadius: 8 },
+  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.spaceCadet },
+  currentLocation: { fontSize: 22, fontWeight: 'bold', color: COLORS.spaceCadet, marginBottom: 2 },
+  currentDateTime: { fontSize: 13, color: COLORS.slateGray, marginBottom: 12 },
   currentMain: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   currentLeft: { flex: 1 },
-  currentDesc: { fontSize: 16, fontWeight: '600', color: COLORS.spaceCadet },
-  currentTempRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
-  currentIcon: { fontSize: 48, marginRight: 12 },
   currentTemp: { fontSize: 64, fontWeight: 'bold', color: COLORS.spaceCadet },
   currentSensacion: { fontSize: 13, color: COLORS.slateGray, marginTop: 4 },
   currentRight: { alignItems: 'center', paddingLeft: 16 },
   currentWindIcon: { fontSize: 36 },
   currentWindText: { fontSize: 13, color: COLORS.spaceCadet, fontWeight: '600' },
   currentWindSpeed: { fontSize: 12, color: COLORS.slateGray },
-  currentLinks: { flexDirection: 'row', gap: 8, marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
+  currentLinks: { flexDirection: 'row', gap: 8, marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(213, 184, 147, 0.3)' },
   linkText: { fontSize: 12, color: COLORS.coffee, fontWeight: '600' },
   sectionTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.tan, marginTop: 20, marginBottom: 10 },
-  hourlyRow: { flexDirection: 'row' },
+  hourlyRow: { flexDirection: 'row', paddingVertical: 8 },
   hourCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 10,
     padding: 12,
     marginRight: 8,
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   hourRain: { fontSize: 10, color: '#1E88E5', marginTop: 2 },
   dailyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   dayCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   dayTemp: { fontSize: 12, fontWeight: 'bold', color: COLORS.spaceCadet, marginTop: 4 },
   dayWind: { fontSize: 10, color: COLORS.slateGray, marginTop: 2 },
   recomCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 12,
     padding: 16,
     borderLeftWidth: 4,
@@ -366,4 +366,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
 });

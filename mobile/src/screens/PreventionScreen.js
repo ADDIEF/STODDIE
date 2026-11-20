@@ -11,8 +11,10 @@ import {
 } from 'react-native';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { useToast } from '../context/ToastContext';
 
 export default function PreventionScreen({ onBack }) {
+  const { showError } = useToast();
   const [categorias, setCategorias] = useState([]);
   const [guias, setGuias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +30,7 @@ export default function PreventionScreen({ onBack }) {
         setCategorias(catsData.results || catsData);
         setGuias(guidesData.results || guidesData);
       } catch (error) {
-        Alert.alert('Error', error.message || 'No se pudieron cargar las guías');
+        showError(error.message || 'No se pudieron cargar las guías');
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -43,10 +45,10 @@ export default function PreventionScreen({ onBack }) {
     );
     return (
       <View style={styles.catCard} key={item.id_categoria}>
-        <TouchableOpacity style={styles.catHeader} onPress={() => {}}>
+        <View style={styles.catHeader}>
           <Text style={styles.catTitle}>{item.nombre_categoria}</Text>
           <Text style={styles.catSubtitle}>{item.descripcion}</Text>
-        </TouchableOpacity>
+        </View>
         {guiasDeCategoria.map((guia) => (
           <View style={styles.guiaCard} key={guia.id_guia}>
             <Text style={styles.guiaTitle}>{guia.titulo}</Text>
@@ -64,19 +66,20 @@ export default function PreventionScreen({ onBack }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
+      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
+        <ActivityIndicator size="large" color={COLORS.coffee} />
+        <Text style={styles.loaderText}>Cargando guías...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={onBack}>
+        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
           <Text style={styles.backText}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Guías de prevención</Text>
+        <Text style={styles.title}>Guías de Prevención</Text>
         <Text style={styles.subtitle}>Información por tipo de riesgo</Text>
       </View>
 
@@ -94,39 +97,48 @@ export default function PreventionScreen({ onBack }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.spaceCadet },
-  header: { padding: 16, paddingTop: 44 },
+  container: { flex: 1 },
+  header: {
+    padding: 16,
+    paddingTop: 44,
+    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+  },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
   backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
   title: { fontSize: 22, fontWeight: 'bold', color: COLORS.tan },
   subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4 },
   catCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: 16,
     padding: 16,
     marginHorizontal: 12,
     marginBottom: 16,
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 6,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.caput,
   },
   catHeader: { marginBottom: 12 },
   catTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.spaceCadet },
   catSubtitle: { fontSize: 13, color: COLORS.slateGray, marginTop: 4 },
   guiaCard: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 8,
+    backgroundColor: 'rgba(248, 250, 252, 0.8)',
+    borderRadius: 10,
     padding: 12,
     marginBottom: 10,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
+    borderLeftColor: COLORS.coffee,
   },
   guiaTitle: { fontSize: 15, fontWeight: '600', color: COLORS.spaceCadet, marginBottom: 6 },
   guiaContent: { fontSize: 14, color: COLORS.spaceCadet, lineHeight: 20, marginBottom: 8 },
   guiaFooter: { flexDirection: 'row', justifyContent: 'space-between' },
   guiaMeta: { fontSize: 11, color: COLORS.slateGray, fontStyle: 'italic' },
   listContent: { paddingBottom: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.spaceCadet },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
 });

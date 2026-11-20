@@ -74,12 +74,12 @@ export default function LoginScreen({ onLogin, onRegister }) {
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.coffee} style={styles.loading} />
           ) : (
-            <TouchableOpacity style={styles.buttonPrimary} onPress={handleLogin}>
+            <TouchableOpacity style={styles.buttonPrimary} onPress={handleLogin} activeOpacity={0.8}>
               <Text style={styles.buttonPrimaryText}>Ingresar</Text>
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.linkButton} onPress={onRegister}>
+          <TouchableOpacity style={styles.linkButton} onPress={onRegister} activeOpacity={0.7}>
             <Text style={styles.linkText}>¿No tienes cuenta? Regístrate</Text>
           </TouchableOpacity>
         </View>
@@ -92,10 +92,10 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
     padding: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
