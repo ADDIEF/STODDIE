@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -58,7 +57,7 @@ export default function IncidentListScreen({
       >
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>#{item.id_incidente || item.pk}</Text>
-          <View style={[styles.badge, { backgroundColor: (item.id_estado === 1 || item.estado_nombre === 'Pendiente') ? COLORS.caput : COLORS.coffee }]}>
+          <View style={[styles.badge, { backgroundColor: (item.id_estado === 1 || item.estado_nombre === 'Pendiente') ? COLORS.danger : COLORS.navy }]}>
             <Text style={styles.badgeText}>{item.estado_nombre || `Estado ${item.id_estado}`}</Text>
           </View>
         </View>
@@ -89,43 +88,41 @@ export default function IncidentListScreen({
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
-        <View style={styles.loader}>
-          <ActivityIndicator size="large" color={COLORS.coffee} />
-          <Text style={styles.loaderText}>Cargando reportes...</Text>
-        </View>
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
+        <Text style={styles.loaderText}>Cargando reportes...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Reportes Ciudadanos</Text>
         <Text style={styles.subtitle}>{incidents.length} incidente(s) registrado(s)</Text>
 
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.actionButton} onPress={onMap}>
+          <TouchableOpacity style={styles.actionButton} onPress={onMap} activeOpacity={0.7}>
             <Text style={styles.actionButtonText}>🗺️ Mapa</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={onWeather}>
+          <TouchableOpacity style={styles.actionButton} onPress={onWeather} activeOpacity={0.7}>
             <Text style={styles.actionButtonText}>🌤️ Clima</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={onPrevention}>
+          <TouchableOpacity style={styles.actionButton} onPress={onPrevention} activeOpacity={0.7}>
             <Text style={styles.actionButtonText}>🛡️ Prevención</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={onEmergency}>
+          <TouchableOpacity style={styles.actionButton} onPress={onEmergency} activeOpacity={0.7}>
             <Text style={styles.actionButtonText}>🚨 Emergencia</Text>
           </TouchableOpacity>
         </View>
 
         {isAdmin && (
-          <TouchableOpacity style={styles.adminButton} onPress={onAdmin}>
+          <TouchableOpacity style={styles.adminButton} onPress={onAdmin} activeOpacity={0.7}>
             <Text style={styles.adminButtonText}>🛡️ Panel de Moderación</Text>
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
           <Text style={styles.logoutButtonText}>🚪 Cerrar Sesión</Text>
         </TouchableOpacity>
       </View>
@@ -151,73 +148,68 @@ export default function IncidentListScreen({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { padding: 16, paddingTop: 44 },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4, marginBottom: 16 },
-  actionButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.navy },
+  subtitle: { fontSize: 14, color: COLORS.textMedium, marginTop: 4, marginBottom: 16 },
+  actionButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   actionButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(213, 184, 147, 0.3)',
+    borderColor: COLORS.borderDark,
   },
-  actionButtonText: { color: COLORS.tan, fontSize: 12, fontWeight: '600' },
+  actionButtonText: { color: COLORS.navy, fontSize: 12, fontWeight: '600' },
   adminButton: {
-    backgroundColor: COLORS.caput,
+    backgroundColor: COLORS.danger,
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 16,
     alignItems: 'center',
     marginBottom: 8,
-    elevation: 4,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
   },
   adminButtonText: { color: '#FFF', fontSize: 13, fontWeight: '700' },
   logoutButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(213, 184, 147, 0.2)',
+    borderColor: COLORS.borderDark,
   },
-  logoutButtonText: { color: COLORS.slateGray, fontSize: 13, fontWeight: '600' },
+  logoutButtonText: { color: COLORS.textDark, fontSize: 13, fontWeight: '600' },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 12,
     marginBottom: 12,
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
+    borderLeftColor: COLORS.danger,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: COLORS.spaceCadet },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textDark },
   badge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   badgeText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
-  cardSubtitle: { fontSize: 13, color: COLORS.slateGray, marginBottom: 6, fontWeight: '500' },
-  cardDescription: { fontSize: 14, color: COLORS.spaceCadet, marginBottom: 8, lineHeight: 20 },
+  cardSubtitle: { fontSize: 13, color: COLORS.textMedium, marginBottom: 6, fontWeight: '500' },
+  cardDescription: { fontSize: 14, color: COLORS.textDark, marginBottom: 8, lineHeight: 20 },
   cardMeta: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-  cardMetaText: { fontSize: 11, color: COLORS.slateGray },
+  cardMetaText: { fontSize: 11, color: COLORS.textMedium },
   listContent: { paddingBottom: 100 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
   fab: {
     position: 'absolute',
     bottom: 24,
@@ -225,16 +217,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: COLORS.caput,
+    backgroundColor: COLORS.danger,
     borderRadius: 28,
     paddingVertical: 14,
     paddingHorizontal: 20,
     elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
   },
-  fabIcon: { fontSize: 20 },
+  fabIcon: { fontSize: 20, color: '#FFF' },
   fabText: { color: '#FFF', fontSize: 14, fontWeight: '700' },
 });

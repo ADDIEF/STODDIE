@@ -90,7 +90,7 @@ export default function AdminModerationScreen({
       <TouchableOpacity style={[styles.card, isPend && styles.cardPending]} onPress={() => onDetail(item.id_incidente || item.pk)} activeOpacity={0.7}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>#{item.id_incidente || item.pk} • {item.tipo_riesgo_nombre || 'Sin tipo'}</Text>
-          <View style={[styles.badge, { backgroundColor: isPend ? COLORS.caput : COLORS.coffee }]}>
+          <View style={[styles.badge, { backgroundColor: isPend ? COLORS.danger : COLORS.navy }]}>
             <Text style={styles.badgeText}>{getEstadoLabel(item.id_estado)}</Text>
           </View>
         </View>
@@ -107,15 +107,15 @@ export default function AdminModerationScreen({
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
         <Text style={styles.loaderText}>Cargando incidentes...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.7}>
           <Text style={styles.backText}>← Cliente</Text>
@@ -130,7 +130,7 @@ export default function AdminModerationScreen({
           value={searchText}
           onChangeText={setSearchText}
           placeholder="Buscar por descripción, tipo, zona..."
-          placeholderTextColor={COLORS.slateGray}
+          placeholderTextColor={COLORS.textMedium}
         />
 
         <Text style={styles.filterLabel}>Filtrar por estado:</Text>
@@ -218,85 +218,86 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     paddingTop: 44,
-    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    backgroundColor: COLORS.navy,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+    borderBottomColor: COLORS.borderLight,
   },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 13, color: COLORS.slateGray, marginTop: 4, marginBottom: 8 },
+  backText: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.accent },
+  subtitle: { fontSize: 13, color: COLORS.serenityBlue, marginTop: 4, marginBottom: 8 },
   searchInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderDark,
     borderRadius: 12,
     padding: 12,
     fontSize: 14,
-    color: COLORS.spaceCadet,
+    color: COLORS.textDark,
     marginTop: 8,
   },
-  filterLabel: { fontSize: 12, fontWeight: '600', color: COLORS.tan, marginTop: 10, marginBottom: 6 },
+  filterLabel: { fontSize: 12, fontWeight: '600', color: COLORS.accent, marginTop: 10, marginBottom: 6 },
   filterRow: { flexDirection: 'row', marginBottom: 4 },
-  filterBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1, borderColor: COLORS.slateGray, backgroundColor: 'rgba(255, 255, 255, 0.9)', marginRight: 8 },
-  filterBtnActive: { backgroundColor: COLORS.coffee, borderColor: COLORS.coffee },
-  filterText: { fontSize: 12, fontWeight: '600', color: COLORS.spaceCadet },
+  filterBtn: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1, borderColor: COLORS.borderDark, backgroundColor: COLORS.white, marginRight: 8 },
+  filterBtnActive: { backgroundColor: COLORS.navy, borderColor: COLORS.navy },
+  filterText: { fontSize: 12, fontWeight: '600', color: COLORS.textDark },
   filterTextActive: { color: '#FFF' },
   depSelector: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderDark,
     borderRadius: 12,
     padding: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  depSelectorText: { fontSize: 14, flex: 1, color: COLORS.spaceCadet },
-  depSelectorArrow: { fontSize: 12, color: COLORS.coffee },
+  depSelectorText: { fontSize: 14, flex: 1, color: COLORS.textDark },
+  depSelectorArrow: { fontSize: 12, color: COLORS.navy },
   depPickerList: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
     borderTopWidth: 0,
+    borderColor: COLORS.borderLight,
     borderRadius: 12,
     marginTop: 4,
     maxHeight: 200,
   },
-  depPickerItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(213, 184, 147, 0.3)' },
-  depPickerItemText: { fontSize: 14, color: COLORS.spaceCadet },
+  depPickerItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight },
+  depPickerItemText: { fontSize: 14, color: COLORS.textDark },
   headerButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
   headerButton: {
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(213, 184, 147, 0.3)',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: COLORS.borderLight,
+    backgroundColor: COLORS.pureLight,
   },
-  headerButtonText: { fontSize: 12, fontWeight: '600', color: COLORS.tan },
-  logoutButton: { backgroundColor: COLORS.caput, borderColor: COLORS.caput },
+  headerButtonText: { fontSize: 12, fontWeight: '600', color: COLORS.navy },
+  logoutButton: { backgroundColor: COLORS.danger, borderColor: COLORS.danger },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 16,
     padding: 14,
     marginHorizontal: 12,
     marginBottom: 10,
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.slateGray,
+    borderLeftColor: COLORS.serenityBlue,
   },
-  cardPending: { borderLeftColor: COLORS.caput },
+  cardPending: { borderLeftColor: COLORS.danger },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.spaceCadet, flex: 1, flexWrap: 'wrap' },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.textDark, flex: 1, flexWrap: 'wrap' },
   badge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   badgeText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
-  description: { fontSize: 14, color: COLORS.spaceCadet, marginBottom: 6 },
-  meta: { fontSize: 12, color: COLORS.slateGray, marginBottom: 2 },
+  description: { fontSize: 14, color: COLORS.textDark, marginBottom: 6 },
+  meta: { fontSize: 12, color: COLORS.textMedium, marginBottom: 2 },
   list: { paddingBottom: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.white },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
 });

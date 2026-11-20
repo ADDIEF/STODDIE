@@ -66,15 +66,15 @@ export default function PreventionScreen({ onBack }) {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
         <Text style={styles.loaderText}>Cargando guías...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
           <Text style={styles.backText}>← Volver</Text>
@@ -101,16 +101,16 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     paddingTop: 44,
-    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    backgroundColor: COLORS.navy,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+    borderBottomColor: COLORS.borderLight,
   },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4 },
+  backText: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.accent },
+  subtitle: { fontSize: 14, color: COLORS.serenityBlue, marginTop: 4 },
   catCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 12,
@@ -118,27 +118,29 @@ const styles = StyleSheet.create({
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
+    borderLeftColor: COLORS.danger,
   },
   catHeader: { marginBottom: 12 },
-  catTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.spaceCadet },
-  catSubtitle: { fontSize: 13, color: COLORS.slateGray, marginTop: 4 },
+  catTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
+  catSubtitle: { fontSize: 13, color: COLORS.textMedium, marginTop: 4 },
   guiaCard: {
-    backgroundColor: 'rgba(248, 250, 252, 0.8)',
+    backgroundColor: COLORS.white,
     borderRadius: 10,
     padding: 12,
     marginBottom: 10,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.coffee,
+    borderLeftColor: COLORS.navy,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  guiaTitle: { fontSize: 15, fontWeight: '600', color: COLORS.spaceCadet, marginBottom: 6 },
-  guiaContent: { fontSize: 14, color: COLORS.spaceCadet, lineHeight: 20, marginBottom: 8 },
+  guiaTitle: { fontSize: 15, fontWeight: '600', color: COLORS.textDark, marginBottom: 6 },
+  guiaContent: { fontSize: 14, color: COLORS.textDark, lineHeight: 20, marginBottom: 8 },
   guiaFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-  guiaMeta: { fontSize: 11, color: COLORS.slateGray, fontStyle: 'italic' },
+  guiaMeta: { fontSize: 11, color: COLORS.textMedium, fontStyle: 'italic' },
   listContent: { paddingBottom: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.white },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
 });

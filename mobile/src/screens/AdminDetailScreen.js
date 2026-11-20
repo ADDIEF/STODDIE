@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -92,8 +91,8 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
         <Text style={styles.loaderText}>Cargando detalle...</Text>
       </View>
     );
@@ -101,7 +100,7 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
 
   if (!incident) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
         <Text style={styles.emptyText}>Incidente no encontrado</Text>
       </View>
     );
@@ -111,10 +110,10 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
   const isPendiente = incident.id_estado === 1 || estado.toLowerCase() === 'pendiente';
   const isConfirmado = incident.id_estado === 3 || estado.toLowerCase() === 'confirmado';
   const isFalso = incident.id_estado === 5 || estado.toLowerCase() === 'falso / rechazado';
-  const semaforoColor = isConfirmado ? '#4CAF50' : isPendiente ? '#FFA000' : isFalso ? '#D32F2F' : COLORS.slateGray;
+  const semaforoColor = isConfirmado ? '#4CAF50' : isPendiente ? '#FFA000' : isFalso ? '#D32F2F' : COLORS.serenityBlue;
 
   return (
-    <KeyboardAvoidingView style={[styles.container, { backgroundColor: COLORS.spaceCadet }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: COLORS.white }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.7}>
           <Text style={styles.backText}>← Moderación</Text>
@@ -175,7 +174,7 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
         )}
         <Text style={styles.label}>Observación (opcional)</Text>
         <TextInput style={styles.input} value={observation} onChangeText={setObservation} placeholder="Ej. Verificado en terreno..." />
-        <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.caput }]} onPress={changeStatus} disabled={saving} activeOpacity={0.8}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.danger }]} onPress={changeStatus} disabled={saving} activeOpacity={0.8}>
           <Text style={styles.buttonText}>{saving ? 'Guardando...' : 'Aplicar cambio de estado'}</Text>
         </TouchableOpacity>
 
@@ -199,7 +198,7 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
           </View>
         ))}
         <TextInput style={styles.input} value={commentText} onChangeText={setCommentText} placeholder="Agregar comentario de moderación..." />
-        <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.coffee }]} onPress={addComment} disabled={saving} activeOpacity={0.8}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.navy }]} onPress={addComment} disabled={saving} activeOpacity={0.8}>
           <Text style={styles.buttonText}>Agregar comentario</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -211,35 +210,35 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 16, paddingBottom: 40 },
   backBtn: { alignSelf: 'flex-start', marginBottom: 12 },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
+  backText: { color: COLORS.navy, fontSize: 14, fontWeight: '600' },
   glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: COLORS.borderDark,
     padding: 20,
     marginBottom: 16,
-    elevation: 6,
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
+    borderLeftColor: COLORS.danger,
   },
   semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
   semaforoDot: { width: 16, height: 16, borderRadius: 8 },
-  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.spaceCadet },
-  title: { fontSize: 20, fontWeight: 'bold', color: COLORS.spaceCadet, marginBottom: 8 },
+  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.textDark },
+  title: { fontSize: 20, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 8 },
   row: { marginBottom: 10 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.slateGray },
-  value: { fontSize: 15, color: COLORS.spaceCadet, marginTop: 2 },
-  description: { fontSize: 15, color: COLORS.spaceCadet, marginTop: 2, lineHeight: 22 },
-  section: { fontSize: 16, fontWeight: 'bold', color: COLORS.tan, marginTop: 18, marginBottom: 8 },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textMedium },
+  value: { fontSize: 15, color: COLORS.textDark, marginTop: 2 },
+  description: { fontSize: 15, color: COLORS.textDark, marginTop: 2, lineHeight: 22 },
+  section: { fontSize: 16, fontWeight: 'bold', color: COLORS.navy, marginTop: 18, marginBottom: 8 },
   selector: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderDark,
     borderRadius: 12,
     padding: 14,
     flexDirection: 'row',
@@ -247,26 +246,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 52,
   },
-  selectorText: { fontSize: 15, flex: 1, color: COLORS.spaceCadet },
-  selectorArrow: { fontSize: 14, color: COLORS.coffee },
+  selectorText: { fontSize: 15, flex: 1, color: COLORS.textDark },
+  selectorArrow: { fontSize: 14, color: COLORS.navy },
   picker: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderLight,
     borderRadius: 12,
     marginTop: 6,
     padding: 6,
   },
-  pickerItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(213, 184, 147, 0.3)' },
-  pickerItemText: { fontSize: 15, color: COLORS.spaceCadet },
+  pickerItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight },
+  pickerItemText: { fontSize: 15, color: COLORS.textDark },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderDark,
     borderRadius: 12,
     padding: 12,
     fontSize: 15,
-    color: COLORS.spaceCadet,
+    color: COLORS.textDark,
     marginTop: 6,
   },
   button: {
@@ -274,26 +273,26 @@ const styles = StyleSheet.create({
     padding: 14,
     alignItems: 'center',
     marginTop: 12,
-    elevation: 4,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
   },
   buttonText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
   histCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.coffee,
+    borderLeftColor: COLORS.navy,
   },
-  histText: { fontSize: 13, color: COLORS.spaceCadet },
-  histObs: { fontSize: 12, color: COLORS.slateGray, marginTop: 4, fontStyle: 'italic' },
-  commentText: { fontSize: 14, color: COLORS.spaceCadet },
-  commentDate: { fontSize: 11, color: COLORS.slateGray, marginTop: 4 },
-  emptyText: { color: COLORS.slateGray, fontSize: 14, marginTop: 8 },
+  histText: { fontSize: 13, color: COLORS.textDark },
+  histObs: { fontSize: 12, color: COLORS.textMedium, marginTop: 4, fontStyle: 'italic' },
+  commentText: { fontSize: 14, color: COLORS.textDark },
+  commentDate: { fontSize: 11, color: COLORS.textMedium, marginTop: 4 },
+  emptyText: { color: COLORS.textMedium, fontSize: 14, marginTop: 8 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
 });

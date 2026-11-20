@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -62,7 +61,9 @@ export default function WeatherScreen({ onBack }) {
     }
     setLoading(true);
     try {
-      const data = await apiRequest(`weather/sources/forecast/?departamento_id=${selectedDepartamentoId}`);
+      const data = await apiRequest(
+        `weather/sources/forecast/?departamento_id=${selectedDepartamentoId}`
+      );
       setClima(data);
     } catch (error) {
       if (error.status === 503) {
@@ -77,8 +78,8 @@ export default function WeatherScreen({ onBack }) {
 
   if (deptsLoading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
         <Text style={styles.loaderText}>Cargando departamentos...</Text>
       </View>
     );
@@ -88,17 +89,16 @@ export default function WeatherScreen({ onBack }) {
   const porHora = clima?.por_hora || [];
   const pronostico7 = clima?.pronostico_7_dias || [];
 
-  // Semáforo de riesgo climático
   const weatherCode = actual?.codigo_clima;
-  const semaforoColor = weatherCode === 0 ? '#4CAF50' : weatherCode <= 3 ? '#FFA000' : weatherCode >= 80 ? '#D32F2F' : COLORS.slateGray;
+  const semaforoColor = weatherCode === 0 ? '#4CAF50' : weatherCode <= 3 ? '#FFA000' : weatherCode >= 80 ? '#D32F2F' : COLORS.serenityBlue;
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}
+      style={[styles.container, { backgroundColor: COLORS.white }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.glassHeader}>
+        <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
             <Text style={styles.backText}>← Volver</Text>
           </TouchableOpacity>
@@ -246,16 +246,16 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1, padding: 16, paddingBottom: 40 },
   header: { marginBottom: 16 },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { fontSize: 14, fontWeight: '600', color: COLORS.tan },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.tan, marginTop: 4 },
-  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4 },
+  backText: { fontSize: 14, fontWeight: '600', color: COLORS.navy },
+  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.navy, marginTop: 4 },
+  subtitle: { fontSize: 14, color: COLORS.textMedium, marginTop: 4 },
   form: { gap: 14 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.tan, marginBottom: 6 },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textDark, marginBottom: 6 },
   selectorGroup: { position: 'relative', marginBottom: 4 },
   selector: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderDark,
     borderRadius: 12,
     padding: 14,
     flexDirection: 'row',
@@ -264,107 +264,112 @@ const styles = StyleSheet.create({
     minHeight: 50,
     width: '100%',
   },
-  selectorText: { fontSize: 16, flex: 1, color: COLORS.spaceCadet },
-  selectorArrow: { fontSize: 14, color: COLORS.coffee },
+  selectorText: { fontSize: 16, flex: 1, color: COLORS.textDark },
+  selectorArrow: { fontSize: 14, color: COLORS.navy },
   pickerList: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
+    borderColor: COLORS.borderLight,
     borderTopWidth: 0,
     borderRadius: 12,
     marginTop: 4,
     maxHeight: 220,
   },
-  pickerItem: { padding: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(213, 184, 147, 0.3)' },
-  pickerItemText: { fontSize: 15, color: COLORS.spaceCadet },
+  pickerItem: { padding: 14, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight },
+  pickerItemText: { fontSize: 15, color: COLORS.textDark },
   buttonPrimary: {
-    backgroundColor: COLORS.coffee,
+    backgroundColor: COLORS.navy,
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 6,
   },
   buttonText: { color: '#FFF', fontWeight: '600', fontSize: 16 },
   glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: COLORS.borderDark,
     padding: 20,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     marginBottom: 16,
   },
   semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 10 },
   semaforoDot: { width: 16, height: 16, borderRadius: 8 },
-  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.spaceCadet },
-  currentLocation: { fontSize: 22, fontWeight: 'bold', color: COLORS.spaceCadet, marginBottom: 2 },
-  currentDateTime: { fontSize: 13, color: COLORS.slateGray, marginBottom: 12 },
+  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.textDark },
+  currentLocation: { fontSize: 22, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 2 },
+  currentDateTime: { fontSize: 13, color: COLORS.textMedium, marginBottom: 12 },
   currentMain: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   currentLeft: { flex: 1 },
-  currentTemp: { fontSize: 64, fontWeight: 'bold', color: COLORS.spaceCadet },
-  currentSensacion: { fontSize: 13, color: COLORS.slateGray, marginTop: 4 },
+  currentTemp: { fontSize: 64, fontWeight: 'bold', color: COLORS.navy },
+  currentSensacion: { fontSize: 13, color: COLORS.textMedium, marginTop: 4 },
   currentRight: { alignItems: 'center', paddingLeft: 16 },
   currentWindIcon: { fontSize: 36 },
-  currentWindText: { fontSize: 13, color: COLORS.spaceCadet, fontWeight: '600' },
-  currentWindSpeed: { fontSize: 12, color: COLORS.slateGray },
-  currentLinks: { flexDirection: 'row', gap: 8, marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(213, 184, 147, 0.3)' },
-  linkText: { fontSize: 12, color: COLORS.coffee, fontWeight: '600' },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.tan, marginTop: 20, marginBottom: 10 },
+  currentWindText: { fontSize: 13, color: COLORS.textDark, fontWeight: '600' },
+  currentWindSpeed: { fontSize: 12, color: COLORS.textMedium },
+  currentLinks: { flexDirection: 'row', gap: 8, marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.borderLight },
+  linkText: { fontSize: 12, color: COLORS.navy, fontWeight: '600' },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.navy, marginTop: 20, marginBottom: 10 },
   hourlyRow: { flexDirection: 'row', paddingVertical: 8 },
   hourCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 10,
     padding: 12,
     marginRight: 8,
     alignItems: 'center',
     minWidth: 80,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  hourTime: { fontSize: 12, color: COLORS.slateGray, fontWeight: '600' },
+  hourTime: { fontSize: 12, color: COLORS.textMedium, fontWeight: '600' },
   hourIcon: { fontSize: 28, marginVertical: 4 },
-  hourTemp: { fontSize: 18, fontWeight: 'bold', color: COLORS.spaceCadet },
-  hourDesc: { fontSize: 10, color: COLORS.slateGray, textAlign: 'center' },
-  hourWind: { fontSize: 10, color: COLORS.spaceCadet, marginTop: 2 },
+  hourTemp: { fontSize: 18, fontWeight: 'bold', color: COLORS.navy },
+  hourDesc: { fontSize: 10, color: COLORS.textMedium, textAlign: 'center' },
+  hourWind: { fontSize: 10, color: COLORS.textDark, marginTop: 2 },
   hourRain: { fontSize: 10, color: '#1E88E5', marginTop: 2 },
   dailyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   dayCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
     width: '18%',
     minWidth: 70,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  dayName: { fontSize: 11, color: COLORS.slateGray, fontWeight: '600' },
-  dayDate: { fontSize: 10, color: COLORS.slateGray },
+  dayName: { fontSize: 11, color: COLORS.textMedium, fontWeight: '600' },
+  dayDate: { fontSize: 10, color: COLORS.textMedium },
   dayIcon: { fontSize: 24, marginVertical: 4 },
   dayRain: { fontSize: 10, color: '#1E88E5' },
-  dayMm: { fontSize: 10, color: COLORS.slateGray },
-  dayTemp: { fontSize: 12, fontWeight: 'bold', color: COLORS.spaceCadet, marginTop: 4 },
-  dayWind: { fontSize: 10, color: COLORS.slateGray, marginTop: 2 },
+  dayMm: { fontSize: 10, color: COLORS.textMedium },
+  dayTemp: { fontSize: 12, fontWeight: 'bold', color: COLORS.navy, marginTop: 4 },
+  dayWind: { fontSize: 10, color: COLORS.textMedium, marginTop: 2 },
   recomCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 12,
     padding: 16,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
+    borderLeftColor: COLORS.danger,
   },
-  recomText: { fontSize: 13, color: COLORS.spaceCadet, lineHeight: 20 },
+  recomText: { fontSize: 13, color: COLORS.textDark, lineHeight: 20 },
   disclaimer: {
     fontSize: 12,
-    color: COLORS.slateGray,
+    color: COLORS.textMedium,
     marginTop: 16,
     fontStyle: 'italic',
     textAlign: 'center',
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
 });

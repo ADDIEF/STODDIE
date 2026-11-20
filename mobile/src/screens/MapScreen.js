@@ -113,8 +113,8 @@ export default function MapScreen({ onBack }) {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
         <Text style={styles.loaderText}>Cargando mapa...</Text>
       </View>
     );
@@ -127,7 +127,7 @@ export default function MapScreen({ onBack }) {
     );
 
     return (
-      <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+      <View style={[styles.container, { backgroundColor: COLORS.white }]}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
             <Text style={styles.backText}>← Volver</Text>
@@ -152,7 +152,7 @@ export default function MapScreen({ onBack }) {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
           <Text style={styles.backText}>← Volver</Text>
@@ -170,19 +170,19 @@ const styles = StyleSheet.create({
   header: {
     padding: 12,
     paddingTop: 44,
-    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    backgroundColor: COLORS.navy,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+    borderBottomColor: COLORS.borderLight,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   backBtn: { alignSelf: 'flex-start' },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 18, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 12, color: COLORS.slateGray, marginTop: 2 },
+  backText: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 18, fontWeight: 'bold', color: COLORS.accent },
+  subtitle: { fontSize: 12, color: COLORS.serenityBlue, marginTop: 2 },
   webview: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   mapContainer: { flex: 1 },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
 });

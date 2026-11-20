@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Animated, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { getAuthToken, clearAuthToken } from './src/api/tokenStorage';
 import { authApi } from './src/api/client';
@@ -141,13 +141,13 @@ export default function App() {
       content = <EmergencyScreen onBack={isAdmin ? () => setScreen('ADMIN') : goList} />;
       break;
     default:
-      content = <Text style={{ color: COLORS.tan }}>Cargando...</Text>;
+      content = <Text style={{ color: COLORS.textDark }}>Cargando...</Text>;
   }
 
   return (
     <ToastProvider>
-      <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
-        <StatusBar style="light" backgroundColor={COLORS.spaceCadet} />
+      <View style={[styles.container, { backgroundColor: COLORS.white }]}>
+        <StatusBar style="dark" backgroundColor={COLORS.white} />
         {content}
       </View>
     </ToastProvider>

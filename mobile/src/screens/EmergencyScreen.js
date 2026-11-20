@@ -61,15 +61,15 @@ export default function EmergencyScreen({ onBack }) {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
         <Text style={styles.loaderText}>Cargando contactos...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
           <Text style={styles.backText}>← Volver</Text>
@@ -162,29 +162,31 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     paddingTop: 44,
-    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    backgroundColor: COLORS.navy,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+    borderBottomColor: COLORS.borderLight,
   },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.tan },
-  subtitle: { fontSize: 14, color: COLORS.slateGray, marginTop: 4, marginBottom: 8 },
+  backText: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.accent },
+  subtitle: { fontSize: 14, color: COLORS.serenityBlue, marginTop: 4, marginBottom: 8 },
   depSelector: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderDark,
     borderRadius: 12,
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
-  depSelectorText: { fontSize: 15, flex: 1, color: COLORS.spaceCadet },
-  depSelectorArrow: { fontSize: 12, color: COLORS.coffee },
+  depSelectorText: { fontSize: 15, flex: 1, color: COLORS.textDark },
+  depSelectorArrow: { fontSize: 12, color: COLORS.navy },
   depPickerList: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
+    borderColor: COLORS.borderLight,
     borderTopWidth: 0,
     borderRadius: 12,
     marginTop: 4,
@@ -193,11 +195,11 @@ const styles = StyleSheet.create({
   depPickerItem: {
     padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(213, 184, 147, 0.3)',
+    borderBottomColor: COLORS.borderLight,
   },
-  depPickerItemText: { fontSize: 15, color: COLORS.spaceCadet },
+  depPickerItemText: { fontSize: 15, color: COLORS.textDark },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 12,
@@ -205,24 +207,24 @@ const styles = StyleSheet.create({
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
+    borderLeftColor: COLORS.danger,
   },
-  entityName: { fontSize: 18, fontWeight: 'bold', color: COLORS.spaceCadet, marginBottom: 4 },
-  entityType: { fontSize: 14, color: COLORS.slateGray, marginBottom: 8 },
+  entityName: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 4 },
+  entityType: { fontSize: 14, color: COLORS.textMedium, marginBottom: 8 },
   metaRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, marginBottom: 6 },
-  metaLabel: { fontSize: 12, fontWeight: '600', color: COLORS.slateGray },
-  metaValue: { fontSize: 14, color: COLORS.spaceCadet },
+  metaLabel: { fontSize: 12, fontWeight: '600', color: COLORS.textMedium },
+  metaValue: { fontSize: 14, color: COLORS.textDark },
   contactos: { marginTop: 8 },
-  contactosTitle: { fontSize: 13, fontWeight: '600', color: COLORS.spaceCadet, marginBottom: 6 },
+  contactosTitle: { fontSize: 13, fontWeight: '600', color: COLORS.textDark, marginBottom: 6 },
   contactoRow: { flexDirection: 'row', gap: 6, marginBottom: 4 },
-  contactoLabel: { fontSize: 13, color: COLORS.slateGray, minWidth: 70 },
-  contactoValue: { fontSize: 13, color: COLORS.spaceCadet, fontWeight: '600' },
-  contactoHorario: { fontSize: 11, color: COLORS.slateGray, fontStyle: 'italic' },
-  noContacts: { fontSize: 13, color: COLORS.slateGray, fontStyle: 'italic' },
+  contactoLabel: { fontSize: 13, color: COLORS.textMedium, minWidth: 70 },
+  contactoValue: { fontSize: 13, color: COLORS.textDark, fontWeight: '600' },
+  contactoHorario: { fontSize: 11, color: COLORS.textMedium, fontStyle: 'italic' },
+  noContacts: { fontSize: 13, color: COLORS.textMedium, fontStyle: 'italic' },
   listContent: { paddingBottom: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.white },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
 });

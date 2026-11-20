@@ -40,10 +40,10 @@ export default function LoginScreen({ onLogin, onRegister }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}
+      style={[styles.container, { backgroundColor: COLORS.white }]}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.glassCard}>
+        <View style={styles.card}>
           <View style={styles.header}>
             <Text style={styles.title}>STODDIE</Text>
             <Text style={styles.subtitle}>Sistema de Reportes Ciudadanos</Text>
@@ -72,9 +72,9 @@ export default function LoginScreen({ onLogin, onRegister }) {
           </View>
 
           {loading ? (
-            <ActivityIndicator size="large" color={COLORS.coffee} style={styles.loading} />
+            <ActivityIndicator size="large" color={COLORS.navy} style={styles.loading} />
           ) : (
-            <TouchableOpacity style={styles.buttonPrimary} onPress={handleLogin} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.buttonPrimary} onPress={handleLogin} activeOpacity={0.7}>
               <Text style={styles.buttonPrimaryText}>Ingresar</Text>
             </TouchableOpacity>
           )}
@@ -91,48 +91,48 @@ export default function LoginScreen({ onLogin, onRegister }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  card: {
+    backgroundColor: COLORS.pureLight,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: COLORS.borderDark,
     padding: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   header: { alignItems: 'center', marginBottom: 32 },
-  title: { fontSize: 36, fontWeight: 'bold', color: '#FFF', letterSpacing: 2 },
-  subtitle: { fontSize: 14, color: 'rgba(213, 184, 147, 0.9)', marginTop: 4 },
-  subtitle2: { fontSize: 12, color: 'rgba(213, 184, 147, 0.6)', marginTop: 2 },
+  title: { fontSize: 36, fontWeight: 'bold', color: COLORS.navy, letterSpacing: 2 },
+  subtitle: { fontSize: 14, color: COLORS.textMedium, marginTop: 4 },
+  subtitle2: { fontSize: 12, color: COLORS.serenityBlue, marginTop: 2 },
   form: { gap: 16, marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: '600', color: 'rgba(213, 184, 147, 0.9)', marginBottom: 6 },
+  label: { fontSize: 14, fontWeight: '600', color: COLORS.textDark, marginBottom: 6 },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
+    borderColor: COLORS.borderDark,
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
-    color: COLORS.spaceCadet,
+    color: COLORS.textDark,
   },
   loading: { marginVertical: 20 },
   buttonPrimary: {
-    backgroundColor: COLORS.coffee,
-    borderRadius: 12,
+    backgroundColor: COLORS.navy,
+    borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 6,
+    elevation: 4,
   },
   buttonPrimaryText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
   linkButton: { marginTop: 20, alignItems: 'center' },
-  linkText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
+  linkText: { color: COLORS.navy, fontSize: 14, fontWeight: '600' },
 });

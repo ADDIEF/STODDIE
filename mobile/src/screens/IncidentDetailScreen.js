@@ -32,8 +32,8 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+        <ActivityIndicator size="large" color={COLORS.navy} />
         <Text style={styles.loaderText}>Cargando detalle...</Text>
       </View>
     );
@@ -41,7 +41,7 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
 
   if (!incident) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
+      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
           <Text style={styles.backText}>← Volver</Text>
         </TouchableOpacity>
@@ -54,12 +54,10 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
   const isPendiente = incident.id_estado === 1 || estado.toLowerCase() === 'pendiente';
   const isConfirmado = incident.id_estado === 3 || estado.toLowerCase() === 'confirmado';
   const isFalso = incident.id_estado === 5 || estado.toLowerCase() === 'falso / rechazado';
-
-  // Semáforo de riesgo
-  const semaforoColor = isConfirmado ? '#4CAF50' : isPendiente ? '#FFA000' : isFalso ? '#D32F2F' : COLORS.slateGray;
+  const semaforoColor = isConfirmado ? '#4CAF50' : isPendiente ? '#FFA000' : isFalso ? '#D32F2F' : COLORS.serenityBlue;
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
           <Text style={styles.backText}>← Volver</Text>
@@ -68,7 +66,6 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
       </View>
 
       <View style={styles.glassCard}>
-        {/* Semáforo de estado */}
         <View style={styles.semaforoRow}>
           <View style={[styles.semaforoDot, { backgroundColor: semaforoColor }]} />
           <Text style={styles.semaforoLabel}>{estado}</Text>
@@ -108,7 +105,6 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
         </View>
       </View>
 
-      {/* Acceso rápido a recomendación preventiva */}
       <View style={styles.quickActions}>
         <TouchableOpacity style={styles.quickButton} onPress={() => {}} activeOpacity={0.7}>
           <Text style={styles.quickButtonIcon}>🛡️</Text>
@@ -128,40 +124,40 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     paddingTop: 44,
-    backgroundColor: 'rgba(37, 52, 79, 0.85)',
+    backgroundColor: COLORS.navy,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(213, 184, 147, 0.25)',
+    borderBottomColor: COLORS.borderLight,
   },
   backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 20, fontWeight: 'bold', color: COLORS.tan },
+  backText: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
+  title: { fontSize: 20, fontWeight: 'bold', color: COLORS.accent },
   glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: COLORS.borderDark,
     padding: 20,
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 16,
-    elevation: 6,
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.caput,
+    borderLeftColor: COLORS.danger,
   },
   semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
   semaforoDot: { width: 16, height: 16, borderRadius: 8 },
-  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.spaceCadet },
+  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.textDark },
   row: { marginBottom: 10 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.slateGray },
-  value: { fontSize: 15, color: COLORS.spaceCadet, marginTop: 2 },
-  description: { fontSize: 15, color: COLORS.spaceCadet, marginTop: 2, lineHeight: 22 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyText: { color: COLORS.slateGray, fontSize: 16, marginTop: 8 },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
+  label: { fontSize: 13, fontWeight: '600', color: COLORS.textMedium },
+  value: { fontSize: 15, color: COLORS.textDark, marginTop: 2 },
+  description: { fontSize: 15, color: COLORS.textDark, marginTop: 2, lineHeight: 22 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.white },
+  emptyText: { color: COLORS.textMedium, fontSize: 16, marginTop: 8 },
+  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
   quickActions: {
     flexDirection: 'row',
     gap: 12,
@@ -170,13 +166,13 @@ const styles = StyleSheet.create({
   },
   quickButton: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: COLORS.pureLight,
     borderRadius: 14,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(213, 184, 147, 0.3)',
+    borderColor: COLORS.borderDark,
   },
   quickButtonIcon: { fontSize: 24, marginBottom: 6 },
-  quickButtonText: { color: COLORS.tan, fontSize: 12, fontWeight: '600', textAlign: 'center' },
+  quickButtonText: { color: COLORS.navy, fontSize: 12, fontWeight: '600', textAlign: 'center' },
 });
