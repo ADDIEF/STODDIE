@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     minWidth: 260,
     maxWidth: '88%',
-    backgroundColor: 'rgba(255,255,255,0.90)',
+    backgroundColor: 'rgba(255,255,255,0.72)',
     borderWidth: 1,
     borderColor: COLORS.borderDark,
     borderLeftWidth: 5,
