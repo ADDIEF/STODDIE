@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { GLASS } from '../theme/glass';
 import { useToast } from '../context/ToastContext';
 
 const WEATHER_ICONS = {
@@ -34,7 +35,6 @@ export default function WeatherScreen({ onBack }) {
   const [departamentos, setDepartamentos] = useState([]);
   const [selectedDepartamentoId, setSelectedDepartamentoId] = useState(null);
   const [selectedDepartamentoLabel, setSelectedDepartamentoLabel] = useState('Selecciona un departamento...');
-  const [selectedDepartamento, setSelectedDepartamento] = useState(null);
   const [clima, setClima] = useState(null);
   const [loading, setLoading] = useState(false);
   const [deptsLoading, setDeptsLoading] = useState(true);
@@ -52,7 +52,7 @@ export default function WeatherScreen({ onBack }) {
       }
     }
     loadDepartamentos();
-  }, []);
+  }, [showError]);
 
   async function consultarClima() {
     if (!selectedDepartamentoId) {
@@ -78,9 +78,9 @@ export default function WeatherScreen({ onBack }) {
 
   if (deptsLoading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
-        <ActivityIndicator size="large" color={COLORS.navy} />
-        <Text style={styles.loaderText}>Cargando departamentos...</Text>
+      <View style={GLASS.centered}>
+        <ActivityIndicator size="large" color={COLORS.goldenCustard} />
+        <Text style={GLASS.loaderText}>Cargando departamentos...</Text>
       </View>
     );
   }
@@ -88,63 +88,56 @@ export default function WeatherScreen({ onBack }) {
   const actual = clima?.actual;
   const porHora = clima?.por_hora || [];
   const pronostico7 = clima?.pronostico_7_dias || [];
-
   const weatherCode = actual?.codigo_clima;
-  const semaforoColor = weatherCode === 0 ? '#4CAF50' : weatherCode <= 3 ? '#FFA000' : weatherCode >= 80 ? '#D32F2F' : COLORS.serenityBlue;
+  const semaforoColor = weatherCode === 0 ? '#2E9E5B' : weatherCode <= 3 ? '#E0A100' : weatherCode >= 80 ? COLORS.rust : COLORS.serenityBlue;
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.container, { backgroundColor: COLORS.white }]}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={GLASS.screen}>
+      <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
-            <Text style={styles.backText}>← Volver</Text>
+          <TouchableOpacity style={GLASS.backButton} onPress={onBack} activeOpacity={0.82}>
+            <Text style={GLASS.backText}>← Volver</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Tiempo en Bolivia</Text>
-          <Text style={styles.subtitle}>Pronóstico por departamento</Text>
+          <Text style={GLASS.titleOnDark}>Tiempo en Bolivia</Text>
+          <Text style={GLASS.subtitleOnDark}>Pronóstico por departamento</Text>
         </View>
 
-        <View style={styles.glassCard}>
-          <View style={styles.selectorGroup}>
-            <Text style={styles.label}>Departamento</Text>
-            <TouchableOpacity style={styles.selector} onPress={() => setShowPicker(!showPicker)} activeOpacity={0.7}>
-              <Text style={styles.selectorText}>{selectedDepartamentoLabel}</Text>
-              <Text style={styles.selectorArrow}>▼</Text>
-            </TouchableOpacity>
-            {showPicker && (
-              <View style={styles.pickerList}>
-                <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
-                  {departamentos.map((d) => (
-                    <TouchableOpacity
-                      key={d.id_departamento}
-                      style={styles.pickerItem}
-                      onPress={() => {
-                        setSelectedDepartamentoId(d.id_departamento);
-                        setSelectedDepartamentoLabel(d.nombre_departamento);
-                        setSelectedDepartamento(d);
-                        setShowPicker(false);
-                        setClima(null);
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.pickerItemText}>{d.nombre_departamento}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-          </View>
+        <View style={GLASS.card}>
+          <Text style={GLASS.label}>Departamento</Text>
+          <TouchableOpacity style={GLASS.selector} onPress={() => setShowPicker(!showPicker)} activeOpacity={0.82}>
+            <Text style={styles.selectorText}>{selectedDepartamentoLabel}</Text>
+            <Text style={styles.selectorArrow}>▼</Text>
+          </TouchableOpacity>
+          {showPicker && (
+            <View style={styles.pickerList}>
+              <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
+                {departamentos.map((d) => (
+                  <TouchableOpacity
+                    key={d.id_departamento}
+                    style={GLASS.modalItem}
+                    onPress={() => {
+                      setSelectedDepartamentoId(d.id_departamento);
+                      setSelectedDepartamentoLabel(d.nombre_departamento);
+                      setShowPicker(false);
+                      setClima(null);
+                    }}
+                    activeOpacity={0.82}
+                  >
+                    <Text style={styles.pickerItemText}>{d.nombre_departamento}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
 
-          <TouchableOpacity style={styles.buttonPrimary} onPress={consultarClima} activeOpacity={0.8}>
-            <Text style={styles.buttonPrimaryText}>{loading ? 'Consultando...' : 'Ver pronóstico'}</Text>
+          <TouchableOpacity style={[GLASS.buttonPrimary, { marginTop: 14 }]} onPress={consultarClima} activeOpacity={0.85}>
+            <Text style={GLASS.buttonPrimaryText}>{loading ? 'Consultando...' : 'Ver pronóstico'}</Text>
           </TouchableOpacity>
         </View>
 
         {clima && actual && (
           <>
-            <View style={[styles.glassCard, { borderLeftWidth: 4, borderLeftColor: semaforoColor }]}>
+            <View style={[GLASS.card, { borderLeftWidth: 5, borderLeftColor: semaforoColor, marginTop: 14 }]}>
               <View style={styles.semaforoRow}>
                 <View style={[styles.semaforoDot, { backgroundColor: semaforoColor }]} />
                 <Text style={styles.semaforoLabel}>Condición actual: {actual.descripcion}</Text>
@@ -159,9 +152,9 @@ export default function WeatherScreen({ onBack }) {
                   )}
                 </View>
                 <View style={styles.currentRight}>
-                  <Text style={styles.currentWindIcon}>{getWindArrow(actual.viento_direccion)}</Text>
-                  <Text style={styles.currentWindText}>{actual.viento_direccion_texto}</Text>
-                  <Text style={styles.currentWindSpeed}>{actual.viento_velocidad != null ? `${actual.viento_velocidad} km/h` : '—'}</Text>
+                  <Text style={styles.windIcon}>{getWindArrow(actual.viento_direccion)}</Text>
+                  <Text style={styles.windText}>{actual.viento_direccion_texto}</Text>
+                  <Text style={styles.windSpeed}>{actual.viento_velocidad != null ? `${actual.viento_velocidad} km/h` : '—'}</Text>
                 </View>
               </View>
               <View style={styles.currentLinks}>
@@ -184,7 +177,7 @@ export default function WeatherScreen({ onBack }) {
                       <Text style={styles.hourTemp}>{h.temperatura != null ? `${Math.round(h.temperatura)}°` : '—'}</Text>
                       <Text style={styles.hourDesc} numberOfLines={1}>{h.descripcion}</Text>
                       {h.viento_velocidad != null && (
-                        <Text style={styles.hourWind}>{getWindArrow(h.viento_direccion)} {h.viento_velocidad} km/h</Text>
+                        <Text style={styles.hourMeta}>{getWindArrow(h.viento_direccion)} {h.viento_velocidad} km/h</Text>
                       )}
                       {h.precipitacion_prob != null && (
                         <Text style={styles.hourRain}>💧 {h.precipitacion_prob}%</Text>
@@ -204,18 +197,12 @@ export default function WeatherScreen({ onBack }) {
                       <Text style={styles.dayName}>{d.dia_nombre}</Text>
                       <Text style={styles.dayDate}>{d.fecha ? d.fecha.slice(5) : ''}</Text>
                       <Text style={styles.dayIcon}>{getIcon(d.codigo_clima)}</Text>
-                      {d.precipitacion_prob != null && (
-                        <Text style={styles.dayRain}>💧 {d.precipitacion_prob}%</Text>
-                      )}
-                      {d.precipitacion_mm != null && (
-                        <Text style={styles.dayMm}>{d.precipitacion_mm} mm</Text>
-                      )}
+                      {d.precipitacion_prob != null && <Text style={styles.hourRain}>💧 {d.precipitacion_prob}%</Text>}
+                      {d.precipitacion_mm != null && <Text style={styles.dayMeta}>{d.precipitacion_mm} mm</Text>}
                       <Text style={styles.dayTemp}>
                         {d.temperatura_max != null ? Math.round(d.temperatura_max) : '—'}° / {d.temperatura_min != null ? Math.round(d.temperatura_min) : '—'}°
                       </Text>
-                      {d.viento_velocidad_max != null && (
-                        <Text style={styles.dayWind}>🌬️ {d.viento_velocidad_max} km/h</Text>
-                      )}
+                      {d.viento_velocidad_max != null && <Text style={styles.dayMeta}>🌬️ {d.viento_velocidad_max} km/h</Text>}
                     </View>
                   ))}
                 </View>
@@ -242,134 +229,76 @@ export default function WeatherScreen({ onBack }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContent: { flexGrow: 1, padding: 16, paddingBottom: 40 },
-  header: { marginBottom: 16 },
-  backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { fontSize: 14, fontWeight: '600', color: COLORS.navy },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.navy, marginTop: 4 },
-  subtitle: { fontSize: 14, color: COLORS.textMedium, marginTop: 4 },
-  form: { gap: 14 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textDark, marginBottom: 6 },
-  selectorGroup: { position: 'relative', marginBottom: 4 },
-  selector: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.borderDark,
-    borderRadius: 12,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    minHeight: 50,
-    width: '100%',
-  },
-  selectorText: { fontSize: 16, flex: 1, color: COLORS.textDark },
-  selectorArrow: { fontSize: 14, color: COLORS.navy },
+  scroll: { padding: 14, paddingBottom: 40 },
+  header: { marginBottom: 14 },
+  selectorText: { fontSize: 15, flex: 1, color: COLORS.ink, fontWeight: '600' },
+  selectorArrow: { fontSize: 13, color: COLORS.navy },
   pickerList: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
-    borderTopWidth: 0,
-    borderRadius: 12,
-    marginTop: 4,
-    maxHeight: 220,
-  },
-  pickerItem: { padding: 14, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight },
-  pickerItemText: { fontSize: 15, color: COLORS.textDark },
-  buttonPrimary: {
-    backgroundColor: COLORS.navy,
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-  },
-  buttonText: { color: '#FFF', fontWeight: '600', fontSize: 16 },
-  glassCard: {
-    backgroundColor: COLORS.pureLight,
-    borderRadius: 20,
+    backgroundColor: COLORS.glassStrong,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
-    padding: 20,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    marginBottom: 16,
+    borderRadius: 14,
+    marginTop: 6,
   },
-  semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 10 },
-  semaforoDot: { width: 16, height: 16, borderRadius: 8 },
-  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.textDark },
-  currentLocation: { fontSize: 22, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 2 },
-  currentDateTime: { fontSize: 13, color: COLORS.textMedium, marginBottom: 12 },
+  pickerItemText: { fontSize: 14, color: COLORS.ink, fontWeight: '600' },
+  semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 10 },
+  semaforoDot: { width: 16, height: 16, borderRadius: 8, borderWidth: 1, borderColor: COLORS.borderDark },
+  semaforoLabel: { fontSize: 15, fontWeight: '800', color: COLORS.ink },
+  currentLocation: { fontSize: 22, fontWeight: '800', color: COLORS.navy, marginBottom: 2 },
+  currentDateTime: { fontSize: 12, color: COLORS.cocoa, marginBottom: 12 },
   currentMain: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   currentLeft: { flex: 1 },
-  currentTemp: { fontSize: 64, fontWeight: 'bold', color: COLORS.navy },
-  currentSensacion: { fontSize: 13, color: COLORS.textMedium, marginTop: 4 },
-  currentRight: { alignItems: 'center', paddingLeft: 16 },
-  currentWindIcon: { fontSize: 36 },
-  currentWindText: { fontSize: 13, color: COLORS.textDark, fontWeight: '600' },
-  currentWindSpeed: { fontSize: 12, color: COLORS.textMedium },
-  currentLinks: { flexDirection: 'row', gap: 8, marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.borderLight },
-  linkText: { fontSize: 12, color: COLORS.navy, fontWeight: '600' },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.navy, marginTop: 20, marginBottom: 10 },
-  hourlyRow: { flexDirection: 'row', paddingVertical: 8 },
+  currentTemp: { fontSize: 60, fontWeight: '800', color: COLORS.navy },
+  currentSensacion: { fontSize: 13, color: COLORS.cocoa, marginTop: 4 },
+  currentRight: { alignItems: 'center', paddingLeft: 12 },
+  windIcon: { fontSize: 34 },
+  windText: { fontSize: 12, color: COLORS.ink, fontWeight: '700' },
+  windSpeed: { fontSize: 11, color: COLORS.cocoa },
+  currentLinks: { flexDirection: 'row', gap: 7, marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.glassBorderDark },
+  linkText: { fontSize: 11, color: COLORS.navy, fontWeight: '800' },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: COLORS.pureLight, marginTop: 20, marginBottom: 10, textShadowColor: '#000', textShadowRadius: 4 },
+  hourlyRow: { flexDirection: 'row', paddingVertical: 6 },
   hourCard: {
-    backgroundColor: COLORS.pureLight,
-    borderRadius: 10,
+    backgroundColor: COLORS.glassStrong,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
     padding: 12,
     marginRight: 8,
     alignItems: 'center',
-    minWidth: 80,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
+    minWidth: 86,
   },
-  hourTime: { fontSize: 12, color: COLORS.textMedium, fontWeight: '600' },
-  hourIcon: { fontSize: 28, marginVertical: 4 },
-  hourTemp: { fontSize: 18, fontWeight: 'bold', color: COLORS.navy },
-  hourDesc: { fontSize: 10, color: COLORS.textMedium, textAlign: 'center' },
-  hourWind: { fontSize: 10, color: COLORS.textDark, marginTop: 2 },
-  hourRain: { fontSize: 10, color: '#1E88E5', marginTop: 2 },
+  hourTime: { fontSize: 12, color: COLORS.cocoa, fontWeight: '700' },
+  hourIcon: { fontSize: 26, marginVertical: 3 },
+  hourTemp: { fontSize: 18, fontWeight: '800', color: COLORS.navy },
+  hourDesc: { fontSize: 10, color: COLORS.cocoa, textAlign: 'center' },
+  hourMeta: { fontSize: 10, color: COLORS.ink, marginTop: 2 },
+  hourRain: { fontSize: 10, color: COLORS.navy, marginTop: 2, fontWeight: '700' },
   dailyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   dayCard: {
-    backgroundColor: COLORS.pureLight,
-    borderRadius: 10,
-    padding: 12,
+    backgroundColor: COLORS.glassStrong,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
+    padding: 10,
     alignItems: 'center',
     width: '18%',
-    minWidth: 70,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
+    minWidth: 68,
   },
-  dayName: { fontSize: 11, color: COLORS.textMedium, fontWeight: '600' },
-  dayDate: { fontSize: 10, color: COLORS.textMedium },
-  dayIcon: { fontSize: 24, marginVertical: 4 },
-  dayRain: { fontSize: 10, color: '#1E88E5' },
-  dayMm: { fontSize: 10, color: COLORS.textMedium },
-  dayTemp: { fontSize: 12, fontWeight: 'bold', color: COLORS.navy, marginTop: 4 },
-  dayWind: { fontSize: 10, color: COLORS.textMedium, marginTop: 2 },
+  dayName: { fontSize: 11, color: COLORS.cocoa, fontWeight: '700' },
+  dayDate: { fontSize: 10, color: COLORS.cocoa },
+  dayIcon: { fontSize: 22, marginVertical: 3 },
+  dayMeta: { fontSize: 9, color: COLORS.cocoa },
+  dayTemp: { fontSize: 11, fontWeight: '800', color: COLORS.navy, marginTop: 3 },
   recomCard: {
-    backgroundColor: COLORS.pureLight,
-    borderRadius: 12,
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.danger,
+    backgroundColor: COLORS.glassWarm,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
+    borderLeftWidth: 5,
+    borderLeftColor: COLORS.rust,
+    padding: 14,
   },
-  recomText: { fontSize: 13, color: COLORS.textDark, lineHeight: 20 },
-  disclaimer: {
-    fontSize: 12,
-    color: COLORS.textMedium,
-    marginTop: 16,
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
+  recomText: { fontSize: 13, color: COLORS.ink, lineHeight: 20 },
+  disclaimer: { fontSize: 11, color: COLORS.pureLight, marginTop: 18, fontStyle: 'italic', textAlign: 'center' },
 });

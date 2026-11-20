@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { getAuthToken, clearAuthToken } from './src/api/tokenStorage';
 import { authApi } from './src/api/client';
 
+import AppBackground from './src/components/AppBackground';
 import { COLORS } from './src/theme/colors';
+import { GLASS } from './src/theme/glass';
 import { ToastProvider } from './src/context/ToastContext';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -93,9 +96,9 @@ export default function App() {
           onBack={() => setScreen('LIST')}
           onDetail={goAdminDetail}
           onMap={goMap}
-          onWeather={() => setScreen('WEATHER')}
-          onPrevention={() => setScreen('PREVENTION')}
-          onEmergency={() => setScreen('EMERGENCY')}
+          onWeather={goWeather}
+          onPrevention={goPrevention}
+          onEmergency={goEmergency}
           onLogout={handleLogout}
         />
       );
@@ -127,9 +130,7 @@ export default function App() {
       );
       break;
     case 'DETAIL':
-      content = (
-        <IncidentDetailScreen incidentId={incidentId} onBack={goList} />
-      );
+      content = <IncidentDetailScreen incidentId={incidentId} onBack={goList} />;
       break;
     case 'WEATHER':
       content = <WeatherScreen onBack={isAdmin ? () => setScreen('ADMIN') : goList} />;
@@ -141,19 +142,30 @@ export default function App() {
       content = <EmergencyScreen onBack={isAdmin ? () => setScreen('ADMIN') : goList} />;
       break;
     default:
-      content = <Text style={{ color: COLORS.textDark }}>Cargando...</Text>;
+      content = (
+        <View style={GLASS.centered}>
+          <View style={[GLASS.card, { alignItems: 'center', minWidth: 220 }]}>
+            <ActivityIndicator size="large" color={COLORS.navy} />
+            <Text style={styles.loadingText}>Cargando...</Text>
+          </View>
+        </View>
+      );
   }
 
   return (
-    <ToastProvider>
-      <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-        <StatusBar style="dark" backgroundColor={COLORS.white} />
-        {content}
-      </View>
-    </ToastProvider>
+    <SafeAreaProvider>
+      <ToastProvider>
+        <AppBackground>
+          <SafeAreaView style={GLASS.screen} edges={['top', 'left', 'right']}>
+            <StatusBar style="light" backgroundColor="#1E1A30" />
+            {content}
+          </SafeAreaView>
+        </AppBackground>
+      </ToastProvider>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  loadingText: { marginTop: 12, color: '#4C362B', fontWeight: '700', fontSize: 14 },
 });

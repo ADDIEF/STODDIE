@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  FlatList,
   Platform,
-  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,6 +10,7 @@ import {
 import { WebView } from 'react-native-webview';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { GLASS } from '../theme/glass';
 import { useToast } from '../context/ToastContext';
 
 const MAP_HTML_TEMPLATE = `
@@ -49,9 +47,7 @@ const MAP_HTML_TEMPLATE = `
       shadowSize: [41, 41],
     });
 
-    const markers = [];
     const bounds = [];
-
     if (incidents && incidents.length > 0) {
       incidents.forEach((inc) => {
         const lat = parseFloat(inc.latitud);
@@ -69,14 +65,10 @@ const MAP_HTML_TEMPLATE = `
             '<b>Nota:</b> ' + (inc.descripcion || '—') +
             '</div>'
           );
-          markers.push(m);
           bounds.push([lat, lng]);
         }
       });
-
-      if (bounds.length > 0) {
-        map.fitBounds(bounds);
-      }
+      if (bounds.length > 0) map.fitBounds(bounds);
     } else {
       map.setView([-16.5, -68.13], 6);
     }
@@ -89,7 +81,6 @@ export default function MapScreen({ onBack }) {
   const { showError } = useToast();
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -105,43 +96,16 @@ export default function MapScreen({ onBack }) {
         showError(error.message || 'No se pudieron cargar los incidentes');
       } finally {
         setLoading(false);
-        setRefreshing(false);
       }
     }
     load();
-  }, []);
+  }, [showError]);
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
-        <ActivityIndicator size="large" color={COLORS.navy} />
-        <Text style={styles.loaderText}>Cargando mapa...</Text>
-      </View>
-    );
-  }
-
-  if (Platform.OS === 'web') {
-    const html = MAP_HTML_TEMPLATE.replace(
-      '__INCIDENTS_JSON__',
-      JSON.stringify(incidents).replace(/</g, '\\u003c')
-    );
-
-    return (
-      <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
-            <Text style={styles.backText}>← Volver</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Mapa de Incidentes - Bolivia</Text>
-          <Text style={styles.subtitle}>{incidents.length} reporte(s) en el mapa</Text>
-        </View>
-        <View style={styles.mapContainer}>
-          {React.createElement('iframe', {
-            srcDoc: html,
-            title: 'Mapa de incidentes - Bolivia',
-            style: { border: '0', width: '100%', height: '100%', display: 'block' },
-          })}
-        </View>
+      <View style={GLASS.centered}>
+        <ActivityIndicator size="large" color={COLORS.goldenCustard} />
+        <Text style={GLASS.loaderText}>Cargando mapa...</Text>
       </View>
     );
   }
@@ -152,37 +116,50 @@ export default function MapScreen({ onBack }) {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
-          <Text style={styles.backText}>← Volver</Text>
+    <View style={GLASS.screen}>
+      <View style={GLASS.header}>
+        <TouchableOpacity style={GLASS.backButton} onPress={onBack} activeOpacity={0.82}>
+          <Text style={GLASS.backText}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Mapa de Incidentes - Bolivia</Text>
-        <Text style={styles.subtitle}>{incidents.length} reporte(s) en el mapa</Text>
+        <Text style={GLASS.titleOnDark}>Mapa de Incidentes - Bolivia</Text>
+        <Text style={GLASS.subtitleOnDark}>{incidents.length} reporte(s) en el mapa</Text>
       </View>
-      <WebView style={styles.webview} originWhitelist={['*']} javaScriptEnabled domStorageEnabled source={{ html }} />
+
+      <View style={styles.mapFrame}>
+        {Platform.OS === 'web' ? (
+          React.createElement('iframe', {
+            srcDoc: html,
+            title: 'Mapa de incidentes - Bolivia',
+            style: { border: 0, width: '100%', height: '100%', display: 'block' },
+          })
+        ) : (
+          <WebView
+            style={styles.webview}
+            originWhitelist={['*']}
+            javaScriptEnabled
+            domStorageEnabled
+            source={{ html }}
+          />
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: {
-    padding: 12,
-    paddingTop: 44,
-    backgroundColor: COLORS.navy,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  mapFrame: {
+    flex: 1,
+    margin: 14,
+    borderRadius: 22,
+    overflow: 'hidden',
+    backgroundColor: COLORS.glassStrong,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
+    shadowColor: '#0B1020',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.32,
+    shadowRadius: 22,
+    elevation: 9,
   },
-  backBtn: { alignSelf: 'flex-start' },
-  backText: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 18, fontWeight: 'bold', color: COLORS.accent },
-  subtitle: { fontSize: 12, color: COLORS.serenityBlue, marginTop: 2 },
-  webview: { flex: 1 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  mapContainer: { flex: 1 },
-  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
+  webview: { flex: 1, backgroundColor: COLORS.white },
 });

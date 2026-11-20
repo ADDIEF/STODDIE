@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { GLASS } from '../theme/glass';
 import { useToast } from '../context/ToastContext';
 
 export default function AdminDetailScreen({ incidentId, onBack }) {
@@ -28,8 +29,7 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
 
-  const loadAll = async () => {
-    setLoading(true);
+  const loadAll = useCallback(async () => {
     try {
       const [inc, hist, comm, estados] = await Promise.allSettled([
         apiRequest(`incidents/${incidentId}/`),
@@ -47,9 +47,14 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [incidentId, showError]);
 
-  useEffect(() => { loadAll(); }, [incidentId]);
+  useEffect(() => {
+    (async () => {
+      await Promise.resolve();
+      await loadAll();
+    })();
+  }, [loadAll]);
 
   const changeStatus = async () => {
     if (!selectedStateId) {
@@ -91,16 +96,19 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
-        <ActivityIndicator size="large" color={COLORS.navy} />
-        <Text style={styles.loaderText}>Cargando detalle...</Text>
+      <View style={GLASS.centered}>
+        <ActivityIndicator size="large" color={COLORS.goldenCustard} />
+        <Text style={GLASS.loaderText}>Cargando detalle...</Text>
       </View>
     );
   }
 
   if (!incident) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
+      <View style={GLASS.centered}>
+        <TouchableOpacity style={GLASS.backButton} onPress={onBack} activeOpacity={0.82}>
+          <Text style={GLASS.backText}>← Moderación</Text>
+        </TouchableOpacity>
         <Text style={styles.emptyText}>Incidente no encontrado</Text>
       </View>
     );
@@ -110,72 +118,67 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
   const isPendiente = incident.id_estado === 1 || estado.toLowerCase() === 'pendiente';
   const isConfirmado = incident.id_estado === 3 || estado.toLowerCase() === 'confirmado';
   const isFalso = incident.id_estado === 5 || estado.toLowerCase() === 'falso / rechazado';
-  const semaforoColor = isConfirmado ? '#4CAF50' : isPendiente ? '#FFA000' : isFalso ? '#D32F2F' : COLORS.serenityBlue;
+  const semaforoColor = isConfirmado ? '#2E9E5B' : isPendiente ? '#E0A100' : isFalso ? COLORS.rust : COLORS.serenityBlue;
 
   return (
-    <KeyboardAvoidingView style={[styles.container, { backgroundColor: COLORS.white }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.7}>
-          <Text style={styles.backText}>← Moderación</Text>
+    <KeyboardAvoidingView
+      style={GLASS.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <TouchableOpacity style={GLASS.backButton} onPress={onBack} activeOpacity={0.82}>
+          <Text style={GLASS.backText}>← Moderación</Text>
         </TouchableOpacity>
-        <View style={styles.glassCard}>
+
+        <View style={[GLASS.card, { borderLeftWidth: 5, borderLeftColor: semaforoColor }]}>
           <View style={styles.semaforoRow}>
             <View style={[styles.semaforoDot, { backgroundColor: semaforoColor }]} />
             <Text style={styles.semaforoLabel}>{estado}</Text>
           </View>
           <Text style={styles.title}>Incidente #{incident.id_incidente || incident.pk}</Text>
-          <View style={styles.row}>
-            <Text style={styles.label}>Tipo de riesgo:</Text>
-            <Text style={styles.value}>{incident.tipo_riesgo_nombre || '—'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Nivel de severidad:</Text>
-            <Text style={styles.value}>{incident.nivel_severidad_nombre || 'Sin definir'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Zona:</Text>
-            <Text style={styles.value}>{incident.zona_nombre || 'Sin zona'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Latitud:</Text>
-            <Text style={styles.value}>{incident.latitud != null ? incident.latitud : '—'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Longitud:</Text>
-            <Text style={styles.value}>{incident.longitud != null ? incident.longitud : '—'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Referencia:</Text>
-            <Text style={styles.value}>{incident.referencia_ubicacion || '—'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Descripción:</Text>
-            <Text style={styles.description}>{incident.descripcion || '—'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Fecha:</Text>
-            <Text style={styles.value}>{incident.fecha_reporte ? incident.fecha_reporte.slice(0, 16) : '—'}</Text>
-          </View>
+          <DetailRow label="Tipo de riesgo" value={incident.tipo_riesgo_nombre || '—'} />
+          <DetailRow label="Nivel de severidad" value={incident.nivel_severidad_nombre || 'Sin definir'} />
+          <DetailRow label="Zona" value={incident.zona_nombre || 'Sin zona'} />
+          <DetailRow label="Latitud" value={incident.latitud != null ? String(incident.latitud) : '—'} />
+          <DetailRow label="Longitud" value={incident.longitud != null ? String(incident.longitud) : '—'} />
+          <DetailRow label="Referencia" value={incident.referencia_ubicacion || '—'} />
+          <DetailRow label="Descripción" value={incident.descripcion || '—'} />
+          <DetailRow label="Fecha" value={incident.fecha_reporte ? incident.fecha_reporte.slice(0, 16) : '—'} />
         </View>
 
         <Text style={styles.section}>Cambiar estado (moderación)</Text>
-        <TouchableOpacity style={styles.selector} onPress={() => setShowPicker(!showPicker)} activeOpacity={0.7}>
+        <TouchableOpacity style={GLASS.selector} onPress={() => setShowPicker(!showPicker)} activeOpacity={0.82}>
           <Text style={styles.selectorText}>{selectedStateLabel}</Text>
           <Text style={styles.selectorArrow}>▼</Text>
         </TouchableOpacity>
         {showPicker && (
           <View style={styles.picker}>
             {states.map((s) => (
-              <TouchableOpacity key={s.id_estado} style={styles.pickerItem} onPress={() => { setSelectedStateId(s.id_estado); setSelectedStateLabel(s.nombre_estado); setShowPicker(false); }} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={s.id_estado}
+                style={GLASS.modalItem}
+                onPress={() => {
+                  setSelectedStateId(s.id_estado);
+                  setSelectedStateLabel(s.nombre_estado);
+                  setShowPicker(false);
+                }}
+                activeOpacity={0.82}
+              >
                 <Text style={styles.pickerItemText}>{s.nombre_estado}</Text>
               </TouchableOpacity>
             ))}
           </View>
         )}
-        <Text style={styles.label}>Observación (opcional)</Text>
-        <TextInput style={styles.input} value={observation} onChangeText={setObservation} placeholder="Ej. Verificado en terreno..." />
-        <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.danger }]} onPress={changeStatus} disabled={saving} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>{saving ? 'Guardando...' : 'Aplicar cambio de estado'}</Text>
+        <Text style={[GLASS.label, { marginTop: 12 }]}>Observación (opcional)</Text>
+        <TextInput
+          style={GLASS.input}
+          value={observation}
+          onChangeText={setObservation}
+          placeholder="Ej. Verificado en terreno..."
+          placeholderTextColor={COLORS.textMedium}
+        />
+        <TouchableOpacity style={[GLASS.buttonAction, { marginTop: 14 }]} onPress={changeStatus} disabled={saving} activeOpacity={0.85}>
+          <Text style={GLASS.buttonActionText}>{saving ? 'Guardando...' : 'Aplicar cambio de estado'}</Text>
         </TouchableOpacity>
 
         <Text style={styles.section}>Historial ({histories.length})</Text>
@@ -197,102 +200,71 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
             <Text style={styles.commentDate}>{c.fecha_comentario ? c.fecha_comentario.slice(0, 16) : ''}</Text>
           </View>
         ))}
-        <TextInput style={styles.input} value={commentText} onChangeText={setCommentText} placeholder="Agregar comentario de moderación..." />
-        <TouchableOpacity style={[styles.button, { backgroundColor: COLORS.navy }]} onPress={addComment} disabled={saving} activeOpacity={0.8}>
-          <Text style={styles.buttonText}>Agregar comentario</Text>
+        <TextInput
+          style={GLASS.input}
+          value={commentText}
+          onChangeText={setCommentText}
+          placeholder="Agregar comentario de moderación..."
+          placeholderTextColor={COLORS.textMedium}
+        />
+        <TouchableOpacity style={[GLASS.buttonPrimary, { marginTop: 12 }]} onPress={addComment} disabled={saving} activeOpacity={0.85}>
+          <Text style={GLASS.buttonPrimaryText}>Agregar comentario</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
+function DetailRow({ label, value }) {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scroll: { padding: 16, paddingBottom: 40 },
-  backBtn: { alignSelf: 'flex-start', marginBottom: 12 },
-  backText: { color: COLORS.navy, fontSize: 14, fontWeight: '600' },
-  glassCard: {
-    backgroundColor: COLORS.pureLight,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.borderDark,
-    padding: 20,
-    marginBottom: 16,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.danger,
-  },
-  semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 10 },
-  semaforoDot: { width: 16, height: 16, borderRadius: 8 },
-  semaforoLabel: { fontSize: 16, fontWeight: '700', color: COLORS.textDark },
-  title: { fontSize: 20, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 8 },
-  row: { marginBottom: 10 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textMedium },
-  value: { fontSize: 15, color: COLORS.textDark, marginTop: 2 },
-  description: { fontSize: 15, color: COLORS.textDark, marginTop: 2, lineHeight: 22 },
-  section: { fontSize: 16, fontWeight: 'bold', color: COLORS.navy, marginTop: 18, marginBottom: 8 },
-  selector: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.borderDark,
-    borderRadius: 12,
-    padding: 14,
+  scroll: { padding: 14, paddingBottom: 40 },
+  semaforoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 10 },
+  semaforoDot: { width: 16, height: 16, borderRadius: 8, borderWidth: 1, borderColor: COLORS.borderDark },
+  semaforoLabel: { fontSize: 15, fontWeight: '800', color: COLORS.ink },
+  title: { fontSize: 20, fontWeight: '800', color: COLORS.navy, marginBottom: 8 },
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    minHeight: 52,
+    gap: 12,
+    paddingVertical: 9,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.glassBorderDark,
   },
-  selectorText: { fontSize: 15, flex: 1, color: COLORS.textDark },
-  selectorArrow: { fontSize: 14, color: COLORS.navy },
+  label: { fontSize: 13, fontWeight: '700', color: COLORS.cocoa, flex: 1 },
+  value: { fontSize: 14, color: COLORS.ink, fontWeight: '600', flex: 1.4, textAlign: 'right' },
+  section: { fontSize: 16, fontWeight: '800', color: COLORS.pureLight, marginTop: 20, marginBottom: 10, textShadowColor: '#000', textShadowRadius: 4 },
+  selectorText: { fontSize: 15, flex: 1, color: COLORS.ink, fontWeight: '600' },
+  selectorArrow: { fontSize: 13, color: COLORS.navy },
   picker: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
-    borderRadius: 12,
-    marginTop: 6,
-    padding: 6,
-  },
-  pickerItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight },
-  pickerItemText: { fontSize: 15, color: COLORS.textDark },
-  input: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.glassStrong,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 15,
-    color: COLORS.textDark,
+    borderRadius: 14,
     marginTop: 6,
+    padding: 4,
   },
-  button: {
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    marginTop: 12,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-  },
-  buttonText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+  pickerItemText: { fontSize: 14, color: COLORS.ink, fontWeight: '600' },
   histCard: {
-    backgroundColor: COLORS.pureLight,
-    borderRadius: 10,
+    backgroundColor: COLORS.glassStrong,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
     padding: 12,
     marginBottom: 8,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.navy,
   },
-  histText: { fontSize: 13, color: COLORS.textDark },
-  histObs: { fontSize: 12, color: COLORS.textMedium, marginTop: 4, fontStyle: 'italic' },
-  commentText: { fontSize: 14, color: COLORS.textDark },
-  commentDate: { fontSize: 11, color: COLORS.textMedium, marginTop: 4 },
-  emptyText: { color: COLORS.textMedium, fontSize: 14, marginTop: 8 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
+  histText: { fontSize: 12, color: COLORS.ink, fontWeight: '600' },
+  histObs: { fontSize: 12, color: COLORS.cocoa, marginTop: 4, fontStyle: 'italic' },
+  commentText: { fontSize: 13, color: COLORS.ink, fontWeight: '600' },
+  commentDate: { fontSize: 11, color: COLORS.cocoa, marginTop: 4 },
+  emptyText: { color: COLORS.pureLight, fontSize: 14, marginTop: 8, fontWeight: '600' },
 });

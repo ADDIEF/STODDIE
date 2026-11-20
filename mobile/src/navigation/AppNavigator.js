@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { getAuthToken, clearAuthToken } from '../api/tokenStorage';
+import { getAuthToken } from '../api/tokenStorage';
 
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';

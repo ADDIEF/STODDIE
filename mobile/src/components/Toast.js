@@ -1,83 +1,77 @@
-import { useState, useEffect } from 'react';
-import {
-  Animated,
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, StyleSheet, Text } from 'react-native';
+import { COLORS } from '../theme/colors';
+
+const ICONS = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+
+const ACCENTS = {
+  success: COLORS.navy,
+  error: COLORS.rust,
+  warning: COLORS.goldenCustard,
+  info: COLORS.serenityBlue,
+};
 
 export default function Toast({ message, type = 'info', visible, onHide }) {
-  const opacity = new Animated.Value(visible ? 1 : 0);
-  const translateY = new Animated.Value(visible ? 0 : 20);
+  const [opacity] = useState(() => new Animated.Value(0));
+  const [translateY] = useState(() => new Animated.Value(-18));
 
-  const styles = StyleSheet.create({
-    container: {
-      position: 'absolute',
-      top: 60,
-      alignSelf: 'center',
-      paddingHorizontal: 20,
-      paddingVertical: 14,
-      borderRadius: 10,
-      minWidth: 250,
-      maxWidth: '85%',
-      elevation: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      zIndex: 1000,
-    },
-    success: { backgroundColor: '#1E88E5', borderLeftWidth: 4, borderLeftColor: '#0D47A1' },
-    error: { backgroundColor: '#D32F2F', borderLeftWidth: 4, borderLeftColor: '#B71C1C' },
-    warning: { backgroundColor: '#FFA000', borderLeftWidth: 4, borderLeftColor: '#F57C00' },
-    info: { backgroundColor: '#1976D2', borderLeftWidth: 4, borderLeftColor: '#0D47A1' },
-    text: { color: '#FFF', fontSize: 14, fontWeight: '600', lineHeight: 20 },
-    icon: { fontSize: 20, marginRight: 10 },
-  });
-
-  const typeStyles = {
-    success: styles.success,
-    error: styles.error,
-    warning: styles.warning,
-    info: styles.info,
-  };
-
-  const icons = {
-    success: '✅',
-    error: '❌',
-    warning: '⚠️',
-    info: 'ℹ️',
-  };
-
-  // Auto-ocultar toast después de 3 segundos
   useEffect(() => {
-    if (visible) {
-      const timer = setTimeout(() => {
-        onHide();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [visible, onHide]);
+    if (!visible) return undefined;
 
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 260, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration: 260, useNativeDriver: true }),
+    ]).start();
 
-  Animated.timing(opacity, {
-    toValue: visible ? 1 : 0,
-    duration: 300,
-    useNativeDriver: false,
-  }).start();
+    const timer = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 0, duration: 220, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: -18, duration: 220, useNativeDriver: true }),
+      ]).start(() => onHide && onHide());
+    }, 3000);
 
-  Animated.timing(translateY, {
-    toValue: visible ? 0 : 20,
-    duration: 300,
-    useNativeDriver: false,
-  }).start();
+    return () => clearTimeout(timer);
+  }, [visible, onHide, opacity, translateY]);
 
   if (!visible) return null;
 
   return (
-    <Animated.View style={[styles.container, typeStyles[type], { opacity, transform: [{ translateY }] }]}>
-      <Text style={[styles.text]}>{icons[type]} {message}</Text>
+    <Animated.View
+      style={[
+        styles.container,
+        { borderLeftColor: ACCENTS[type] || ACCENTS.info },
+        { opacity, transform: [{ translateY }] },
+      ]}
+    >
+      <Text style={styles.icon}>{ICONS[type] || ICONS.info}</Text>
+      <Text style={styles.text}>{message}</Text>
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 54,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderRadius: 16,
+    minWidth: 260,
+    maxWidth: '88%',
+    backgroundColor: 'rgba(255,255,255,0.90)',
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
+    borderLeftWidth: 5,
+    shadowColor: '#0B1020',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.32,
+    shadowRadius: 16,
+    elevation: 10,
+    zIndex: 2000,
+  },
+  icon: { fontSize: 20, marginRight: 10 },
+  text: { flex: 1, color: COLORS.ink, fontSize: 14, fontWeight: '700', lineHeight: 20 },
+});

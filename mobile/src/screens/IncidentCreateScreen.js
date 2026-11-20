@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,6 +13,7 @@ import {
 import * as Location from 'expo-location';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { GLASS } from '../theme/glass';
 import { useToast } from '../context/ToastContext';
 
 export default function IncidentCreateScreen({ onBack, onCreated }) {
@@ -51,7 +51,7 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
       }
     }
     loadCatalogs();
-  }, []);
+  }, [showError]);
 
   useEffect(() => {
     async function loadZones() {
@@ -129,9 +129,9 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
 
   if (catalogsLoading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.spaceCadet }]}>
-        <ActivityIndicator size="large" color={COLORS.coffee} />
-        <Text style={styles.loaderText}>Cargando catálogos...</Text>
+      <View style={GLASS.centered}>
+        <ActivityIndicator size="large" color={COLORS.goldenCustard} />
+        <Text style={GLASS.loaderText}>Cargando catálogos...</Text>
       </View>
     );
   }
@@ -148,26 +148,28 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
     };
 
     return (
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalBox}>
-          <Text style={styles.modalTitle}>{showPicker === 'riesgo' ? 'Tipo de riesgo' : showPicker === 'severidad' ? 'Nivel de severidad' : 'Zona'}</Text>
-          <View style={styles.modalScroll}>
+      <View style={GLASS.modalOverlay}>
+        <View style={GLASS.modalBox}>
+          <Text style={styles.modalTitle}>
+            {showPicker === 'riesgo' ? 'Tipo de riesgo' : showPicker === 'severidad' ? 'Nivel de severidad' : 'Zona'}
+          </Text>
+          <ScrollView style={styles.modalScroll} nestedScrollEnabled>
             {options.length === 0 ? (
               <Text style={styles.modalEmpty}>Cargando opciones...</Text>
             ) : (
               options.map((opt) => (
                 <TouchableOpacity
                   key={opt[idField]}
-                  style={styles.modalItem}
+                  style={GLASS.modalItem}
                   onPress={() => setSelected(opt[idField], opt[labelField])}
-                  activeOpacity={0.7}
+                  activeOpacity={0.82}
                 >
                   <Text style={styles.modalItemText}>{opt[labelField]}</Text>
                 </TouchableOpacity>
               ))
             )}
-          </View>
-          <TouchableOpacity style={styles.modalClose} onPress={() => setShowPicker(null)}>
+          </ScrollView>
+          <TouchableOpacity style={styles.modalClose} onPress={() => setShowPicker(null)} activeOpacity={0.82}>
             <Text style={styles.modalCloseText}>Cerrar</Text>
           </TouchableOpacity>
         </View>
@@ -178,105 +180,92 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.container, { backgroundColor: COLORS.spaceCadet }]}
+      style={GLASS.screen}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.glassCard}>
-          <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-            <Text style={styles.backText}>← Volver</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <View style={[GLASS.card, styles.card]}>
+          <TouchableOpacity style={GLASS.backButton} onPress={onBack} activeOpacity={0.82}>
+            <Text style={GLASS.backText}>← Volver</Text>
           </TouchableOpacity>
+
           <Text style={styles.title}>Nuevo Incidente</Text>
-          <Text style={styles.subtitle}>Reporta un riesgo natural urbano en La Paz</Text>
+          <Text style={styles.subtitle}>Reporta un riesgo natural urbano en Bolivia</Text>
 
           <View style={styles.form}>
-            <View style={styles.selectorGroup}>
-              <Text style={styles.label}>Tipo de riesgo (obligatorio)</Text>
-              <TouchableOpacity
-                style={styles.selector}
-                onPress={() => setShowPicker('riesgo')}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.selectorText}>{selectedTipoRiesgoLabel}</Text>
-                <Text style={styles.selectorArrow}>▼</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={GLASS.label}>Tipo de riesgo (obligatorio)</Text>
+            <TouchableOpacity style={GLASS.selector} onPress={() => setShowPicker('riesgo')} activeOpacity={0.82}>
+              <Text style={styles.selectorText}>{selectedTipoRiesgoLabel}</Text>
+              <Text style={styles.selectorArrow}>▼</Text>
+            </TouchableOpacity>
 
-            <View style={styles.selectorGroup}>
-              <Text style={styles.label}>Nivel de severidad (opcional)</Text>
-              <TouchableOpacity
-                style={styles.selector}
-                onPress={() => setShowPicker('severidad')}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.selectorText}>{selectedSeveridadLabel}</Text>
-                <Text style={styles.selectorArrow}>▼</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={[GLASS.label, { marginTop: 12 }]}>Nivel de severidad (opcional)</Text>
+            <TouchableOpacity style={GLASS.selector} onPress={() => setShowPicker('severidad')} activeOpacity={0.82}>
+              <Text style={styles.selectorText}>{selectedSeveridadLabel}</Text>
+              <Text style={styles.selectorArrow}>▼</Text>
+            </TouchableOpacity>
 
-            <View style={styles.selectorGroup}>
-              <Text style={styles.label}>Zona (opcional)</Text>
-              <TouchableOpacity
-                style={styles.selector}
-                onPress={() => setShowPicker('zona')}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.selectorText}>{selectedZonaLabel}</Text>
-                <Text style={styles.selectorArrow}>▼</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={[GLASS.label, { marginTop: 12 }]}>Zona (opcional)</Text>
+            <TouchableOpacity style={GLASS.selector} onPress={() => setShowPicker('zona')} activeOpacity={0.82}>
+              <Text style={styles.selectorText}>{selectedZonaLabel}</Text>
+              <Text style={styles.selectorArrow}>▼</Text>
+            </TouchableOpacity>
 
-            <Text style={styles.label}>Descripción</Text>
+            <Text style={[GLASS.label, { marginTop: 12 }]}>Descripción</Text>
             <TextInput
-              style={styles.textarea}
+              style={GLASS.textarea}
               value={descripcion}
               onChangeText={setDescripcion}
               placeholder="¿Qué estás observando? (ej. posible inundación en la avenida...)"
+              placeholderTextColor={COLORS.textMedium}
               multiline
               numberOfLines={4}
             />
 
             <View style={styles.locationRow}>
               <View style={styles.locationCol}>
-                <Text style={styles.label}>Latitud</Text>
+                <Text style={[GLASS.label, { marginTop: 12 }]}>Latitud</Text>
                 <TextInput
-                  style={styles.input}
+                  style={GLASS.input}
                   value={latitud}
                   onChangeText={setLatitud}
                   keyboardType="numeric"
                   placeholder="-16.5..."
+                  placeholderTextColor={COLORS.textMedium}
                 />
               </View>
               <View style={styles.locationCol}>
-                <Text style={styles.label}>Longitud</Text>
+                <Text style={[GLASS.label, { marginTop: 12 }]}>Longitud</Text>
                 <TextInput
-                  style={styles.input}
+                  style={GLASS.input}
                   value={longitud}
                   onChangeText={setLongitud}
                   keyboardType="numeric"
                   placeholder="-68.1..."
+                  placeholderTextColor={COLORS.textMedium}
                 />
               </View>
             </View>
 
-            <TouchableOpacity style={styles.useLocationBtn} onPress={useCurrentLocation} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.useLocationBtn} onPress={useCurrentLocation} activeOpacity={0.82}>
               <Text style={styles.useLocationText}>📍 Usar ubicación actual (GPS)</Text>
             </TouchableOpacity>
 
-            <Text style={styles.label}>Referencia de ubicación (opcional)</Text>
+            <Text style={[GLASS.label, { marginTop: 12 }]}>Referencia de ubicación (opcional)</Text>
             <TextInput
-              style={styles.input}
+              style={GLASS.input}
               value={referencia}
               onChangeText={setReferencia}
               placeholder="Cerca del mercado, esquina con calle 5..."
+              placeholderTextColor={COLORS.textMedium}
             />
           </View>
 
           {loading ? (
-            <ActivityIndicator size="large" color={COLORS.coffee} style={styles.loading} />
+            <ActivityIndicator size="large" color={COLORS.navy} style={styles.loading} />
           ) : (
-            <TouchableOpacity style={styles.buttonAction} onPress={handleSubmit} activeOpacity={0.8}>
-              <Text style={styles.buttonActionIcon}>📋</Text>
-              <Text style={styles.buttonActionText}>Registrar Incidente</Text>
+            <TouchableOpacity style={GLASS.buttonAction} onPress={handleSubmit} activeOpacity={0.85}>
+              <Text style={styles.buttonIcon}>📋</Text>
+              <Text style={GLASS.buttonActionText}>Registrar Incidente</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -288,123 +277,32 @@ export default function IncidentCreateScreen({ onBack, onCreated }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   scrollContent: { flexGrow: 1, padding: 16, paddingBottom: 40 },
-  glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  backBtn: { alignSelf: 'flex-start', marginBottom: 16 },
-  backText: { color: COLORS.tan, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.tan, marginBottom: 4 },
-  subtitle: { fontSize: 14, color: COLORS.slateGray, marginBottom: 20 },
-  form: { gap: 14 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.tan, marginBottom: 6 },
-  selector: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
-    borderRadius: 12,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    minHeight: 52,
-  },
-  selectorText: { fontSize: 16, flex: 1, color: COLORS.spaceCadet, marginRight: 8 },
-  selectorArrow: { fontSize: 14, color: COLORS.coffee },
-  textarea: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    color: COLORS.spaceCadet,
-    textAlignVertical: 'top',
-    minHeight: 100,
-  },
+  card: { padding: 20 },
+  title: { fontSize: 24, fontWeight: '800', color: COLORS.navy },
+  subtitle: { fontSize: 13, color: COLORS.cocoa, marginBottom: 18, fontWeight: '600' },
+  form: {},
+  selectorText: { fontSize: 15, flex: 1, color: COLORS.ink, fontWeight: '600', marginRight: 8 },
+  selectorArrow: { fontSize: 13, color: COLORS.navy },
   locationRow: { flexDirection: 'row', gap: 10 },
   locationCol: { flex: 1 },
-  input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(97, 120, 145, 0.4)',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    color: COLORS.spaceCadet,
-  },
   useLocationBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(213, 184, 147, 0.25)',
-    borderWidth: 1,
-    borderColor: COLORS.coffee,
+    minHeight: 48,
     borderRadius: 12,
-    padding: 14,
-    marginVertical: 8,
-  },
-  useLocationText: { color: COLORS.coffee, fontSize: 14, fontWeight: '600' },
-  loading: { marginVertical: 20 },
-  buttonAction: {
-    backgroundColor: COLORS.caput,
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    marginTop: 8,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-  },
-  buttonActionIcon: { fontSize: 20, color: '#FFF' },
-  buttonActionText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loaderText: { color: COLORS.tan, marginTop: 12, fontSize: 14 },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modalBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 20,
-    padding: 20,
-    width: '90%',
-    maxWidth: 400,
-    maxHeight: '80%',
     borderWidth: 1,
-    borderColor: 'rgba(213, 184, 147, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 12,
+    borderColor: COLORS.borderDark,
+    backgroundColor: COLORS.champagne,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 14,
   },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.spaceCadet, marginBottom: 12, textAlign: 'center' },
-  modalScroll: { maxHeight: 300 },
-  modalItem: { padding: 14, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
-  modalItemText: { fontSize: 16, color: COLORS.spaceCadet },
-  modalEmpty: { color: COLORS.slateGray, paddingVertical: 12, textAlign: 'center' },
-  modalClose: { marginTop: 12, padding: 10, alignItems: 'center' },
-  modalCloseText: { fontSize: 14, color: COLORS.coffee, fontWeight: '600' },
+  useLocationText: { color: COLORS.ink, fontSize: 14, fontWeight: '800' },
+  loading: { marginVertical: 20 },
+  buttonIcon: { fontSize: 20, color: COLORS.white },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: COLORS.ink, marginBottom: 12, textAlign: 'center' },
+  modalScroll: { maxHeight: 320 },
+  modalItemText: { fontSize: 15, color: COLORS.ink, fontWeight: '600' },
+  modalEmpty: { color: COLORS.cocoa, paddingVertical: 12, textAlign: 'center' },
+  modalClose: { marginTop: 12, minHeight: 44, borderRadius: 12, backgroundColor: COLORS.navy, alignItems: 'center', justifyContent: 'center' },
+  modalCloseText: { color: COLORS.white, fontSize: 14, fontWeight: '800' },
 });

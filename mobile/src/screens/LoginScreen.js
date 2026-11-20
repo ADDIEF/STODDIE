@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { authApi } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { GLASS } from '../theme/glass';
 import { useToast } from '../context/ToastContext';
 
 export default function LoginScreen({ onLogin, onRegister }) {
@@ -40,47 +41,52 @@ export default function LoginScreen({ onLogin, onRegister }) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.container, { backgroundColor: COLORS.white }]}
+      style={GLASS.screen}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
-          <View style={styles.header}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <View style={[GLASS.card, styles.card]}>
+          <View style={styles.brand}>
+            <View style={styles.brandMark}>
+              <Text style={styles.brandIcon}>🌤️</Text>
+            </View>
             <Text style={styles.title}>STODDIE</Text>
             <Text style={styles.subtitle}>Sistema de Reportes Ciudadanos</Text>
-            <Text style={styles.subtitle2}>La Paz, Bolivia</Text>
+            <Text style={styles.caption}>La Paz, Bolivia</Text>
           </View>
 
           <View style={styles.form}>
-            <Text style={styles.label}>Correo electrónico</Text>
+            <Text style={GLASS.label}>Correo electrónico</Text>
             <TextInput
-              style={styles.input}
+              style={GLASS.input}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
               placeholder="correo@ejemplo.com"
+              placeholderTextColor={COLORS.textMedium}
             />
 
-            <Text style={styles.label}>Contraseña</Text>
+            <Text style={[GLASS.label, { marginTop: 14 }]}>Contraseña</Text>
             <TextInput
-              style={styles.input}
+              style={GLASS.input}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               placeholder="••••••••"
+              placeholderTextColor={COLORS.textMedium}
             />
           </View>
 
           {loading ? (
             <ActivityIndicator size="large" color={COLORS.navy} style={styles.loading} />
           ) : (
-            <TouchableOpacity style={styles.buttonPrimary} onPress={handleLogin} activeOpacity={0.7}>
-              <Text style={styles.buttonPrimaryText}>Ingresar</Text>
+            <TouchableOpacity style={GLASS.buttonPrimary} onPress={handleLogin} activeOpacity={0.82}>
+              <Text style={GLASS.buttonPrimaryText}>Ingresar</Text>
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.linkButton} onPress={onRegister} activeOpacity={0.7}>
-            <Text style={styles.linkText}>¿No tienes cuenta? Regístrate</Text>
+          <TouchableOpacity style={styles.registerButton} onPress={onRegister} activeOpacity={0.82}>
+            <Text style={styles.registerText}>¿No tienes cuenta? Regístrate</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -89,50 +95,40 @@ export default function LoginScreen({ onLogin, onRegister }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  card: {
-    backgroundColor: COLORS.pureLight,
+  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 20 },
+  card: { padding: 24 },
+  brand: { alignItems: 'center', marginBottom: 26 },
+  brandMark: {
+    width: 62,
+    height: 62,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.borderDark,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  header: { alignItems: 'center', marginBottom: 32 },
-  title: { fontSize: 36, fontWeight: 'bold', color: COLORS.navy, letterSpacing: 2 },
-  subtitle: { fontSize: 14, color: COLORS.textMedium, marginTop: 4 },
-  subtitle2: { fontSize: 12, color: COLORS.serenityBlue, marginTop: 2 },
-  form: { gap: 16, marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: '600', color: COLORS.textDark, marginBottom: 6 },
-  input: {
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.borderDark,
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    color: COLORS.textDark,
-  },
-  loading: { marginVertical: 20 },
-  buttonPrimary: {
     backgroundColor: COLORS.navy,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    marginBottom: 12,
+    shadowColor: '#0B1020',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  buttonPrimaryText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
-  linkButton: { marginTop: 20, alignItems: 'center' },
-  linkText: { color: COLORS.navy, fontSize: 14, fontWeight: '600' },
+  brandIcon: { fontSize: 30 },
+  title: { fontSize: 34, fontWeight: '800', color: COLORS.navy, letterSpacing: 2 },
+  subtitle: { fontSize: 14, color: COLORS.cocoa, marginTop: 4, fontWeight: '600', textAlign: 'center' },
+  caption: { fontSize: 12, color: COLORS.serenityBlue, marginTop: 4 },
+  form: { marginBottom: 24 },
+  loading: { marginVertical: 18 },
+  registerButton: {
+    minHeight: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
+    backgroundColor: COLORS.champagne,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 14,
+  },
+  registerText: { color: COLORS.ink, fontWeight: '700', fontSize: 14 },
 });

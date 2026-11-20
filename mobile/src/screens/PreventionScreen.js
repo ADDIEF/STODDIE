@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import { apiRequest } from '../api/client';
 import { COLORS } from '../theme/colors';
+import { GLASS } from '../theme/glass';
 import { useToast } from '../context/ToastContext';
 
 export default function PreventionScreen({ onBack }) {
@@ -37,20 +37,18 @@ export default function PreventionScreen({ onBack }) {
       }
     }
     loadData();
-  }, []);
+  }, [showError]);
 
   const renderCategoria = ({ item }) => {
-    const guiasDeCategoria = guias.filter(
-      (g) => g.id_categoria === item.id_categoria
-    );
+    const guiasDeCategoria = guias.filter((g) => g.id_categoria === item.id_categoria);
     return (
-      <View style={styles.catCard} key={item.id_categoria}>
+      <View style={styles.catCard}>
         <View style={styles.catHeader}>
           <Text style={styles.catTitle}>{item.nombre_categoria}</Text>
           <Text style={styles.catSubtitle}>{item.descripcion}</Text>
         </View>
         {guiasDeCategoria.map((guia) => (
-          <View style={styles.guiaCard} key={guia.id_guia}>
+          <View key={guia.id_guia} style={styles.guiaCard}>
             <Text style={styles.guiaTitle}>{guia.titulo}</Text>
             <Text style={styles.guiaContent}>{guia.contenido}</Text>
             <View style={styles.guiaFooter}>
@@ -66,21 +64,21 @@ export default function PreventionScreen({ onBack }) {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: COLORS.white }]}>
-        <ActivityIndicator size="large" color={COLORS.navy} />
-        <Text style={styles.loaderText}>Cargando guías...</Text>
+      <View style={GLASS.centered}>
+        <ActivityIndicator size="large" color={COLORS.goldenCustard} />
+        <Text style={GLASS.loaderText}>Cargando guías...</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: COLORS.white }]}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.7}>
-          <Text style={styles.backText}>← Volver</Text>
+    <View style={GLASS.screen}>
+      <View style={GLASS.header}>
+        <TouchableOpacity style={GLASS.backButton} onPress={onBack} activeOpacity={0.82}>
+          <Text style={GLASS.backText}>← Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Guías de Prevención</Text>
-        <Text style={styles.subtitle}>Información por tipo de riesgo</Text>
+        <Text style={GLASS.titleOnDark}>Guías de Prevención</Text>
+        <Text style={GLASS.subtitleOnDark}>Información por tipo de riesgo</Text>
       </View>
 
       <FlatList
@@ -88,59 +86,55 @@ export default function PreventionScreen({ onBack }) {
         renderItem={renderCategoria}
         keyExtractor={(item) => String(item.id_categoria)}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => {}} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              apiRequest('prevention/categories/')
+                .then((d) => setCategorias(d.results || d))
+                .catch(() => {})
+                .finally(() => setRefreshing(false));
+            }}
+          />
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={styles.list}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: {
-    padding: 16,
-    paddingTop: 44,
-    backgroundColor: COLORS.navy,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
-  },
-  backBtn: { alignSelf: 'flex-start', marginBottom: 8 },
-  backText: { color: COLORS.accent, fontSize: 14, fontWeight: '600' },
-  title: { fontSize: 22, fontWeight: 'bold', color: COLORS.accent },
-  subtitle: { fontSize: 14, color: COLORS.serenityBlue, marginTop: 4 },
+  list: { padding: 14, paddingBottom: 30 },
   catCard: {
-    backgroundColor: COLORS.pureLight,
-    borderRadius: 16,
+    backgroundColor: COLORS.glass,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
     padding: 16,
-    marginHorizontal: 12,
-    marginBottom: 16,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.danger,
+    marginBottom: 14,
+    borderLeftWidth: 5,
+    borderLeftColor: COLORS.navy,
+    shadowColor: '#0B1020',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.26,
+    shadowRadius: 18,
+    elevation: 7,
   },
   catHeader: { marginBottom: 12 },
-  catTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
-  catSubtitle: { fontSize: 13, color: COLORS.textMedium, marginTop: 4 },
+  catTitle: { fontSize: 18, fontWeight: '800', color: COLORS.navy },
+  catSubtitle: { fontSize: 13, color: COLORS.cocoa, marginTop: 3 },
   guiaCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
+    backgroundColor: COLORS.glassStrong,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.borderDark,
     padding: 12,
     marginBottom: 10,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.navy,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
+    borderLeftColor: COLORS.rust,
   },
-  guiaTitle: { fontSize: 15, fontWeight: '600', color: COLORS.textDark, marginBottom: 6 },
-  guiaContent: { fontSize: 14, color: COLORS.textDark, lineHeight: 20, marginBottom: 8 },
-  guiaFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-  guiaMeta: { fontSize: 11, color: COLORS.textMedium, fontStyle: 'italic' },
-  listContent: { paddingBottom: 20 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.white },
-  loaderText: { color: COLORS.textMedium, marginTop: 12, fontSize: 14 },
+  guiaTitle: { fontSize: 15, fontWeight: '800', color: COLORS.ink, marginBottom: 6 },
+  guiaContent: { fontSize: 13, color: COLORS.ink, lineHeight: 20, marginBottom: 8 },
+  guiaFooter: { flexDirection: 'row', justifyContent: 'flex-end' },
+  guiaMeta: { fontSize: 11, color: COLORS.cocoa, fontStyle: 'italic' },
 });
