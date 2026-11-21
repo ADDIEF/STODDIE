@@ -6,6 +6,8 @@ from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
+from apps.api_serializers import parse_positive_integer
+
 from .api_serializers import (
     ComentarioCreateSerializer,
     ComentarioReadSerializer,
@@ -97,6 +99,19 @@ class IncidenteViewSet(
             nombre_rol='Administrador'
         ).exists()
 
+    # Filtros opcionales para moderación y seguimiento. Los ciudadanos también
+    # pueden usarlos: todos los usuarios autenticados ven el mapa completo.
+    filter_param_fields = {
+        'id_estado': 'estado_id',
+        'estado': 'estado_id',
+        'id_nivel_severidad': 'nivel_severidad_id',
+        'severidad': 'nivel_severidad_id',
+        'id_tipo_riesgo': 'tipo_riesgo_id',
+        'tipo_riesgo': 'tipo_riesgo_id',
+        'id_usuario': 'usuario_id',
+        'usuario': 'usuario_id',
+    }
+
     def get_queryset(self):
         queryset = Incidente.objects.select_related(
             'usuario',
@@ -110,8 +125,21 @@ class IncidenteViewSet(
             'zona__localidad__municipio__provincia__departamento',
             'zona__localidad__municipio__provincia__departamento__pais',
         ).order_by('-fecha_reporte')
-        if not self.is_moderator():
+
+        params = self.request.query_params
+        for param_name, field_name in self.filter_param_fields.items():
+            raw_value = params.get(param_name)
+            if raw_value in (None, ''):
+                continue
+            value = parse_positive_integer(raw_value, param_name)
+            queryset = queryset.filter(**{field_name: value})
+
+        solo_mios = params.get('solo_mios')
+        if solo_mios is not None and str(solo_mios).strip().lower() in {
+            '1', 'true', 'si', 'sí', 'yes',
+        }:
             queryset = queryset.filter(usuario=self.request.user)
+
         return queryset
 
     def get_serializer_class(self):

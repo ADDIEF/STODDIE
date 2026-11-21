@@ -122,7 +122,9 @@ export default function App() {
       );
       break;
     case 'MAP':
-      content = <MapScreen onBack={goList} />;
+      content = (
+        <MapScreen onBack={goList} profile={profile} isAdmin={isAdmin} />
+      );
       break;
     case 'CREATE':
       content = (
