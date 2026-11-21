@@ -123,7 +123,12 @@ export default function App() {
       break;
     case 'MAP':
       content = (
-        <MapScreen onBack={goList} profile={profile} isAdmin={isAdmin} />
+        <MapScreen
+          onBack={goList}
+          onDetail={goDetail}
+          profile={profile}
+          isAdmin={isAdmin}
+        />
       );
       break;
     case 'CREATE':
@@ -132,7 +137,14 @@ export default function App() {
       );
       break;
     case 'DETAIL':
-      content = <IncidentDetailScreen incidentId={incidentId} onBack={goList} />;
+      content = (
+        <IncidentDetailScreen
+          incidentId={incidentId}
+          onBack={goList}
+          onPrevention={goPrevention}
+          onEmergency={goEmergency}
+        />
+      );
       break;
     case 'WEATHER':
       content = <WeatherScreen onBack={isAdmin ? () => setScreen('ADMIN') : goList} />;

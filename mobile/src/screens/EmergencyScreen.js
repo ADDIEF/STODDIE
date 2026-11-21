@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -24,32 +24,36 @@ export default function EmergencyScreen({ onBack }) {
   const [refreshing, setRefreshing] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [entData, conData, depData] = await Promise.all([
-          apiRequest('emergency/entities/'),
-          apiRequest('emergency/contacts/'),
-          apiRequest('geography/departments/'),
-        ]);
-        const entList = entData.results || entData;
-        const conList = conData.results || conData;
-        setDepartamentos(depData.results || depData);
+  const loadData = useCallback(async () => {
+    try {
+      const [entData, conData, depData] = await Promise.all([
+        apiRequest('emergency/entities/'),
+        apiRequest('emergency/contacts/'),
+        apiRequest('geography/departments/'),
+      ]);
+      const entList = entData.results || entData;
+      const conList = conData.results || conData;
+      setDepartamentos(depData.results || depData);
 
-        const entidadesConContactos = entList.map((entidad) => ({
-          ...entidad,
-          contactos: conList.filter((c) => c.id_entidad === entidad.id_entidad),
-        }));
-        setEntidades(entidadesConContactos);
-      } catch (error) {
-        showError(error.message || 'No se pudieron cargar los contactos');
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
+      const entidadesConContactos = entList.map((entidad) => ({
+        ...entidad,
+        contactos: conList.filter((c) => c.id_entidad === entidad.id_entidad),
+      }));
+      setEntidades(entidadesConContactos);
+    } catch (error) {
+      showError(error.message || 'No se pudieron cargar los contactos');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-    loadData();
   }, [showError]);
+
+  useEffect(() => {
+    (async () => {
+      await Promise.resolve();
+      await loadData();
+    })();
+  }, [loadData]);
 
   const filteredEntidades = selectedDepartamentoId
     ? entidades.filter((e) => e.id_departamento === selectedDepartamentoId)
@@ -141,7 +145,15 @@ export default function EmergencyScreen({ onBack }) {
           </View>
         )}
         keyExtractor={(item) => String(item.id_entidad)}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(false)} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              loadData();
+            }}
+          />
+        }
         contentContainerStyle={styles.list}
       />
     </View>
@@ -162,7 +174,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     minHeight: 46,
   },
-  depSelectorText: { fontSize: 14, flex: 1, color: COLORS.ink, fontWeight: '700' },
+  depSelectorText: {
+    fontSize: 14,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    color: COLORS.ink,
+    fontWeight: '700',
+    numberOfLines: 1,
+    ellipsizeMode: 'tail',
+  },
   depSelectorArrow: { fontSize: 12, color: COLORS.navy },
   depPickerList: {
     backgroundColor: COLORS.glassStrong,

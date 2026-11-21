@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { apiRequest } from '../api/client';
@@ -12,10 +13,17 @@ import { COLORS } from '../theme/colors';
 import { GLASS } from '../theme/glass';
 import { useToast } from '../context/ToastContext';
 
-export default function IncidentDetailScreen({ incidentId, onBack }) {
+export default function IncidentDetailScreen({
+  incidentId,
+  onBack,
+  onPrevention,
+  onEmergency,
+}) {
   const { showError } = useToast();
+  const { width } = useWindowDimensions();
   const [incident, setIncident] = useState(null);
   const [loading, setLoading] = useState(true);
+  const stackedActions = width < 480;
 
   useEffect(() => {
     async function load() {
@@ -83,14 +91,31 @@ export default function IncidentDetailScreen({ incidentId, onBack }) {
           <DetailRow label="Fecha" value={incident.fecha_reporte ? incident.fecha_reporte.slice(0, 16) : '—'} />
         </View>
 
-        <View style={styles.quickActions}>
-          <TouchableOpacity style={[GLASS.buttonGlass, { flex: 1 }]} activeOpacity={0.82}>
+        <View
+          style={[
+            styles.quickActions,
+            stackedActions && styles.quickActionsStacked,
+          ]}
+        >
+          <TouchableOpacity
+            style={[GLASS.buttonGlass, styles.quickAction]}
+            onPress={onPrevention}
+            activeOpacity={0.82}
+          >
             <Text style={styles.quickIcon}>🛡️</Text>
-            <Text style={GLASS.buttonGlassText}>Ver guías preventivas</Text>
+            <Text style={[GLASS.buttonGlassText, styles.quickActionText]}>
+              Ver guías preventivas
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[GLASS.buttonGlass, { flex: 1 }]} activeOpacity={0.82}>
+          <TouchableOpacity
+            style={[GLASS.buttonGlass, styles.quickAction]}
+            onPress={onEmergency}
+            activeOpacity={0.82}
+          >
             <Text style={styles.quickIcon}>🚨</Text>
-            <Text style={GLASS.buttonGlassText}>Contactos de emergencia</Text>
+            <Text style={[GLASS.buttonGlassText, styles.quickActionText]}>
+              Contactos de emergencia
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -123,6 +148,17 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '700', color: COLORS.cocoa, flex: 1 },
   value: { fontSize: 14, color: COLORS.ink, fontWeight: '600', flex: 1.4, textAlign: 'right' },
   quickActions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  quickIcon: { fontSize: 22, marginBottom: 4 },
+  quickActionsStacked: { flexDirection: 'column' },
+  quickAction: {
+    flex: 1,
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+  },
+  quickActionText: { flexShrink: 1 },
+  quickIcon: { fontSize: 22 },
   emptyText: { color: COLORS.pureLight, fontSize: 15, marginTop: 10, fontWeight: '600' },
 });

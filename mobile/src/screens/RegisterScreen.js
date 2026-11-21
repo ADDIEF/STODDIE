@@ -273,7 +273,16 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: COLORS.ink, fontWeight: '700', marginTop: 4 },
   caption: { fontSize: 12, color: COLORS.cocoa, marginTop: 2 },
   form: {},
-  selectorText: { fontSize: 15, flex: 1, color: COLORS.ink, fontWeight: '600' },
+  selectorText: {
+    fontSize: 15,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    color: COLORS.ink,
+    fontWeight: '600',
+    numberOfLines: 1,
+    ellipsizeMode: 'tail',
+  },
   selectorArrow: { fontSize: 13, color: COLORS.navy },
   gpsBtn: {
     minHeight: 48,

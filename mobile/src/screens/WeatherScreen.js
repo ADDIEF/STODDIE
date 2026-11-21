@@ -169,7 +169,7 @@ export default function WeatherScreen({ onBack }) {
             {porHora.length > 0 && (
               <>
                 <Text style={styles.sectionTitle}>Por hora</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hourlyRow}>
+                <ScrollView horizontal style={styles.hourlyRow}>
                   {porHora.map((h, idx) => (
                     <View key={idx} style={styles.hourCard}>
                       <Text style={styles.hourTime}>{h.hora}</Text>
@@ -231,7 +231,16 @@ export default function WeatherScreen({ onBack }) {
 const styles = StyleSheet.create({
   scroll: { padding: 14, paddingBottom: 40 },
   header: { marginBottom: 14 },
-  selectorText: { fontSize: 15, flex: 1, color: COLORS.ink, fontWeight: '600' },
+  selectorText: {
+    fontSize: 15,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    color: COLORS.ink,
+    fontWeight: '600',
+    numberOfLines: 1,
+    ellipsizeMode: 'tail',
+  },
   selectorArrow: { fontSize: 13, color: COLORS.navy },
   pickerList: {
     backgroundColor: COLORS.glassStrong,
@@ -255,7 +264,7 @@ const styles = StyleSheet.create({
   windText: { fontSize: 12, color: COLORS.ink, fontWeight: '700' },
   windSpeed: { fontSize: 11, color: COLORS.cocoa },
   currentLinks: { flexDirection: 'row', gap: 7, marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.glassBorderDark },
-  linkText: { fontSize: 11, color: COLORS.navy, fontWeight: '800' },
+  linkText: { fontSize: 11, color: COLORS.cocoa, fontWeight: '600' },
   sectionTitle: { fontSize: 16, fontWeight: '800', color: COLORS.pureLight, marginTop: 20, marginBottom: 10, textShadowColor: '#000', textShadowRadius: 4 },
   hourlyRow: { flexDirection: 'row', paddingVertical: 6 },
   hourCard: {
@@ -282,8 +291,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.borderDark,
     padding: 10,
     alignItems: 'center',
-    width: '18%',
-    minWidth: 68,
+    width: '30%',
   },
   dayName: { fontSize: 11, color: COLORS.cocoa, fontWeight: '700' },
   dayDate: { fontSize: 10, color: COLORS.cocoa },

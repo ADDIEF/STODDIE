@@ -159,17 +159,24 @@ export default function IncidentListScreen({
 const styles = StyleSheet.create({
   actionButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
   actionButton: {
-    minHeight: 40,
+    width: '48%',
+    minHeight: 44,
     borderRadius: 12,
     backgroundColor: COLORS.glassStrong,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionText: { color: COLORS.ink, fontSize: 12, fontWeight: '800' },
+  actionText: {
+    color: COLORS.ink,
+    fontSize: 12,
+    fontWeight: '800',
+    numberOfLines: 1,
+    adjustsFontSizeToFit: true,
+  },
   adminButton: {
     minHeight: 44,
     borderRadius: 12,
@@ -182,7 +189,7 @@ const styles = StyleSheet.create({
   },
   adminText: { color: COLORS.white, fontSize: 13, fontWeight: '800' },
   logoutButton: {
-    minHeight: 40,
+    minHeight: 44,
     borderRadius: 12,
     backgroundColor: COLORS.glassStrong,
     borderWidth: 1,

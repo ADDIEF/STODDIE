@@ -21,7 +21,7 @@ const ESTADOS = [
   { id: '2', label: 'En Revisión' },
   { id: '3', label: 'Confirmados' },
   { id: '4', label: 'Resueltos' },
-  { id: '5', label: 'Falsos' },
+  { id: '5', label: 'Falso / Rechazado' },
 ];
 
 export default function AdminModerationScreen({
@@ -73,6 +73,10 @@ export default function AdminModerationScreen({
 
   const filtered = incidents.filter((item) => {
     if (filterEstado !== 'ALL' && String(item.id_estado) !== filterEstado) return false;
+    if (
+      filterDepartamento !== 'ALL' &&
+      String(item.id_departamento) !== String(filterDepartamento)
+    ) return false;
     if (searchText.trim()) {
       const q = searchText.toLowerCase();
       const text = `${item.descripcion || ''} ${item.tipo_riesgo_nombre || ''} ${item.zona_nombre || ''} ${item.id_estado || ''}`.toLowerCase();
@@ -144,7 +148,7 @@ export default function AdminModerationScreen({
         />
 
         <Text style={styles.filterLabel}>Filtrar por estado:</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
+        <View style={styles.filterRow}>
           {ESTADOS.map((e) => (
             <TouchableOpacity
               key={e.id}
@@ -157,7 +161,7 @@ export default function AdminModerationScreen({
               </Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
 
         <Text style={styles.filterLabel}>Filtrar por departamento:</Text>
         <TouchableOpacity style={styles.depSelector} onPress={() => setShowDepPicker(!showDepPicker)} activeOpacity={0.82}>
@@ -241,21 +245,26 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   filterLabel: { fontSize: 12, fontWeight: '800', color: COLORS.butter, marginTop: 10, marginBottom: 6 },
-  filterRow: { flexDirection: 'row', marginBottom: 4 },
+  filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
   filterBtn: {
-    minHeight: 36,
+    minHeight: 44,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
     backgroundColor: COLORS.glassStrong,
     paddingHorizontal: 12,
-    paddingVertical: 7,
-    marginRight: 8,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   filterBtnActive: { backgroundColor: COLORS.navy },
-  filterText: { fontSize: 12, fontWeight: '800', color: COLORS.ink },
+  filterText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: COLORS.ink,
+    numberOfLines: 1,
+    adjustsFontSizeToFit: true,
+  },
   filterTextActive: { color: COLORS.white },
   depSelector: {
     backgroundColor: COLORS.glassStrong,
@@ -269,7 +278,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 44,
   },
-  depSelectorText: { fontSize: 13, flex: 1, color: COLORS.ink, fontWeight: '700' },
+  depSelectorText: {
+    fontSize: 13,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    color: COLORS.ink,
+    fontWeight: '700',
+    numberOfLines: 1,
+    ellipsizeMode: 'tail',
+  },
   depSelectorArrow: { fontSize: 12, color: COLORS.navy },
   depPickerList: {
     backgroundColor: COLORS.glassStrong,
@@ -281,17 +299,24 @@ const styles = StyleSheet.create({
   depPickerItemText: { fontSize: 13, color: COLORS.ink, fontWeight: '600' },
   headerButtons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
   headerButton: {
-    minHeight: 40,
+    width: '48%',
+    minHeight: 44,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
     backgroundColor: COLORS.glassStrong,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerButtonText: { fontSize: 12, fontWeight: '800', color: COLORS.ink },
+  headerButtonText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: COLORS.ink,
+    numberOfLines: 1,
+    adjustsFontSizeToFit: true,
+  },
   logoutButton: { backgroundColor: COLORS.rust },
   logoutText: { color: COLORS.white },
   list: { padding: 14, paddingBottom: 30 },

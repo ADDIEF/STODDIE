@@ -9,10 +9,10 @@ import {
   ActivityIndicator,
   FlatList,
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
@@ -213,13 +213,17 @@ function Chip({ label, active, color, onPress }) {
   );
 }
 
-function IncidentCard({ incident }) {
+function IncidentCard({ incident, onPress }) {
   const fecha = incident.fecha_reporte
     ? String(incident.fecha_reporte).slice(0, 10)
     : '—';
 
   return (
-    <View style={[GLASS.cardInner, styles.listCard]}>
+    <TouchableOpacity
+      style={[GLASS.cardInner, styles.listCard]}
+      onPress={onPress}
+      activeOpacity={0.82}
+    >
       <View style={styles.listCardTop}>
         <Text style={styles.listCardTitle}>
           Incidente #{incident.id_incidente ?? incident.pk}
@@ -247,16 +251,19 @@ function IncidentCard({ incident }) {
       <Text style={styles.listCardMuted}>
         {incident.zona_nombre || 'Sin zona'} · {fecha}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
 export default function MapScreen({
   onBack,
+  onDetail,
   profile: profileProp,
   isAdmin: isAdminProp,
 }) {
   const { showError } = useToast();
+  const { width } = useWindowDimensions();
+  const compact = width < 480;
   const webViewRef = useRef(null);
   const iframeRef = useRef(null);
 
@@ -396,8 +403,8 @@ export default function MapScreen({
           visibles
         </Text>
 
-        <View style={styles.filterRow}>
-          <View style={styles.segment}>
+        <View style={[styles.filterRow, compact && styles.filterRowStacked]}>
+          <View style={[styles.segment, compact && styles.segmentStacked]}>
             {MAP_FILTERS.map((option) => {
               const active = filter === option.id;
               return (
@@ -423,7 +430,7 @@ export default function MapScreen({
             })}
           </View>
           <TouchableOpacity
-            style={styles.viewToggle}
+            style={[styles.viewToggle, compact && styles.viewToggleStacked]}
             onPress={() => setViewMode(viewMode === 'MAP' ? 'LIST' : 'MAP')}
             activeOpacity={0.82}
           >
@@ -435,11 +442,7 @@ export default function MapScreen({
       </View>
 
       {isAdmin ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.adminFilters}
-        >
+        <View style={styles.adminFilters}>
           <Text style={styles.filterCaption}>Moderación:</Text>
           <Chip
             label="Todos los estados"
@@ -473,7 +476,7 @@ export default function MapScreen({
               onPress={() => setSeverityFilter(severity.id_nivel_severidad)}
             />
           ))}
-        </ScrollView>
+        </View>
       ) : null}
 
       {viewMode === 'MAP' ? (
@@ -511,7 +514,12 @@ export default function MapScreen({
           keyExtractor={(item) =>
             String(item.id_incidente ?? item.pk ?? item.fecha_reporte)
           }
-          renderItem={({ item }) => <IncidentCard incident={item} />}
+          renderItem={({ item }) => (
+            <IncidentCard
+              incident={item}
+              onPress={() => onDetail?.(item.id_incidente ?? item.pk)}
+            />
+          )}
           ListEmptyComponent={
             <View style={GLASS.cardInner}>
               <Text style={styles.emptyText}>No hay reportes para este filtro.</Text>
@@ -531,33 +539,48 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 12,
   },
+  filterRowStacked: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+  },
   viewToggle: {
-    minHeight: 38,
+    minHeight: 44,
     justifyContent: 'center',
     paddingHorizontal: 12,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
     backgroundColor: COLORS.glassStrong,
+    flexShrink: 0,
+  },
+  viewToggleStacked: {
+    width: '100%',
   },
   viewToggleText: {
     color: COLORS.ink,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '800',
+    textAlign: 'center',
   },
   segment: {
+    flexGrow: 1,
+    flexShrink: 1,
     flexDirection: 'row',
     borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
     backgroundColor: COLORS.glassStrong,
-    overflow: 'hidden',
-    alignSelf: 'flex-start',
+    alignSelf: 'stretch',
+  },
+  segmentStacked: {
+    flexGrow: 0,
+    width: '100%',
   },
   segmentButton: {
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    minHeight: 38,
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    minHeight: 44,
     justifyContent: 'center',
   },
   segmentButtonActive: {
@@ -567,18 +590,22 @@ const styles = StyleSheet.create({
     color: COLORS.ink,
     fontSize: 12,
     fontWeight: '700',
+    numberOfLines: 1,
+    adjustsFontSizeToFit: true,
   },
   segmentTextActive: {
     color: COLORS.white,
   },
   adminFilters: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
   filterCaption: {
+    width: '100%',
     color: COLORS.pureLight,
     fontSize: 12,
     fontWeight: '800',
@@ -591,23 +618,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.borderDark,
     backgroundColor: COLORS.glassStrong,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    minHeight: 32,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 44,
   },
   chipActive: {
     backgroundColor: COLORS.goldenCustard,
   },
   chipDot: {
-    width: 9,
-    height: 9,
+    width: 10,
+    height: 10,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: COLORS.borderDark,
   },
   chipText: {
     color: COLORS.ink,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
   chipTextActive: {

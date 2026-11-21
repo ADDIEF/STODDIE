@@ -185,6 +185,7 @@ export const GLASS = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     minHeight: 50,
   },
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -20,24 +20,28 @@ export default function PreventionScreen({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [catsData, guidesData] = await Promise.all([
-          apiRequest('prevention/categories/'),
-          apiRequest('prevention/guides/'),
-        ]);
-        setCategorias(catsData.results || catsData);
-        setGuias(guidesData.results || guidesData);
-      } catch (error) {
-        showError(error.message || 'No se pudieron cargar las guías');
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
+  const loadData = useCallback(async () => {
+    try {
+      const [catsData, guidesData] = await Promise.all([
+        apiRequest('prevention/categories/'),
+        apiRequest('prevention/guides/'),
+      ]);
+      setCategorias(catsData.results || catsData);
+      setGuias(guidesData.results || guidesData);
+    } catch (error) {
+      showError(error.message || 'No se pudieron cargar las guías');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-    loadData();
   }, [showError]);
+
+  useEffect(() => {
+    (async () => {
+      await Promise.resolve();
+      await loadData();
+    })();
+  }, [loadData]);
 
   const renderCategoria = ({ item }) => {
     const guiasDeCategoria = guias.filter((g) => g.id_categoria === item.id_categoria);
@@ -90,10 +94,7 @@ export default function PreventionScreen({ onBack }) {
             refreshing={refreshing}
             onRefresh={() => {
               setRefreshing(true);
-              apiRequest('prevention/categories/')
-                .then((d) => setCategorias(d.results || d))
-                .catch(() => {})
-                .finally(() => setRefreshing(false));
+              loadData();
             }}
           />
         }

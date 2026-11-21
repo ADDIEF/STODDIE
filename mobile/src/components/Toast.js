@@ -37,6 +37,7 @@ export default function Toast({ message, type = 'info', visible, onHide }) {
 
   return (
     <Animated.View
+      pointerEvents="none"
       style={[
         styles.container,
         { borderLeftColor: ACCENTS[type] || ACCENTS.info },

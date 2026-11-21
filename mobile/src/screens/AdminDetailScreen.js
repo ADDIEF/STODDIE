@@ -153,20 +153,22 @@ export default function AdminDetailScreen({ incidentId, onBack }) {
         </TouchableOpacity>
         {showPicker && (
           <View style={styles.picker}>
-            {states.map((s) => (
-              <TouchableOpacity
-                key={s.id_estado}
-                style={GLASS.modalItem}
-                onPress={() => {
-                  setSelectedStateId(s.id_estado);
-                  setSelectedStateLabel(s.nombre_estado);
-                  setShowPicker(false);
-                }}
-                activeOpacity={0.82}
-              >
-                <Text style={styles.pickerItemText}>{s.nombre_estado}</Text>
-              </TouchableOpacity>
-            ))}
+            <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled>
+              {states.map((s) => (
+                <TouchableOpacity
+                  key={s.id_estado}
+                  style={GLASS.modalItem}
+                  onPress={() => {
+                    setSelectedStateId(s.id_estado);
+                    setSelectedStateLabel(s.nombre_estado);
+                    setShowPicker(false);
+                  }}
+                  activeOpacity={0.82}
+                >
+                  <Text style={styles.pickerItemText}>{s.nombre_estado}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )}
         <Text style={[GLASS.label, { marginTop: 12 }]}>Observación (opcional)</Text>
@@ -241,7 +243,16 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '700', color: COLORS.cocoa, flex: 1 },
   value: { fontSize: 14, color: COLORS.ink, fontWeight: '600', flex: 1.4, textAlign: 'right' },
   section: { fontSize: 16, fontWeight: '800', color: COLORS.pureLight, marginTop: 20, marginBottom: 10, textShadowColor: '#000', textShadowRadius: 4 },
-  selectorText: { fontSize: 15, flex: 1, color: COLORS.ink, fontWeight: '600' },
+  selectorText: {
+    fontSize: 15,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    color: COLORS.ink,
+    fontWeight: '600',
+    numberOfLines: 1,
+    ellipsizeMode: 'tail',
+  },
   selectorArrow: { fontSize: 13, color: COLORS.navy },
   picker: {
     backgroundColor: COLORS.glassStrong,
